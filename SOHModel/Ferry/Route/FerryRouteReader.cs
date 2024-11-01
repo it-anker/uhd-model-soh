@@ -18,9 +18,9 @@ public static class FerryRouteReader
     /// <returns>A dictionary with line id to <see cref="FerryRoute" />.</returns>
     public static Dictionary<int, FerryRoute> Read(string file, FerryStationLayer ferryStationLayer)
     {
-        var routes = new Dictionary<int, FerryRoute>();
+        Dictionary<int, FerryRoute> routes = new Dictionary<int, FerryRoute>();
 
-        var dataTable = CsvReader.MapData(file);
+        DataTable? dataTable = CsvReader.MapData(file);
 
         if (dataTable.Rows.Count < 2) return routes;
 
@@ -29,19 +29,19 @@ public static class FerryRouteReader
         {
             if (row.ItemArray.Length <= 2) continue;
 
-            var line = row[0].Value<int>();
+            int line = row[0].Value<int>();
             if (!routes.ContainsKey(line))
             {
                 routes.Add(line, new FerryRoute());
                 startStation = null;
             }
 
-            var route = routes[line];
-            var stationId = row[1].Value<string>();
-            var station = ferryStationLayer.Find(stationId);
+            FerryRoute route = routes[line];
+            string? stationId = row[1].Value<string>();
+            FerryStation? station = ferryStationLayer.Find(stationId);
             if (station == null) continue;
 
-            var minutes = row[2].Value<int>();
+            int minutes = row[2].Value<int>();
             station.Lines.Add(line.Value<string>());
 
             if (startStation != null) route.Entries.Add(new FerryRouteEntry(startStation, station, minutes));

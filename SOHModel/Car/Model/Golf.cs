@@ -54,24 +54,24 @@ public class Golf : Car
     {
         if (carParkingLayer == null || parkingSpotPosition == null || environment == null)
         {
-            var parkingNull = carParkingLayer != null ? "not null" : "null";
-            var envNull = environment != null ? "not null" : "null";
-            var posNull = parkingSpotPosition != null ? "not null" : "null";
+            string parkingNull = carParkingLayer != null ? "not null" : "null";
+            string envNull = environment != null ? "not null" : "null";
+            string posNull = parkingSpotPosition != null ? "not null" : "null";
 
             throw new ArgumentException(
                 $"All parameters must be not null: carParkingLayer({parkingNull}), environment({envNull}), parkingSpotPosition({posNull})");
         }
 
-        var car = new Golf
+        Golf car = new Golf
         {
             CarParkingLayer = carParkingLayer,
             Environment = environment
         };
 
-        var parkingSpace = carParkingLayer.Nearest(parkingSpotPosition);
+        CarParkingSpace? parkingSpace = carParkingLayer.Nearest(parkingSpotPosition);
         if (parkingSpace == null) throw new ApplicationException("No free parking spot found. No Car created.");
 
-        var counter = 0;
+        int counter = 0;
         while (!parkingSpace.Enter(car))
         {
             parkingSpace = carParkingLayer.Nearest(parkingSpotPosition);

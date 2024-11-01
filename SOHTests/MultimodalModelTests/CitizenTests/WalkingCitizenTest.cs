@@ -31,7 +31,7 @@ public class CitizenTest : IClassFixture<MediatorLayerAltonaAltstadtFixture>
         _mediatorLayer = mediatorLayerFixture.MediatorLayer;
         _environment = new SpatialGraphEnvironment(ResourcesConstants.WalkGraphAltonaAltstadt);
 
-        var context = SimulationContext.Start2020InSeconds;
+        SimulationContext? context = SimulationContext.Start2020InSeconds;
         _mediatorLayer.Context = context;
 
         _layer = new CitizenLayer
@@ -49,9 +49,9 @@ public class CitizenTest : IClassFixture<MediatorLayerAltonaAltstadtFixture>
     [Fact]
     public void CitizenSpawnsAtHome()
     {
-        var homePosition =
+        Position homePosition =
             _layer.MediatorLayer.GetNextPoiOfType(_environment.GetRandomNode().Position, OsmFeatureCodes.Buildings);
-        var citizen = new Citizen
+        Citizen citizen = new Citizen
         {
             Gender = GenderType.Male, Worker = true, PartTimeWorker = false, StartPosition = homePosition,
             MediatorLayer = _layer.MediatorLayer
@@ -65,11 +65,11 @@ public class CitizenTest : IClassFixture<MediatorLayerAltonaAltstadtFixture>
     [Fact]
     public void MoveFromHomeToWork()
     {
-        var homeNode = _environment.NearestNode(Position.CreateGeoPosition(9.9571284, 53.5541156));
-        var workNode = _environment.NearestNode(Position.CreateGeoPosition(9.948387, 53.5489888));
+        ISpatialNode homeNode = _environment.NearestNode(Position.CreateGeoPosition(9.9571284, 53.5541156));
+        ISpatialNode workNode = _environment.NearestNode(Position.CreateGeoPosition(9.948387, 53.5489888));
         Assert.NotEqual(homeNode.Position, workNode.Position);
 
-        var citizen = new Citizen
+        Citizen citizen = new Citizen
         {
             Gender = GenderType.Male,
             Worker = true, PartTimeWorker = false,
@@ -78,7 +78,7 @@ public class CitizenTest : IClassFixture<MediatorLayerAltonaAltstadtFixture>
             MediatorLayer = _layer.MediatorLayer
         };
         citizen.Init(_layer);
-        var startPosition = citizen.Position;
+        Position startPosition = citizen.Position;
         Assert.InRange(citizen.Home.Position.DistanceInMTo(startPosition), 0, 23);
         Assert.NotEqual(workNode.Position, startPosition);
 
@@ -90,7 +90,7 @@ public class CitizenTest : IClassFixture<MediatorLayerAltonaAltstadtFixture>
         Assert.NotEqual(citizen.Home, citizen.Work);
 
         //does not move, because no next action chosen
-        for (var tick = 0; tick < 10; tick++, _layer.Context.UpdateStep())
+        for (int tick = 0; tick < 10; tick++, _layer.Context.UpdateStep())
         {
             citizen.Tick();
 
@@ -98,10 +98,10 @@ public class CitizenTest : IClassFixture<MediatorLayerAltonaAltstadtFixture>
             Assert.Equal(0, citizen.Velocity);
         }
 
-        for (var tick = 0; tick < SecondsPerDay; tick++, _layer.Context.UpdateStep())
+        for (int tick = 0; tick < SecondsPerDay; tick++, _layer.Context.UpdateStep())
         {
             citizen.Tick();
-            var dayPlanAction = citizen.Tour.Current;
+            Trip dayPlanAction = citizen.Tour.Current;
             if (dayPlanAction is { TripReason: TripReason.Work } && citizen.GoalReached)
             {
                 Assert.True(citizen.StoreTickResult);
@@ -120,11 +120,11 @@ public class CitizenTest : IClassFixture<MediatorLayerAltonaAltstadtFixture>
     [Fact]
     public void CitizenIsAtWorkAndHomeWithinFullDay()
     {
-        var homePosition = _layer.MediatorLayer.GetNextPoiOfType(_environment.GetRandomNode().Position,
+        Position homePosition = _layer.MediatorLayer.GetNextPoiOfType(_environment.GetRandomNode().Position,
             OsmFeatureCodes.Buildings, true, 1000);
         // homePosition = Position.CreateGeoPosition(9.9519875, 53.5453516);
 
-        var workPosition = _layer.MediatorLayer.GetNextPoiOfType(_environment.GetRandomNode().Position,
+        Position workPosition = _layer.MediatorLayer.GetNextPoiOfType(_environment.GetRandomNode().Position,
             OsmFeatureCodes.Buildings, true, 1000);
         // workPosition = Position.CreateGeoPosition(9.9338139, 53.5485157);
 
@@ -134,7 +134,7 @@ public class CitizenTest : IClassFixture<MediatorLayerAltonaAltstadtFixture>
 
         Assert.NotEqual(homePosition, workPosition);
 
-        var citizen = new Citizen
+        Citizen citizen = new Citizen
         {
             Gender = GenderType.Male,
             Worker = true,
@@ -155,14 +155,14 @@ public class CitizenTest : IClassFixture<MediatorLayerAltonaAltstadtFixture>
         Assert.Equal(homePosition, citizen.Home.Position);
         Assert.Equal(workPosition, citizen.Work.Position);
 
-        var homeNodePosition = _environment.NearestNode(homePosition).Position;
-        var workNodePosition = _environment.NearestNode(workPosition).Position;
+        Position? homeNodePosition = _environment.NearestNode(homePosition).Position;
+        Position? workNodePosition = _environment.NearestNode(workPosition).Position;
         Assert.NotEqual(homeNodePosition, workNodePosition);
 
-        var wasAtHome = false;
-        var wasAtWork = false;
+        bool wasAtHome = false;
+        bool wasAtWork = false;
 
-        for (var tick = 0; tick < SecondsPerDay; tick++, _layer.Context.UpdateStep())
+        for (int tick = 0; tick < SecondsPerDay; tick++, _layer.Context.UpdateStep())
         {
             citizen.Tick();
             wasAtHome |= citizen.Position.DistanceInMTo(homeNodePosition) < 10;
@@ -176,7 +176,7 @@ public class CitizenTest : IClassFixture<MediatorLayerAltonaAltstadtFixture>
     [Fact]
     public void StartDayAtHomeEndDayAtHome()
     {
-        var citizen = new Citizen
+        Citizen citizen = new Citizen
         {
             Gender = GenderType.Male,
             Worker = true,
@@ -192,13 +192,13 @@ public class CitizenTest : IClassFixture<MediatorLayerAltonaAltstadtFixture>
             return (citizen.Tour.Current?.TripReason.Equals(TripReason.Work) ?? false) && citizen.GoalReached;
         }
 
-        for (var tick = 0; tick < SecondsPerDay && !AtWork(); tick++, _layer.Context.UpdateStep())
+        for (int tick = 0; tick < SecondsPerDay && !AtWork(); tick++, _layer.Context.UpdateStep())
             citizen.Tick();
 
         Assert.NotNull(citizen.Tour.Current);
         Assert.Equal(TripReason.Work, citizen.Tour.Current.TripReason);
 
-        var workNode = _environment.NearestNode(citizen.Work.Position);
+        ISpatialNode workNode = _environment.NearestNode(citizen.Work.Position);
         Assert.InRange(workNode.Position.DistanceInKmTo(citizen.Position), 0, 0.01);
 
         bool AtHome()
@@ -207,21 +207,21 @@ public class CitizenTest : IClassFixture<MediatorLayerAltonaAltstadtFixture>
             return citizen.Tour.Current.TripReason.Equals(TripReason.HomeTime) && citizen.GoalReached;
         }
 
-        for (var tick = 0; tick < SecondsPerDay && !AtHome(); tick++, _layer.Context.UpdateStep())
+        for (int tick = 0; tick < SecondsPerDay && !AtHome(); tick++, _layer.Context.UpdateStep())
             citizen.Tick();
 
         Assert.NotNull(citizen.Tour.Current);
         Assert.Equal(TripReason.HomeTime, citizen.Tour.Current.TripReason);
 
         // At the end the agent is on a node.
-        var homeNode = _environment.NearestNode(citizen.Home.Position);
+        ISpatialNode homeNode = _environment.NearestNode(citizen.Home.Position);
         Assert.InRange(homeNode.Position.DistanceInKmTo(citizen.Position), 0, 0.01);
     }
 
     [Fact]
     public void TestCreateCitizensByScheduler()
     {
-        var table = new DataTable();
+        DataTable table = new DataTable();
 
         table.Columns.Add("startTime");
         table.Columns.Add("endTime");
@@ -255,8 +255,8 @@ public class CitizenTest : IClassFixture<MediatorLayerAltonaAltstadtFixture>
                 { "6:00", "9:00", 10, 4, "Point(9.87707 53.53461)", "Point(9.97969 53.54480)", "fullTimeWorker" },
             LoadOption.Upsert);
 
-        var context = SimulationContext.Start2020InSeconds;
-        var citizenLayer = new CitizenLayer
+        SimulationContext? context = SimulationContext.Start2020InSeconds;
+        CitizenLayer citizenLayer = new CitizenLayer
         {
             MediatorLayer = _mediatorLayer,
             SpatialGraphMediatorLayer = new SpatialGraphMediatorLayer
@@ -264,20 +264,20 @@ public class CitizenTest : IClassFixture<MediatorLayerAltonaAltstadtFixture>
                 Environment = new FourNodeGraphEnv().GraphEnvironment
             }
         };
-        var layer = new CitizenSchedulerLayer(citizenLayer, table)
+        CitizenSchedulerLayer layer = new CitizenSchedulerLayer(citizenLayer, table)
         {
             MediatorLayer = _mediatorLayer
         };
         citizenLayer.Context = context;
 
-        var citizens = new List<ITickClient>();
+        List<ITickClient> citizens = new List<ITickClient>();
         layer.InitLayer(new LayerInitData(), (_, client) => citizens.Add(client), (_, _) => { });
 
         layer.Context = context;
         Assert.NotNull(layer.SchedulingTable);
         Assert.NotNull(layer.TimeSeries);
 
-        for (var i = 0; i < 54000; i++)
+        for (int i = 0; i < 54000; i++)
         {
             layer.PreTick();
             context.UpdateStep();
@@ -289,7 +289,7 @@ public class CitizenTest : IClassFixture<MediatorLayerAltonaAltstadtFixture>
     [Fact]
     public void TestInitializeSchedulerLayer()
     {
-        var table = new DataTable();
+        DataTable table = new DataTable();
 
         table.Columns.Add("startTime");
         table.Columns.Add("endTime");
@@ -323,11 +323,11 @@ public class CitizenTest : IClassFixture<MediatorLayerAltonaAltstadtFixture>
                 { "6:00", "9:00", 10, 4, "Point(9.87707 53.53461)", "Point(9.97969 53.54480)", "fullTimeWorker" },
             LoadOption.Upsert);
 
-        var citizenLayer = new CitizenLayer
+        CitizenLayer citizenLayer = new CitizenLayer
         {
             MediatorLayer = _mediatorLayer
         };
-        var schedulerLayer = new CitizenSchedulerLayer(citizenLayer, table)
+        CitizenSchedulerLayer schedulerLayer = new CitizenSchedulerLayer(citizenLayer, table)
         {
             MediatorLayer = _mediatorLayer
         };
@@ -336,7 +336,7 @@ public class CitizenTest : IClassFixture<MediatorLayerAltonaAltstadtFixture>
 
         Assert.NotNull(schedulerLayer.SchedulingTable);
         Assert.NotNull(schedulerLayer.AllDayTimeSeries);
-        var workingKinds = schedulerLayer.AllDayTimeSeries.Values
+        WorkingType[] workingKinds = schedulerLayer.AllDayTimeSeries.Values
             .Select(entry => entry.Data["workingKind"].Value<WorkingType>()).ToArray();
         Assert.Contains(WorkingType.Unemployed, workingKinds);
         Assert.Contains(WorkingType.FullTimeWorker, workingKinds);

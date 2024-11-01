@@ -39,7 +39,7 @@ public class CycleTraveler : Traveler<CycleTravelerLayer>
     {
         if (_cycleTravelerLayer.GatewayLayer != null)
         {
-            var (start, goal) = _cycleTravelerLayer.GatewayLayer.Validate(Position, GoalPosition);
+            (Position start, Position goal) = _cycleTravelerLayer.GatewayLayer.Validate(Position, GoalPosition);
             return SearchMultimodalRoute(start, goal);
         }
 
@@ -50,8 +50,8 @@ public class CycleTraveler : Traveler<CycleTravelerLayer>
     {
         if (HasBike)
         {
-            var street = EnvironmentLayer.Environment;
-            var route = street.FindShortestRoute(street.NearestNode(start), street.NearestNode(goal),
+            ISpatialGraphEnvironment street = EnvironmentLayer.Environment;
+            Route? route = street.FindShortestRoute(street.NearestNode(start), street.NearestNode(goal),
                 edge => edge.Modalities.Contains(SpatialModalityType.CarDriving));
             return new MultimodalRoute(route, ModalChoice.CyclingOwnBike);
         }
@@ -61,7 +61,7 @@ public class CycleTraveler : Traveler<CycleTravelerLayer>
 
     protected override bool EnterModalType(ModalChoice modalChoice, Route route)
     {
-        var success = base.EnterModalType(modalChoice, route);
+        bool success = base.EnterModalType(modalChoice, route);
         if (success && modalChoice == ModalChoice.CyclingRentalBike)
         {
             _cycleTravelerLayer.RentalCount++;

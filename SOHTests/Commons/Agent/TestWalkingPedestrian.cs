@@ -18,8 +18,8 @@ public class TestWalkingPedestrian : MultiCapableAgent<TestMultimodalLayer>
         Gender = GenderType.Female;
         EnvironmentLayer = layer.SpatialGraphMediatorLayer;
 
-        var environment = EnvironmentLayer.Environment;
-        var route = environment.FindShortestRoute(environment.NearestNode(StartPosition),
+        ISpatialGraphEnvironment environment = EnvironmentLayer.Environment;
+        Route? route = environment.FindShortestRoute(environment.NearestNode(StartPosition),
             environment.NearestNode(GoalPosition),
             edge => edge.Modalities.Contains(SpatialModalityType.Walking));
         MultimodalRoute = new MultimodalRoute(route, ModalChoice.Walking);

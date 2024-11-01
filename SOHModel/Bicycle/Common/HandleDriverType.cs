@@ -19,8 +19,8 @@ public class HandleDriverType
 
     public static double DetermineDriverRand(DriverType driverType)
     {
-        var driverRandRange = MaxDriverRand - MinDriverRand;
-        var part = driverRandRange / Enum.GetNames(typeof(DriverType)).Length;
+        double driverRandRange = MaxDriverRand - MinDriverRand;
+        double part = driverRandRange / Enum.GetNames(typeof(DriverType)).Length;
         switch (driverType)
         {
             case DriverType.Aggressive:
@@ -153,7 +153,7 @@ public class HandleDriverType
     public static bool DecideIfOvertaking(DriverType driverType)
     {
 //            var    part       = 100 / Enum.GetNames(typeof(DriverType)).Length;
-        var likeliness = driverType switch
+        double likeliness = driverType switch
         {
             DriverType.Aggressive => RandomHelper.Random.NextDouble(40, 100),
             DriverType.Normal => RandomHelper.Random.NextDouble(0, 100),

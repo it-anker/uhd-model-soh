@@ -3,12 +3,14 @@ using System.Data;
 using System.Linq;
 using Mars.Common.Core;
 using Mars.Common.IO.Csv;
+using Mars.Components.Layers;
 using Mars.Core.Data;
 using Mars.Interfaces;
 using Mars.Interfaces.Data;
 using Mars.Interfaces.Model;
 using SOHModel.Ferry.Model;
 using SOHModel.Ferry.Route;
+using SOHModel.Ferry.Station;
 using SOHTests.Commons.Layer;
 using Xunit;
 
@@ -26,16 +28,16 @@ public class FerryRouteReaderTests : IClassFixture<FerryRouteLayerFixture>
     [Fact]
     public void ImportFerryLineCsvIntoFerrySchedule()
     {
-        var ferryLayer = new FerryRouteLayerFixture().FerryStationLayer;
-        var routes = FerryRouteReader.Read(ResourcesConstants.FerryLineCsv, ferryLayer);
+        FerryStationLayer ferryLayer = new FerryRouteLayerFixture().FerryStationLayer;
+        Dictionary<int, FerryRoute> routes = FerryRouteReader.Read(ResourcesConstants.FerryLineCsv, ferryLayer);
 
         Assert.Contains(61, routes.Keys);
-        var ferrySchedule61 = routes[61];
+        FerryRoute ferrySchedule61 = routes[61];
         Assert.Equal(8, ferrySchedule61.Entries.Count);
         Assert.NotNull(ferrySchedule61.Entries.First().From);
 
         Assert.Contains(62, routes.Keys);
-        var ferrySchedule62 = routes[62];
+        FerryRoute ferrySchedule62 = routes[62];
         Assert.Equal(10, ferrySchedule62.Entries.Count);
         Assert.NotNull(ferrySchedule62.Entries.First().From);
     }
@@ -43,7 +45,7 @@ public class FerryRouteReaderTests : IClassFixture<FerryRouteLayerFixture>
     [Fact]
     public void TestDateTimeFormatParsing()
     {
-        var time = "7:00".Value<DateTime>();
+        DateTime time = "7:00".Value<DateTime>();
 
         Assert.Equal(7, time.Hour);
         Assert.Equal(0, time.Minute);
@@ -53,9 +55,9 @@ public class FerryRouteReaderTests : IClassFixture<FerryRouteLayerFixture>
     [Fact]
     public void TestCreateDriverBasedOnInput()
     {
-        var manager = new EntityManagerImpl(CsvReader.MapData(ResourcesConstants.FerryCsv));
-        var ferryLayer = new FerryLayer(_fixture.FerryRouteLayer) { EntityManager = manager };
-        var ferryScheduler = new FerrySchedulerLayer(ferryLayer);
+        EntityManagerImpl manager = new EntityManagerImpl(CsvReader.MapData(ResourcesConstants.FerryCsv));
+        FerryLayer ferryLayer = new FerryLayer(_fixture.FerryRouteLayer) { EntityManager = manager };
+        FerrySchedulerLayer ferryScheduler = new FerrySchedulerLayer(ferryLayer);
 
         ferryScheduler.InitLayer(new LayerInitData
             {
@@ -72,13 +74,13 @@ public class FerryRouteReaderTests : IClassFixture<FerryRouteLayerFixture>
         Assert.Empty(ferryScheduler.TimeSeries);
 
         Assert.NotNull(SimulationContext.Start2020InSeconds.CurrentTimePoint);
-        var res = ferryScheduler.AllDayTimeSeries.Query(
+        List<SchedulerEntry> res = ferryScheduler.AllDayTimeSeries.Query(
                 DateTime.MinValue.AddHours(20))
             .ToList();
         Assert.Equal(2, res.Count);
 
 
-        for (var i = 0; i < 50400; i++)
+        for (int i = 0; i < 50400; i++)
         {
             ferryScheduler.PreTick();
             ferryScheduler.Context.UpdateStep();
@@ -98,16 +100,16 @@ public class FerryRouteReaderTests : IClassFixture<FerryRouteLayerFixture>
     [Fact]
     public void TestCreateDriverBasedOnInputWithType()
     {
-        var ferryTable = new DataTable();
+        DataTable ferryTable = new DataTable();
 
         ferryTable.Columns.Add("passengerCapacity");
         ferryTable.Columns.Add("type");
         ferryTable.LoadDataRow(new object[] { 21, "Type1" }, LoadOption.Upsert);
         ferryTable.LoadDataRow(new object[] { 22, "Type2" }, LoadOption.Upsert);
 
-        var manager = new EntityManagerImpl(ferryTable);
+        EntityManagerImpl manager = new EntityManagerImpl(ferryTable);
 
-        var table = new DataTable();
+        DataTable table = new DataTable();
 
         table.Columns.Add("id");
         table.Columns.Add("startTime");
@@ -121,8 +123,8 @@ public class FerryRouteReaderTests : IClassFixture<FerryRouteLayerFixture>
         table.LoadDataRow(new object[] { 2, "5:00", "14:00", 60, 2, 11, "Type2" }, LoadOption.Upsert);
 
 
-        var ferryLayer = new FerryLayer(_fixture.FerryRouteLayer) { EntityManager = manager };
-        var ferryScheduler = new FerrySchedulerLayer(ferryLayer, table);
+        FerryLayer ferryLayer = new FerryLayer(_fixture.FerryRouteLayer) { EntityManager = manager };
+        FerrySchedulerLayer ferryScheduler = new FerrySchedulerLayer(ferryLayer, table);
 
 
         ferryScheduler.InitLayer(new LayerInitData(), (_, _) => { },
@@ -135,13 +137,13 @@ public class FerryRouteReaderTests : IClassFixture<FerryRouteLayerFixture>
         Assert.NotEmpty(ferryScheduler.AllDayTimeSeries);
 
         Assert.NotNull(SimulationContext.Start2020InSeconds.CurrentTimePoint);
-        var res = ferryScheduler.AllDayTimeSeries.Query(
+        List<SchedulerEntry> res = ferryScheduler.AllDayTimeSeries.Query(
                 DateTime.MinValue.AddHours(8))
             .ToList();
         Assert.Equal(2, res.Count);
 
 
-        for (var i = 0; i < 50400; i++)
+        for (int i = 0; i < 50400; i++)
         {
             ferryScheduler.PreTick();
             ferryScheduler.Context.UpdateStep();
@@ -159,16 +161,16 @@ public class FerryRouteReaderTests : IClassFixture<FerryRouteLayerFixture>
     [Fact]
     public void TestExceptionForMissingReference()
     {
-        var ferryTable = new DataTable();
+        DataTable ferryTable = new DataTable();
 
         ferryTable.Columns.Add("capacity");
         ferryTable.Columns.Add("type");
         ferryTable.LoadDataRow(new object[] { 1, "Type1" }, LoadOption.Upsert);
         ferryTable.LoadDataRow(new object[] { 2, "Type2" }, LoadOption.Upsert);
 
-        var manager = new EntityManagerImpl(ferryTable);
+        EntityManagerImpl manager = new EntityManagerImpl(ferryTable);
 
-        var table = new DataTable();
+        DataTable table = new DataTable();
 
         table.Columns.Add("id");
         table.Columns.Add("endTime");
@@ -180,8 +182,8 @@ public class FerryRouteReaderTests : IClassFixture<FerryRouteLayerFixture>
         table.LoadDataRow(new object[] { 3, "20:00", 0, 1, 12, "Type45" }, LoadOption.Upsert);
 
 
-        var ferryLayer = new FerryLayer(_fixture.FerryRouteLayer) { EntityManager = manager };
-        var ferryScheduler = new FerrySchedulerLayer(ferryLayer, table);
+        FerryLayer ferryLayer = new FerryLayer(_fixture.FerryRouteLayer) { EntityManager = manager };
+        FerrySchedulerLayer ferryScheduler = new FerrySchedulerLayer(ferryLayer, table);
 
         ferryScheduler.InitLayer(new LayerInitData(), (_, _) => { },
             (_, _) => { });
@@ -194,7 +196,7 @@ public class FerryRouteReaderTests : IClassFixture<FerryRouteLayerFixture>
     [Fact]
     public void TestInitializeFerryScheduler()
     {
-        var ferryScheduler = new FerrySchedulerLayer(new FerryLayer(_fixture.FerryRouteLayer));
+        FerrySchedulerLayer ferryScheduler = new FerrySchedulerLayer(new FerryLayer(_fixture.FerryRouteLayer));
 
 
         ferryScheduler.InitLayer(new LayerInitData
@@ -208,7 +210,7 @@ public class FerryRouteReaderTests : IClassFixture<FerryRouteLayerFixture>
         Assert.NotNull(ferryScheduler.AllDayTimeSeries);
         Assert.NotEmpty(ferryScheduler.AllDayTimeSeries);
 
-        var dataRows = ferryScheduler.AllDayTimeSeries.Query(
+        List<SchedulerEntry> dataRows = ferryScheduler.AllDayTimeSeries.Query(
             DateTime.MinValue.AddHours(20)).ToList();
 
         Assert.Equal(2, dataRows.Count);

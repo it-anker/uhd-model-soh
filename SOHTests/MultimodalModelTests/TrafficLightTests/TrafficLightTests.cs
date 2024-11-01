@@ -9,7 +9,7 @@ public class TrafficLightTests
     [Fact]
     public void TrafficLightCtorTest()
     {
-        var trafficLight = new TrafficLight(TrafficLightPhase.Red, 1, 2, 3);
+        TrafficLight trafficLight = new TrafficLight(TrafficLightPhase.Red, 1, 2, 3);
 
         Assert.Equal(TrafficLightPhase.Red, trafficLight.TrafficLightPhase);
         Assert.Equal(1, trafficLight.StartGreenTick);

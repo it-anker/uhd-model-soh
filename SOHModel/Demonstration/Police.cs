@@ -74,7 +74,7 @@ public class Police : MultiCapableAgent<DemonstrationLayer>
         // Police is at station and looking for a radical demonstrator to chase
         if (State is PoliceState.Stationary)
         {
-            var nearestRadicalDemonstrator = FindNearestRadDemBreakingOut(MaxSearchDistance);
+            RadicalDemonstrator? nearestRadicalDemonstrator = FindNearestRadDemBreakingOut(MaxSearchDistance);
             if (nearestRadicalDemonstrator is not null) StartChasingRadDem(nearestRadicalDemonstrator);
         }
 
@@ -120,7 +120,7 @@ public class Police : MultiCapableAgent<DemonstrationLayer>
         if (State is PoliceState.Returning)
         {
             base.Move();
-            var nearestRadicalDemonstrator = FindNearestRadDemBreakingOut(MaxSearchDistance);
+            RadicalDemonstrator? nearestRadicalDemonstrator = FindNearestRadDemBreakingOut(MaxSearchDistance);
             if (nearestRadicalDemonstrator is not null) StartChasingRadDem(nearestRadicalDemonstrator);
 
             if (GoalReached)
@@ -138,7 +138,7 @@ public class Police : MultiCapableAgent<DemonstrationLayer>
     {
         if (_myRadicalDemonstrator != null)
         {
-            var nearestDemonstrator = _demonstrationLayer?.DemonstratorMap.Values.MinBy(demonstrator =>
+            Demonstrator? nearestDemonstrator = _demonstrationLayer?.DemonstratorMap.Values.MinBy(demonstrator =>
                 demonstrator.Position != null
                     ? _myRadicalDemonstrator.Position.DistanceInMTo(demonstrator.Position)
                     : double.MaxValue);
@@ -156,16 +156,16 @@ public class Police : MultiCapableAgent<DemonstrationLayer>
     /// </summary>
     private RadicalDemonstrator? FindNearestRadDemBreakingOut(double maxSearchDistance)
     {
-        var distanceToNearestRadDem = double.MaxValue;
+        double distanceToNearestRadDem = double.MaxValue;
         RadicalDemonstrator? nearestRadDem = null;
-        var radicalDemonstrators = _demonstrationLayer?.RadicalDemonstratorMap.Values;
+        ICollection<RadicalDemonstrator>? radicalDemonstrators = _demonstrationLayer?.RadicalDemonstratorMap.Values;
         
         if (radicalDemonstrators != null)
-            foreach (var radicalDemonstrator in radicalDemonstrators)
+            foreach (RadicalDemonstrator radicalDemonstrator in radicalDemonstrators)
             {
                 if (radicalDemonstrator.State == RadicalDemonstratorStates.BreakingOut)
                 {
-                    var distanceToRadDem =
+                    double distanceToRadDem =
                         Distance.Euclidean(Position.PositionArray, radicalDemonstrator.Position.PositionArray);
                     if (Position.DistanceInMTo(radicalDemonstrator.Position) <= maxSearchDistance)
                     {

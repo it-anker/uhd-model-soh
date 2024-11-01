@@ -21,8 +21,8 @@ public class TrainGtfsRouteLayer : AbstractLayer, ITrainRouteLayer
         RegisterAgent? registerAgentHandle = null,
         UnregisterAgent? unregisterAgent = null)
     {
-        var result = base.InitLayer(layerInitData, registerAgentHandle, unregisterAgent);
-        var reader = new GTFSReader<GTFSFeed>();
+        bool result = base.InitLayer(layerInitData, registerAgentHandle, unregisterAgent);
+        GTFSReader<GTFSFeed> reader = new GTFSReader<GTFSFeed>();
         
         _feed = Extensions.Read(reader, layerInitData.LayerInitConfig.File);
         
@@ -31,7 +31,7 @@ public class TrainGtfsRouteLayer : AbstractLayer, ITrainRouteLayer
 
     public bool TryGetRoute(string line, out TrainRoute? trainRoute)
     {
-        if (!_routes.TryGetValue(line, out var value))
+        if (!_routes.TryGetValue(line, out TrainRoute? value))
         {
             trainRoute = FindTrainRoute(line);
             if (trainRoute == null) return false;
@@ -48,31 +48,31 @@ public class TrainGtfsRouteLayer : AbstractLayer, ITrainRouteLayer
         ArgumentNullException.ThrowIfNull(TrainStationLayer);
         ArgumentNullException.ThrowIfNull(_feed);
         
-        var trainRoute = new TrainRoute();
+        TrainRoute trainRoute = new TrainRoute();
         
-        var route = _feed.Routes.Get().FirstOrDefault(route => route.ShortName.Equals(routeShortName));
+        GTFS.Entities.Route? route = _feed.Routes.Get().FirstOrDefault(route => route.ShortName.Equals(routeShortName));
         if (route == null) return null;
 
-        var trip = _feed.Trips.Get().FirstOrDefault(trip => trip.RouteId == route.Id);
+        Trip? trip = _feed.Trips.Get().FirstOrDefault(trip => trip.RouteId == route.Id);
         if (trip == null) return null;
 
-        using var stopTimes = _feed.StopTimes.GetForTrip(trip.Id).GetEnumerator();
+        using IEnumerator<StopTime> stopTimes = _feed.StopTimes.GetForTrip(trip.Id).GetEnumerator();
 
         StopTime? lastStopTime = null;
         if (stopTimes.MoveNext()) lastStopTime = stopTimes.Current;
 
         while (stopTimes.MoveNext())
         {
-            var nextStopTime = stopTimes.Current;
-            var lastStop = _feed.Stops.Get(lastStopTime?.StopId);
-            var nextStop = _feed.Stops.Get(nextStopTime?.StopId);
+            StopTime? nextStopTime = stopTimes.Current;
+            Stop? lastStop = _feed.Stops.Get(lastStopTime?.StopId);
+            Stop? nextStop = _feed.Stops.Get(nextStopTime?.StopId);
 
             if (lastStopTime is { DepartureTime.TotalSeconds: > 0 } && 
                 nextStopTime is { ArrivalTime.TotalSeconds: > 0 })
             {
-                var minutes = CalculateTravelTime(lastStopTime.DepartureTime, nextStopTime.ArrivalTime);
-                var startStation = TrainStationLayer.Nearest(Position.CreateGeoPosition(lastStop.Longitude, lastStop.Latitude));
-                var goalStation =
+                int minutes = CalculateTravelTime(lastStopTime.DepartureTime, nextStopTime.ArrivalTime);
+                TrainStation? startStation = TrainStationLayer.Nearest(Position.CreateGeoPosition(lastStop.Longitude, lastStop.Latitude));
+                TrainStation? goalStation =
                     TrainStationLayer.Nearest(Position.CreateGeoPosition(nextStop.Longitude, nextStop.Latitude));
                 if (startStation != null && goalStation != null && startStation != goalStation)
                     trainRoute.Entries.Add(new TrainRouteEntry(startStation, goalStation, minutes));

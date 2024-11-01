@@ -21,8 +21,8 @@ public class MediatorLayerTest : IClassFixture<MediatorLayerAltonaAltstadtFixtur
     public void CheckGetNextPoiOfTypeOutOfRadius()
     {
         //stand 60 meters away from poi
-        var sourcePosition = Position.CreateGeoPosition(9.946563, 53.544225);
-        var position = _mediatorLayer.GetNextPoiOfType(sourcePosition, OsmFeatureCodes.Hotel, true, 5);
+        Position? sourcePosition = Position.CreateGeoPosition(9.946563, 53.544225);
+        Position position = _mediatorLayer.GetNextPoiOfType(sourcePosition, OsmFeatureCodes.Hotel, true, 5);
 
         Assert.Null(position);
 
@@ -36,16 +36,16 @@ public class MediatorLayerTest : IClassFixture<MediatorLayerAltonaAltstadtFixtur
     public void CheckGetNextPoiOfTypeWithoutRadius()
     {
         //stand in front of POI
-        var sourcePosition = Position.CreateGeoPosition(9.94512408, 53.55456001);
-        var targetPosition = Position.CreateGeoPosition(9.94557110, 53.55525420);
+        Position? sourcePosition = Position.CreateGeoPosition(9.94512408, 53.55456001);
+        Position? targetPosition = Position.CreateGeoPosition(9.94557110, 53.55525420);
 
-        var foundPosition = _mediatorLayer.GetNextPoiOfType(sourcePosition, OsmFeatureCodes.Kindergarten);
+        Position foundPosition = _mediatorLayer.GetNextPoiOfType(sourcePosition, OsmFeatureCodes.Kindergarten);
         Assert.Equal(targetPosition.Latitude, foundPosition.Latitude, 7);
         Assert.Equal(targetPosition.Longitude, foundPosition.Longitude, 7);
 
         //stand in front of land use one of these
         sourcePosition = Position.CreateGeoPosition(9.93441760, 53.54642858);
-        var positions = new List<Position>
+        List<Position> positions = new List<Position>
         {
             Position.CreateGeoPosition(9.932083, 53.5472762),
             Position.CreateGeoPosition(9.9333151, 53.547287),
@@ -90,14 +90,14 @@ public class MediatorLayerTest : IClassFixture<MediatorLayerAltonaAltstadtFixtur
     public void CheckGetNextPoiOfTypeWithRadius()
     {
         //stand 60 meters away from poi
-        var sourcePosition = Position.CreateGeoPosition(9.94556643, 53.54431606);
-        var targetPosition = Position.CreateGeoPosition(9.9455592, 53.5444917);
+        Position? sourcePosition = Position.CreateGeoPosition(9.94556643, 53.54431606);
+        Position? targetPosition = Position.CreateGeoPosition(9.9455592, 53.5444917);
 
-        var foundPosition = _mediatorLayer.GetNextPoiOfType(sourcePosition, OsmFeatureCodes.Hotel, true, 80);
+        Position foundPosition = _mediatorLayer.GetNextPoiOfType(sourcePosition, OsmFeatureCodes.Hotel, true, 80);
         Assert.Equal(targetPosition.Latitude, foundPosition.Latitude, 7);
         Assert.Equal(targetPosition.Longitude, foundPosition.Longitude, 7);
 
-        var positions = new List<Position>
+        List<Position> positions = new List<Position>
         {
             Position.CreateGeoPosition(9.932083, 53.5472762),
             Position.CreateGeoPosition(9.9333151, 53.547287),
@@ -128,10 +128,10 @@ public class MediatorLayerTest : IClassFixture<MediatorLayerAltonaAltstadtFixtur
     [Fact]
     public void CheckGetNextPoIofTypeWithTypeOutOfRange()
     {
-        var sourcePosition = Position.CreateGeoPosition(9.9389376, 53.5549218);
-        var targetPosition = Position.CreateGeoPosition(9.9389139, 53.5549624);
+        Position? sourcePosition = Position.CreateGeoPosition(9.9389376, 53.5549218);
+        Position? targetPosition = Position.CreateGeoPosition(9.9389139, 53.5549624);
 
-        var position = _mediatorLayer.GetNextPoiOfType(sourcePosition, OsmFeatureCodes.Playground, true, 10);
+        Position? position = _mediatorLayer.GetNextPoiOfType(sourcePosition, OsmFeatureCodes.Playground, true, 10);
         Assert.Equal(targetPosition.Longitude, position.Longitude, 7);
         Assert.Equal(targetPosition.Latitude, position.Latitude, 7);
 
@@ -142,17 +142,17 @@ public class MediatorLayerTest : IClassFixture<MediatorLayerAltonaAltstadtFixtur
     [Fact]
     public void CheckGetNextPoIofTypeWithWrongType()
     {
-        var sourcePosition = Position.CreateGeoPosition(9.9856634, 53.5491964);
-        var position = _mediatorLayer.GetNextPoiOfType(sourcePosition, 0, true, 1);
+        Position? sourcePosition = Position.CreateGeoPosition(9.9856634, 53.5491964);
+        Position position = _mediatorLayer.GetNextPoiOfType(sourcePosition, 0, true, 1);
         Assert.Null(position);
     }
 
     [Fact]
     public void CheckGetPoIofTypeInRange()
     {
-        var sourcePosition = Position.CreateGeoPosition(9.94173415, 53.55491127);
-        var targetPosition = Position.CreateGeoPosition(9.9418009, 53.5548917);
-        var position = _mediatorLayer.GetPoIofTypeInRange(sourcePosition, OsmFeatureCodes.Leisure,
+        Position? sourcePosition = Position.CreateGeoPosition(9.94173415, 53.55491127);
+        Position? targetPosition = Position.CreateGeoPosition(9.9418009, 53.5548917);
+        Position position = _mediatorLayer.GetPoIofTypeInRange(sourcePosition, OsmFeatureCodes.Leisure,
             OsmFeatureCodes.DogPark, true, 10);
         Assert.Equal(targetPosition.Longitude, position.Longitude, 7);
         Assert.Equal(targetPosition.Latitude, position.Latitude, 7);
@@ -161,7 +161,7 @@ public class MediatorLayerTest : IClassFixture<MediatorLayerAltonaAltstadtFixtur
     [Fact]
     public void CheckGetPoIofTypeInRangeWithWrongRange()
     {
-        var sourcePosition = Position.CreateGeoPosition(9.946934, 53.561126);
+        Position? sourcePosition = Position.CreateGeoPosition(9.946934, 53.561126);
 
         Assert.Throws<ArgumentException>(() =>
             _mediatorLayer.GetPoIofTypeInRange(sourcePosition, 0, 1));
@@ -170,13 +170,13 @@ public class MediatorLayerTest : IClassFixture<MediatorLayerAltonaAltstadtFixtur
     [Fact]
     public void GetPoiWithOneOutOfManyTypes()
     {
-        var sourcePosition = Position.CreateGeoPosition(9.9389376, 53.5549218);
-        var targetPosition = Position.CreateGeoPosition(9.9389139, 53.5549624);
+        Position? sourcePosition = Position.CreateGeoPosition(9.9389376, 53.5549218);
+        Position? targetPosition = Position.CreateGeoPosition(9.9389139, 53.5549624);
 
-        var listOfTypes = new List<int>
+        List<int> listOfTypes = new List<int>
             { OsmFeatureCodes.ParkPoi, OsmFeatureCodes.Playground, OsmFeatureCodes.Forest };
 
-        var position = _mediatorLayer.FindNextNearestLocationForAnyTarget(sourcePosition, listOfTypes, true, 10);
+        Position position = _mediatorLayer.FindNextNearestLocationForAnyTarget(sourcePosition, listOfTypes, true, 10);
 
         Assert.Equal(targetPosition.Latitude, position.Latitude, 7);
         Assert.Equal(targetPosition.Longitude, position.Longitude, 7);
@@ -185,7 +185,7 @@ public class MediatorLayerTest : IClassFixture<MediatorLayerAltonaAltstadtFixtur
     [Fact]
     public void GetPoiWithOneOutOfManyTypesWithEmptyList()
     {
-        var sourcePosition = Position.CreateGeoPosition(9.946934, 53.561126);
+        Position? sourcePosition = Position.CreateGeoPosition(9.946934, 53.561126);
 
         Assert.Throws<ArgumentException>(() =>
             _mediatorLayer.FindNextNearestLocationForAnyTarget(sourcePosition, new List<int>()));
@@ -194,9 +194,9 @@ public class MediatorLayerTest : IClassFixture<MediatorLayerAltonaAltstadtFixtur
     [Fact]
     public void GetPoiWithOneOutOfManyTypesWithNoPoIinMaxRadius()
     {
-        var sourcePosition = Position.CreateGeoPosition(9.9463861, 53.5443706);
-        var listOfTypes = new List<int> { OsmFeatureCodes.Restaurant, OsmFeatureCodes.FastFood };
-        var position = _mediatorLayer.FindNextNearestLocationForAnyTarget(sourcePosition, listOfTypes);
+        Position? sourcePosition = Position.CreateGeoPosition(9.9463861, 53.5443706);
+        List<int> listOfTypes = new List<int> { OsmFeatureCodes.Restaurant, OsmFeatureCodes.FastFood };
+        Position position = _mediatorLayer.FindNextNearestLocationForAnyTarget(sourcePosition, listOfTypes);
 
         Assert.Equal(20.15, sourcePosition.DistanceInMTo(position), 2);
     }

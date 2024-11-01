@@ -21,5 +21,5 @@ public class DockWorker : Traveler<DockWorkerLayer>
     protected override MultimodalRoute FindMultimodalRoute()
     {
         return MultimodalLayer.Search(this, Position, GoalPosition, ModalChoice.Ferry);
-    } //TODO delete?
+    } // TODO delete?
 }

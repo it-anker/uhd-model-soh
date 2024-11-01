@@ -4,6 +4,7 @@ using Mars.Interfaces.Agents;
 using Mars.Interfaces.Annotations;
 using Mars.Interfaces.Environments;
 using Mars.Interfaces.Layers;
+using NetTopologySuite.Geometries;
 using SOHModel.Bicycle.Parking;
 using SOHModel.Bicycle.Rental;
 using SOHModel.Bicycle.Steering;
@@ -14,6 +15,7 @@ using SOHModel.Domain.Graph;
 using SOHModel.Ferry.Station;
 using SOHModel.Multimodal.Routing;
 using SOHModel.Train.Station;
+using Position = Mars.Interfaces.Environments.Position;
 
 namespace SOHModel.Multimodal.Multimodal;
 
@@ -92,9 +94,9 @@ public abstract class AbstractMultimodalLayer : AbstractLayer, IMultimodalLayer,
     public IEnumerable<ModalChoice> Provides(IModalCapabilitiesAgent agent, ISpatialNode source)
     {
         IEnumerable<ModalChoice> result = Array.Empty<ModalChoice>();
-        foreach (var modalChoice in agent.ModalChoices)
+        foreach (ModalChoice modalChoice in agent.ModalChoices)
         {
-            var environment = SpatialGraphMediatorLayer.Environment;
+            ISpatialGraphEnvironment environment = SpatialGraphMediatorLayer.Environment;
             switch (modalChoice)
             {
                 case ModalChoice.Walking:
@@ -103,9 +105,9 @@ public abstract class AbstractMultimodalLayer : AbstractLayer, IMultimodalLayer,
                 case ModalChoice.CyclingOwnBike:
                     if (agent is IBicycleSteeringCapable { Bicycle : not null } cyclist)
                     {
-                        var parkingLot = cyclist.Bicycle.BicycleParkingLot;
-                        var bicyclePosition = parkingLot != null ? parkingLot.Position : cyclist.Bicycle.Position;
-                        var nearestNode = environment.NearestNode(bicyclePosition);
+                        BicycleParkingLot? parkingLot = cyclist.Bicycle.BicycleParkingLot;
+                        Position bicyclePosition = parkingLot != null ? parkingLot.Position : cyclist.Bicycle.Position;
+                        ISpatialNode? nearestNode = environment.NearestNode(bicyclePosition);
                         if (source.Equals(nearestNode)) result = result.Append(modalChoice);
                     }
 
@@ -116,9 +118,9 @@ public abstract class AbstractMultimodalLayer : AbstractLayer, IMultimodalLayer,
                 case ModalChoice.CarDriving:
                     if (agent is ICarSteeringCapable { Car : not null } driver)
                     {
-                        var carParkingSpace = driver.Car.CarParkingSpace;
+                        CarParkingSpace? carParkingSpace = driver.Car.CarParkingSpace;
                         if (carParkingSpace == null) break;
-                        var nearestNode = environment.NearestNode(carParkingSpace.Position);
+                        ISpatialNode? nearestNode = environment.NearestNode(carParkingSpace.Position);
                         if (source.Equals(nearestNode)) result = result.Append(modalChoice);
                     }
 
@@ -171,12 +173,12 @@ public abstract class AbstractMultimodalLayer : AbstractLayer, IMultimodalLayer,
     {
         if (vectorLayer == null) yield break;
 
-        var feature = vectorLayer.Nearest(source.Position.PositionArray);
+        T? feature = vectorLayer.Nearest(source.Position.PositionArray);
         if (feature == null) yield break;
 
-        var centroid = feature.VectorStructured.Geometry.Centroid;
-        var featurePosition = Position.CreateGeoPosition(centroid.X, centroid.Y);
-        var nearestNode =
+        Point? centroid = feature.VectorStructured.Geometry.Centroid;
+        Position? featurePosition = Position.CreateGeoPosition(centroid.X, centroid.Y);
+        ISpatialNode? nearestNode =
             SpatialGraphMediatorLayer.Environment.NearestNode(featurePosition);
         if (source.Equals(nearestNode))
             yield return modalChoice;
@@ -188,12 +190,12 @@ public abstract class AbstractMultimodalLayer : AbstractLayer, IMultimodalLayer,
     {
         if (vectorLayer == null) return false;
 
-        var feature = vectorLayer.Nearest(source.Position.PositionArray);
+        T? feature = vectorLayer.Nearest(source.Position.PositionArray);
         if (feature == null) return false;
 
-        var centroid = feature.VectorStructured.Geometry.Centroid;
-        var featurePosition = Position.CreateGeoPosition(centroid.X, centroid.Y);
-        var nearestNode = SpatialGraphMediatorLayer.Environment.NearestNode(featurePosition);
+        Point? centroid = feature.VectorStructured.Geometry.Centroid;
+        Position? featurePosition = Position.CreateGeoPosition(centroid.X, centroid.Y);
+        ISpatialNode? nearestNode = SpatialGraphMediatorLayer.Environment.NearestNode(featurePosition);
 
         return source.Equals(nearestNode);
     }

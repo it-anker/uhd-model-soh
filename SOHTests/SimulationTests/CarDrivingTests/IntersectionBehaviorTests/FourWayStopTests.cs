@@ -1,9 +1,11 @@
 using System;
 using System.Collections.Generic;
+using System.Data;
 using System.IO;
 using System.Linq;
 using Mars.Common.IO.Csv;
 using Mars.Components.Starter;
+using Mars.Core.Simulation.Entities;
 using Mars.Interfaces.Model;
 using SOHModel.Car.Model;
 using Xunit;
@@ -16,13 +18,13 @@ public class FourWayStopTests
     [Fact]
     public void FourWayStopTwoCarsGiveWayTest()
     {
-        var modelDescription = new ModelDescription();
+        ModelDescription modelDescription = new ModelDescription();
         modelDescription.AddLayer<CarLayer>();
         modelDescription.AddAgent<CarDriver, CarLayer>();
         modelDescription.AddEntity<Car>();
 
-        var start = DateTime.Parse("2020-01-01T00:00:00");
-        var config = new SimulationConfig
+        DateTime start = DateTime.Parse("2020-01-01T00:00:00");
+        SimulationConfig config = new SimulationConfig
         {
             Globals =
             {
@@ -58,8 +60,8 @@ public class FourWayStopTests
                 }
             }
         };
-        var starter = SimulationStarter.Start(modelDescription, config);
-        var workflowState = starter.Run();
+        SimulationStarter starter = SimulationStarter.Start(modelDescription, config);
+        SimulationWorkflowState workflowState = starter.Run();
 
         Assert.Equal(120, workflowState.Iterations);
 
@@ -78,26 +80,26 @@ public class FourWayStopTests
         //               |      |
         //               |      |
 
-        var table = CsvReader.MapData(Path.Combine(GetType().Name, nameof(CarDriver) + ".csv"));
+        DataTable? table = CsvReader.MapData(Path.Combine(GetType().Name, nameof(CarDriver) + ".csv"));
         Assert.NotNull(table);
 
         //check that the car has come to a full stop
-        var car1CloserThan10Meter = table.Select("Convert(RemainingDistanceOnEdge, System.Decimal) < 10 AND " +
-                                                 "Convert(CurrentEdgeId, 'System.Int32') = 22 AND " +
-                                                 "StableId = '64eae14b-3976-4dd1-b324-e73f1e70a001'");
+        DataRow[] car1CloserThan10Meter = table.Select("Convert(RemainingDistanceOnEdge, System.Decimal) < 10 AND " +
+                                                       "Convert(CurrentEdgeId, 'System.Int32') = 22 AND " +
+                                                       "StableId = '64eae14b-3976-4dd1-b324-e73f1e70a001'");
         Assert.InRange(Convert.ToDouble(car1CloserThan10Meter[1]["Velocity"]), 0.000, 0.001);
 
-        var car2CloserThan10Meter = table.Select("Convert(RemainingDistanceOnEdge, System.Decimal) < 10 AND " +
-                                                 "Convert(CurrentEdgeId, 'System.Int32') = 12 AND " +
-                                                 "StableId = '64eae14b-3976-4dd1-b324-e73f1e70a002'");
+        DataRow[] car2CloserThan10Meter = table.Select("Convert(RemainingDistanceOnEdge, System.Decimal) < 10 AND " +
+                                                       "Convert(CurrentEdgeId, 'System.Int32') = 12 AND " +
+                                                       "StableId = '64eae14b-3976-4dd1-b324-e73f1e70a002'");
         Assert.InRange(Convert.ToDouble(car2CloserThan10Meter[1]["Velocity"]), 0.000, 0.001);
 
         //check that car 1 crosses first
-        var car1SecondEdge = table.Select("Convert(CurrentEdgeId, 'System.Int32') = 41 AND " +
-                                          "StableId = '64eae14b-3976-4dd1-b324-e73f1e70a001'");
+        DataRow[] car1SecondEdge = table.Select("Convert(CurrentEdgeId, 'System.Int32') = 41 AND " +
+                                                "StableId = '64eae14b-3976-4dd1-b324-e73f1e70a001'");
 
-        var car2SecondEdge = table.Select("Convert(CurrentEdgeId, 'System.Int32') = 31 AND " +
-                                          "StableId = '64eae14b-3976-4dd1-b324-e73f1e70a002'");
+        DataRow[] car2SecondEdge = table.Select("Convert(CurrentEdgeId, 'System.Int32') = 31 AND " +
+                                                "StableId = '64eae14b-3976-4dd1-b324-e73f1e70a002'");
 
         Assert.True(Convert.ToInt32(car1SecondEdge.First()["Step"]) <=
                     Convert.ToInt32(car2SecondEdge.First()["Step"]));
@@ -106,13 +108,13 @@ public class FourWayStopTests
     [Fact]
     public void SingleCarComesToFullStopTest()
     {
-        var modelDescription = new ModelDescription();
+        ModelDescription modelDescription = new ModelDescription();
         modelDescription.AddLayer<CarLayer>();
         modelDescription.AddAgent<CarDriver, CarLayer>();
         modelDescription.AddEntity<Car>();
 
-        var start = DateTime.Parse("2020-01-01T00:00:00");
-        var config = new SimulationConfig
+        DateTime start = DateTime.Parse("2020-01-01T00:00:00");
+        SimulationConfig config = new SimulationConfig
         {
             Globals =
             {
@@ -159,8 +161,8 @@ public class FourWayStopTests
                 }
             }
         };
-        var starter = SimulationStarter.Start(modelDescription, config);
-        var workflowState = starter.Run();
+        SimulationStarter starter = SimulationStarter.Start(modelDescription, config);
+        SimulationWorkflowState workflowState = starter.Run();
 
         Assert.Equal(120, workflowState.Iterations);
 
@@ -179,13 +181,13 @@ public class FourWayStopTests
         //               |      |
         //               |      |
 
-        var table = CsvReader.MapData(Path.Combine(GetType().Name,
+        DataTable? table = CsvReader.MapData(Path.Combine(GetType().Name,
             $"{nameof(CarDriver)}{nameof(SingleCarComesToFullStopTest)}.csv"));
         Assert.NotNull(table);
 
         //check that the car has come to a full stop
-        var closerThanTenMeter = table.Select("Convert(RemainingDistanceOnEdge, System.Decimal) < 10 AND " +
-                                              "Convert(CurrentEdgeId, 'System.Int32') = 22");
+        DataRow[] closerThanTenMeter = table.Select("Convert(RemainingDistanceOnEdge, System.Decimal) < 10 AND " +
+                                                    "Convert(CurrentEdgeId, 'System.Int32') = 22");
 
         Assert.InRange(Convert.ToDouble(closerThanTenMeter[1]["Velocity"]), 0.000, 0.001);
     }

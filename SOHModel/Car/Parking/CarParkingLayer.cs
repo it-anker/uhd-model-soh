@@ -28,7 +28,7 @@ public class CarParkingLayer : VectorLayer<CarParkingSpace>, ICarParkingLayer
         RegisterAgent? registerAgentHandle = null,
         UnregisterAgent? unregisterAgent = null)
     {
-        var initialized = base.InitLayer(layerInitData, registerAgentHandle, unregisterAgent);
+        bool initialized = base.InitLayer(layerInitData, registerAgentHandle, unregisterAgent);
         
         if (StreetLayer == null)
             throw new ArgumentException($"{nameof(CarParkingLayer)} requires {nameof(StreetLayer)}");
@@ -41,11 +41,11 @@ public class CarParkingLayer : VectorLayer<CarParkingSpace>, ICarParkingLayer
 
     public void UpdateOccupancy(double percent, int carCount = 0)
     {
-        var spacesCount = Features.Count;
-        var percentReservedForCars = 1.0 * (spacesCount - carCount) / spacesCount;
-        var percentCombined = percent * percentReservedForCars;
+        int spacesCount = Features.Count;
+        double percentReservedForCars = 1.0 * (spacesCount - carCount) / spacesCount;
+        double percentCombined = percent * percentReservedForCars;
 
-        foreach (var parking in Features.OfType<CarParkingSpace>())
+        foreach (CarParkingSpace parking in Features.OfType<CarParkingSpace>())
         {
             parking.Occupied = RandomHelper.Random.NextDouble() < percentCombined;
         }
@@ -76,13 +76,13 @@ public class CarParkingLayer : VectorLayer<CarParkingSpace>, ICarParkingLayer
         }
         else
         {
-            var space = Region(position.PositionArray, radiusInM, Predicate).FirstOrDefault();
+            CarParkingSpace? space = Region(position.PositionArray, radiusInM, Predicate).FirstOrDefault();
             carParkingSpace = space ?? Nearest(position);
         }
 
         if (carParkingSpace != null)
         {
-            var car = EntityManager.Create<Model.Car>(keyAttribute, type);
+            Model.Car? car = EntityManager.Create<Model.Car>(keyAttribute, type);
             car.Environment = StreetLayer.Environment;
             car.CarParkingLayer = this;
             if (carParkingSpace.Enter(car))

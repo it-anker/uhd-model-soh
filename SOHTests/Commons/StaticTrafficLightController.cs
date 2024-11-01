@@ -47,23 +47,23 @@ public class StaticTrafficLightLayer : ISteppedActiveLayer
         if (_initialized) return;
 
         _initialized = true;
-        var lines = File.ReadAllLines(_initConfig);
+        string[] lines = File.ReadAllLines(_initConfig);
 
         if (lines.Length == 0)
             throw new ArgumentOutOfRangeException(nameof(lines),
                 "Input file for traffic lights must at least contain one line with lat,lon and desired state");
 
-        foreach (var line in lines)
+        foreach (string line in lines)
         {
-            var lineContent = line.Split(',');
-            var state = lineContent[2].Value<int>();
-            var lat = lineContent[0].Value<double>();
-            var lon = lineContent[1].Value<double>();
-            var position = Position.CreateGeoPosition(lon, lat);
+            string[] lineContent = line.Split(',');
+            int state = lineContent[2].Value<int>();
+            double lat = lineContent[0].Value<double>();
+            double lon = lineContent[1].Value<double>();
+            Position? position = Position.CreateGeoPosition(lon, lat);
 
-            var node = _carLayer.Environment.NearestNode(position);
+            ISpatialNode? node = _carLayer.Environment.NearestNode(position);
 
-            var distance = position.DistanceInMTo(node.Position);
+            double distance = position.DistanceInMTo(node.Position);
             if (distance > 10)
                 throw new ArgumentOutOfRangeException(nameof(distance), "Found node was more than 10m away");
 

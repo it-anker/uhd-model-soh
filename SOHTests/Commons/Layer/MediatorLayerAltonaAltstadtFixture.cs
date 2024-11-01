@@ -8,9 +8,9 @@ public class MediatorLayerAltonaAltstadtFixture : IDisposable
 {
     public MediatorLayerAltonaAltstadtFixture()
     {
-        var gisPoiLayer = TestVectorPoiLayer.Create(ResourcesConstants.PoisAltonaAltstadt);
-        var gisLandUseLayer = TestVectorLanduseLayer.Create(ResourcesConstants.LanduseAltonaAltstadt);
-        var buildingLayer = TestVectorBuildingsLayer.Create(ResourcesConstants.BuildingsAltonaAltstadt);
+        VectorPoiLayer gisPoiLayer = TestVectorPoiLayer.Create(ResourcesConstants.PoisAltonaAltstadt);
+        VectorLanduseLayer gisLandUseLayer = TestVectorLanduseLayer.Create(ResourcesConstants.LanduseAltonaAltstadt);
+        VectorBuildingsLayer buildingLayer = TestVectorBuildingsLayer.Create(ResourcesConstants.BuildingsAltonaAltstadt);
 
         Assert.True(gisPoiLayer.Features.Count > 0);
         Assert.True(gisLandUseLayer.Features.Count > 0);

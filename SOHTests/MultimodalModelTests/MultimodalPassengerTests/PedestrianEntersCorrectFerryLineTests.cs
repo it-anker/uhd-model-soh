@@ -24,7 +24,7 @@ public class PedestrianEntersCorrectFerryLineTests : IClassFixture<FerryRouteLay
 
     public PedestrianEntersCorrectFerryLineTests(FerryRouteLayerFixture routeLayerFixture)
     {
-        var environment = new SpatialGraphEnvironment(new SpatialGraphOptions
+        SpatialGraphEnvironment environment = new SpatialGraphEnvironment(new SpatialGraphOptions
         {
             GraphImports = new List<Input>
             {
@@ -43,28 +43,28 @@ public class PedestrianEntersCorrectFerryLineTests : IClassFixture<FerryRouteLay
         _ferryStationLayer = routeLayerFixture.FerryStationLayer;
 
 
-        var node1 = environment.AddNode(9.92223, 53.54907);
-        var node2 = environment.AddNode(9.92235, 53.55067);
-        var node3 = environment.AddNode(9.91261, 53.55113);
-        var node4 = environment.AddNode(9.912405, 53.550753);
+        ISpatialNode node1 = environment.AddNode(9.92223, 53.54907);
+        ISpatialNode node2 = environment.AddNode(9.92235, 53.55067);
+        ISpatialNode node3 = environment.AddNode(9.91261, 53.55113);
+        ISpatialNode node4 = environment.AddNode(9.912405, 53.550753);
 
         //Edges
-        var e1 = environment.AddEdge(node1, node2,
+        ISpatialEdge e1 = environment.AddEdge(node1, node2,
             new Dictionary<string, object> { { "lanes", 3 } });
         AddModalities(e1);
-        var e2 = environment.AddEdge(node2, node1,
+        ISpatialEdge e2 = environment.AddEdge(node2, node1,
             new Dictionary<string, object> { { "lanes", 3 } });
         AddModalities(e2);
-        var e3 = environment.AddEdge(node2, node3,
+        ISpatialEdge e3 = environment.AddEdge(node2, node3,
             new Dictionary<string, object> { { "lanes", 2 } });
         AddModalities(e3);
-        var e4 = environment.AddEdge(node3, node2,
+        ISpatialEdge e4 = environment.AddEdge(node3, node2,
             new Dictionary<string, object> { { "lanes", 2 } });
         AddModalities(e4);
-        var e5 = environment.AddEdge(node3, node4,
+        ISpatialEdge e5 = environment.AddEdge(node3, node4,
             new Dictionary<string, object> { { "lanes", 2 } });
         AddModalities(e5);
-        var e6 = environment.AddEdge(node4, node3,
+        ISpatialEdge e6 = environment.AddEdge(node4, node3,
             new Dictionary<string, object> { { "lanes", 2 } });
         AddModalities(e6);
 
@@ -93,7 +93,7 @@ public class PedestrianEntersCorrectFerryLineTests : IClassFixture<FerryRouteLay
     [Fact]
     public void EnterFerryWithCorrectFerryLine()
     {
-        var agent = new TestPassengerPedestrian //requires ferry line 62 to reach goal
+        TestPassengerPedestrian agent = new TestPassengerPedestrian //requires ferry line 62 to reach goal
         {
             StartPosition = _start
         };
@@ -102,14 +102,14 @@ public class PedestrianEntersCorrectFerryLineTests : IClassFixture<FerryRouteLay
         Assert.Equal(1, agent.MultimodalRoute.Count);
         Assert.Equal(ModalChoice.Ferry, agent.MultimodalRoute.CurrentModalChoice);
 
-        var ferryStation = _ferryStationLayer.Nearest(_start);
+        FerryStation ferryStation = _ferryStationLayer.Nearest(_start);
         Assert.Equal("Landungsbrücken Brücke 1", ferryStation.Name);
 
         agent.Tick();
         Assert.Equal(Whereabouts.Offside, agent.Whereabouts);
 
         Assert.Empty(ferryStation.Ferries);
-        var ferryLine61driver = new FerryDriver(_ferryLayer, (_, _) => { })
+        FerryDriver ferryLine61driver = new FerryDriver(_ferryLayer, (_, _) => { })
         {
             Line = 61,
             MinimumBoardingTimeInSeconds = 10
@@ -123,7 +123,7 @@ public class PedestrianEntersCorrectFerryLineTests : IClassFixture<FerryRouteLay
 
         Assert.True(ferryStation.Leave(ferryLine61driver.Ferry));
         Assert.Empty(ferryStation.Ferries);
-        var ferryLine72driver = new FerryDriver(_ferryLayer, (_, _) => { })
+        FerryDriver ferryLine72driver = new FerryDriver(_ferryLayer, (_, _) => { })
         {
             Line = 72,
             MinimumBoardingTimeInSeconds = 10
@@ -137,7 +137,7 @@ public class PedestrianEntersCorrectFerryLineTests : IClassFixture<FerryRouteLay
 
         Assert.True(ferryStation.Leave(ferryLine72driver.Ferry));
         Assert.Empty(ferryStation.Ferries);
-        var ferryLine62driver = new FerryDriver(_ferryLayer, (_, _) => { })
+        FerryDriver ferryLine62driver = new FerryDriver(_ferryLayer, (_, _) => { })
         {
             Line = 62,
             MinimumBoardingTimeInSeconds = 10

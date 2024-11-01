@@ -21,10 +21,10 @@ public class WalkingCyclingMultimodalRouteTests
 
     public WalkingCyclingMultimodalRouteTests()
     {
-        var environment = new SpatialGraphEnvironment(ResourcesConstants.DriveGraphAltonaAltstadt);
+        SpatialGraphEnvironment environment = new SpatialGraphEnvironment(ResourcesConstants.DriveGraphAltonaAltstadt);
         _bicycleRentalLayer = new BicycleRentalLayerFixture(environment).BicycleRentalLayer;
 
-        var layer = new TestMultimodalLayer(environment)
+        TestMultimodalLayer layer = new TestMultimodalLayer(environment)
         {
             BicycleRentalLayer = _bicycleRentalLayer
         };
@@ -44,7 +44,7 @@ public class WalkingCyclingMultimodalRouteTests
     [Fact]
     public void FindWalkCycleRoute()
     {
-        var multimodalRoute = _routeFinder.Search(_agent, _start, _goal, ModalChoice.CyclingRentalBike);
+        MultimodalRoute multimodalRoute = _routeFinder.Search(_agent, _start, _goal, ModalChoice.CyclingRentalBike);
         Assert.NotNull(multimodalRoute);
         Assert.Equal(3, multimodalRoute.Count);
         Assert.Equal(ModalChoice.Walking, multimodalRoute.Stops[0].ModalChoice);
@@ -61,11 +61,11 @@ public class WalkingCyclingMultimodalRouteTests
         BicycleRentalStation rentalStation;
         while ((rentalStation = _bicycleRentalLayer.Nearest(_start, true)) != null)
         {
-            var rentalBicycle = rentalStation.RentAny();
+            IRentalBicycle? rentalBicycle = rentalStation.RentAny();
             Assert.True(rentalStation.Leave(rentalBicycle));
         }
 
-        var multimodalRoute = _routeFinder.Search(_agent, _start, _goal, ModalChoice.CyclingRentalBike);
+        MultimodalRoute multimodalRoute = _routeFinder.Search(_agent, _start, _goal, ModalChoice.CyclingRentalBike);
         Assert.NotNull(multimodalRoute);
         Assert.Equal(1, multimodalRoute.Count);
         Assert.Equal(ModalChoice.Walking, multimodalRoute.Stops[0].ModalChoice);

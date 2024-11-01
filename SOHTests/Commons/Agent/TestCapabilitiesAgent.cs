@@ -30,24 +30,25 @@ public class TestCapabilitiesAgent : IModalCapabilitiesAgent, ICarSteeringCapabl
     public double CyclingPower { get; }
     public double Mass { get; }
     public double Gradient { get; }
-    public Bicycle Bicycle { get; set; }
-    public Position Position { get; set; }
+    public Bicycle? Bicycle { get; set; }
+
+    public Position? Position { get; set; }
+    
+    public bool OvertakingActivated { get; }
+    public bool BrakingActivated { get; set; }
+    public Car? Car { get; set; }
+    public bool CurrentlyCarDriving { get; }
+    
+    public Guid ID { get; set; }
+    public ISet<ModalChoice> ModalChoices { get; }
 
     public void Notify(PassengerMessage passengerMessage)
     {
         throw new NotImplementedException();
     }
 
-    public bool OvertakingActivated { get; }
-    public bool BrakingActivated { get; set; }
-    public Car Car { get; set; }
-    public bool CurrentlyCarDriving { get; }
-
     public void Tick()
     {
         throw new NotImplementedException();
     }
-
-    public Guid ID { get; set; }
-    public ISet<ModalChoice> ModalChoices { get; }
 }

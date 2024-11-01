@@ -19,11 +19,11 @@ public class TestWalkingGatewayPedestrian : TestMultiCapableAgent
     {
         base.Init(layer);
 
-        var environment = layer.SpatialGraphMediatorLayer.Environment;
-        var gateway = layer.GatewayLayer.Validate(StartPosition, GoalPosition).Item2;
+        ISpatialGraphEnvironment environment = layer.SpatialGraphMediatorLayer.Environment;
+        Position gateway = layer.GatewayLayer.Validate(StartPosition, GoalPosition).Item2;
         Assert.NotNull(gateway);
 
-        var route = environment.FindShortestRoute(environment.NearestNode(StartPosition),
+        Route? route = environment.FindShortestRoute(environment.NearestNode(StartPosition),
             environment.NearestNode(gateway),
             edge => edge.Modalities.Contains(SpatialModalityType.Walking));
         MultimodalRoute = new MultimodalRoute(route, ModalChoice.Walking);

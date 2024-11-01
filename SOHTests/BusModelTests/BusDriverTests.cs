@@ -5,6 +5,7 @@ using Mars.Common.IO.Csv;
 using Mars.Components.Environments;
 using Mars.Core.Data;
 using Mars.Interfaces;
+using Mars.Interfaces.Environments;
 using Mars.Interfaces.Model;
 using Mars.Interfaces.Model.Options;
 using SOHModel.Bus.Model;
@@ -49,22 +50,22 @@ public class BusDriverTests : IClassFixture<BusRouteLayerFixture>
     public void VisitAllStationsAlongBusRoute()
     {
         const string line = "113";
-        var driver = new BusDriver(_layer, (_, _) => { })
+        BusDriver driver = new BusDriver(_layer, (_, _) => { })
         {
             Line = line,
             MinimumBoardingTimeInSeconds = 10
         };
 
-        Assert.True(_layer.BusRouteLayer.TryGetRoute(line, out var schedule));
+        Assert.True(_layer.BusRouteLayer.TryGetRoute(line, out BusRoute? schedule));
         Assert.NotNull(schedule);
-        var unvisitedStationEntries = schedule.Entries.ToList();
+        List<BusRouteEntry> unvisitedStationEntries = schedule!.Entries.ToList();
         Assert.Equal(7, unvisitedStationEntries.Count);
-        for (var tick = 0; tick < 9000; tick++, _layer.Context.UpdateStep())
+        for (int tick = 0; tick < 9000; tick++, _layer.Context.UpdateStep())
         {
             driver.Tick();
             if (driver.Boarding)
             {
-                var routeEntry = driver.BusRouteEnumerator.Current;
+                BusRouteEntry routeEntry = driver.BusRouteEnumerator.Current;
                 unvisitedStationEntries.Remove(routeEntry);
             }
         }
@@ -77,14 +78,14 @@ public class BusDriverTests : IClassFixture<BusRouteLayerFixture>
     {
         const int minimalBoardingTime = 32;
 
-        var driver = new BusDriver(_layer, (_, _) => { })
+        BusDriver driver = new BusDriver(_layer, (_, _) => { })
         {
             Line = "113",
             MinimumBoardingTimeInSeconds = minimalBoardingTime
         };
 
-        var currentBoardingTime = -1;
-        for (var tick = 0; tick < 10000; tick++, _layer.Context.UpdateStep())
+        int currentBoardingTime = -1;
+        for (int tick = 0; tick < 10000; tick++, _layer.Context.UpdateStep())
         {
             driver.Tick();
 
@@ -105,16 +106,16 @@ public class BusDriverTests : IClassFixture<BusRouteLayerFixture>
     {
         const int minimumBoardingTimeInSeconds = 10;
 
-        var driver = new BusDriver(_layer, (_, _) => { })
+        BusDriver driver = new BusDriver(_layer, (_, _) => { })
         {
             Line = "113",
             MinimumBoardingTimeInSeconds = minimumBoardingTimeInSeconds
         };
 
-        var firstTickAfterBoarding = false;
+        bool firstTickAfterBoarding = false;
 
-        var nextStartTick = minimumBoardingTimeInSeconds + 1;
-        for (var tick = 0; tick < 2000; tick++, _layer.Context.UpdateStep())
+        int nextStartTick = minimumBoardingTimeInSeconds + 1;
+        for (int tick = 0; tick < 2000; tick++, _layer.Context.UpdateStep())
         {
             driver.Tick();
 
@@ -128,8 +129,8 @@ public class BusDriverTests : IClassFixture<BusRouteLayerFixture>
 
                 Assert.InRange(Math.Abs(tick - nextStartTick), 0, minimumBoardingTimeInSeconds * 2);
 
-                var driverStationStops = driver.CurrentBusRouteEntry;
-                var travelTime = driverStationStops.Minutes * 60;
+                BusRouteEntry driverStationStops = driver.CurrentBusRouteEntry;
+                int travelTime = driverStationStops.Minutes * 60;
                 nextStartTick += travelTime;
             }
         }
@@ -138,19 +139,18 @@ public class BusDriverTests : IClassFixture<BusRouteLayerFixture>
     [Fact]
     public void BusReachesReachStationsWithinDefinedStopMinutes()
     {
-        var driver = new BusDriver(_layer, (_, _) => { })
+        BusDriver driver = new BusDriver(_layer, (_, _) => { })
         {
             Line = "113",
             MinimumBoardingTimeInSeconds = 20
         };
 
-
-        var firstDrivingTick = -1L;
-        var isFirstBoardingTick = true;
-        var travelDurance = 0;
+        long firstDrivingTick = -1L;
+        bool isFirstBoardingTick = true;
+        int travelDurance = 0;
 
         const int ticks = 2000;
-        for (var tick = 0; tick < ticks; tick++, _layer.Context.UpdateStep())
+        for (int tick = 0; tick < ticks; tick++, _layer.Context.UpdateStep())
         {
             driver.Tick();
 
@@ -171,14 +171,14 @@ public class BusDriverTests : IClassFixture<BusRouteLayerFixture>
             isFirstBoardingTick = !driver.Boarding;
         }
 
-        var goal = driver.BusRoute.Entries.Last().To.Position;
+        Position goal = driver.BusRoute.Entries.Last().To.Position;
         Assert.Equal(goal, driver.Position);
     }
 
     [Fact]
     public void Import113Track()
     {
-        var environment = new SpatialGraphEnvironment(new SpatialGraphOptions
+        SpatialGraphEnvironment environment = new SpatialGraphEnvironment(new SpatialGraphOptions
         {
             GraphImports = new List<Input>
             {
@@ -202,7 +202,7 @@ public class BusDriverTests : IClassFixture<BusRouteLayerFixture>
     [Fact]
     public void TestMoveBusAlongBidirectionalPath()
     {
-        var environment = new SpatialGraphEnvironment(new SpatialGraphOptions
+        SpatialGraphEnvironment environment = new SpatialGraphEnvironment(new SpatialGraphOptions
         {
             GraphImports = new List<Input>
             {
@@ -217,9 +217,9 @@ public class BusDriverTests : IClassFixture<BusRouteLayerFixture>
             }
         });
 
-        var manager = new EntityManagerImpl(CsvReader.MapData(ResourcesConstants.BusCsv));
+        EntityManagerImpl manager = new EntityManagerImpl(CsvReader.MapData(ResourcesConstants.BusCsv));
 
-        var layer = new BusLayer
+        BusLayer layer = new BusLayer
         {
             BusRouteLayer = _routeLayerFixture.BusRouteLayer,
             EntityManager = manager,
@@ -227,19 +227,19 @@ public class BusDriverTests : IClassFixture<BusRouteLayerFixture>
             Context = SimulationContext.Start2020InSeconds
         };
 
-        var p1 = environment.FindShortestRoute(environment.Nodes.Last(), environment.Nodes.First());
-        var p2 = environment.FindShortestRoute(environment.Nodes.First(), environment.Nodes.Last());
+        Route p1 = environment.FindShortestRoute(environment.Nodes.Last(), environment.Nodes.First());
+        Route p2 = environment.FindShortestRoute(environment.Nodes.First(), environment.Nodes.Last());
         Assert.Equal(p1.Count, p2.Count);
-        var source = environment.Nodes.First().Position;
-        var target = environment.Nodes.Last().Position;
+        Position? source = environment.Nodes.First().Position;
+        Position? target = environment.Nodes.Last().Position;
 
-        var route = environment.FindShortestRoute(environment.NearestNode(source),
+        Route route = environment.FindShortestRoute(environment.NearestNode(source),
             environment.NearestNode(target));
 
         Assert.NotEmpty(route);
-        var goalReached = false;
+        bool goalReached = false;
 
-        var driver = new BusDriver(layer, (_, _) => goalReached = true)
+        BusDriver driver = new BusDriver(layer, (_, _) => goalReached = true)
         {
             Line = "113",
             Position = source,
@@ -259,7 +259,7 @@ public class BusDriverTests : IClassFixture<BusRouteLayerFixture>
         Assert.NotNull(driver.Bus);
         Assert.NotNull(driver.Layer);
         Assert.NotEqual(Guid.Empty, driver.ID);
-        for (var i = 0; i < 10000; i++, layer.Context.UpdateStep()) driver.Tick();
+        for (int i = 0; i < 10000; i++, layer.Context.UpdateStep()) driver.Tick();
         Assert.True(goalReached);
         Assert.True(driver.StationStops > 0);
         Assert.True(driver.GoalReached);

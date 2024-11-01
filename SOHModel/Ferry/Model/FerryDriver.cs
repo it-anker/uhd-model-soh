@@ -104,10 +104,10 @@ public class FerryDriver : AbstractAgent, IFerrySteeringCapable
                 Environment.Remove(Ferry);
                 FerryRouteEnumerator.Current?.To.Enter(Ferry);
 
-                var currentMinutes = FerryRouteEnumerator.Current?.Minutes ?? 0;
+                int currentMinutes = FerryRouteEnumerator.Current?.Minutes ?? 0;
                 _departureTick += currentMinutes * 60;
 
-                var notAtTerminalStation = FindNextRoute();
+                bool notAtTerminalStation = FindNextRoute();
                 if (notAtTerminalStation)
                 {
                     Ferry.NotifyPassengers(PassengerMessage.GoalReached);
@@ -124,7 +124,7 @@ public class FerryDriver : AbstractAgent, IFerrySteeringCapable
 
     private void FindFerryRouteAndStartCommuting()
     {
-        if (Layer.FerryRouteLayer.FerryRoutes.TryGetValue(Line, out var schedule))
+        if (Layer.FerryRouteLayer.FerryRoutes.TryGetValue(Line, out FerryRoute? schedule))
             FerryRoute = schedule;
         else
             throw new ArgumentException($"No train route provided by {nameof(FerryRouteLayer)}");
@@ -142,9 +142,9 @@ public class FerryDriver : AbstractAgent, IFerrySteeringCapable
     {
         if (!FerryRouteEnumerator.MoveNext()) return false;
 
-        var source =
+        ISpatialNode? source =
             Environment.NearestNode(FerryRouteEnumerator.Current?.From.Position, SpatialModalityType.ShipDriving);
-        var target =
+        ISpatialNode? target =
             Environment.NearestNode(FerryRouteEnumerator.Current?.To.Position, SpatialModalityType.ShipDriving);
 
         Route = Environment.FindShortestRoute(source, target,

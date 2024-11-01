@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System.Data;
 using Mars.Common.IO.Csv;
 using Mars.Core.Data;
 using Mars.Interfaces;
@@ -20,7 +21,7 @@ public class FourNodeCarRentalLayerFixture
     {
         FourNodeGraphEnv = new FourNodeGraphEnv();
 
-        var features = new List<IFeature>
+        List<IFeature> features = new List<IFeature>
         {
             new VectorStructuredData
             {
@@ -33,12 +34,12 @@ public class FourNodeCarRentalLayerFixture
                 Geometry = new Point(FourNodeGraphEnv.Node3Pos.X, FourNodeGraphEnv.Node3Pos.Y)
             }
         };
-        var dataTable = new CsvReader(ResourcesConstants.CarCsv, true).ToTable();
-        var entityManagerImpl = new EntityManagerImpl((typeof(RentalCar), dataTable));
-        var mock = new Mock<ISimulationContainer>();
+        DataTable? dataTable = new CsvReader(ResourcesConstants.CarCsv, true).ToTable();
+        EntityManagerImpl entityManagerImpl = new EntityManagerImpl((typeof(RentalCar), dataTable));
+        Mock<ISimulationContainer> mock = new Mock<ISimulationContainer>();
 
         mock.Setup(container => container.Resolve<IEntityManager>()).Returns(entityManagerImpl);
-        var mapping = new LayerInitData
+        LayerInitData mapping = new LayerInitData
         {
             LayerInitConfig = new LayerMapping
             {
@@ -52,8 +53,8 @@ public class FourNodeCarRentalLayerFixture
             Container = mock.Object
         };
 
-        var streetLayer = new StreetLayer { Environment = FourNodeGraphEnv.GraphEnvironment };
-        var carRentalLayer = new CarRentalLayer { StreetLayer = streetLayer };
+        StreetLayer streetLayer = new StreetLayer { Environment = FourNodeGraphEnv.GraphEnvironment };
+        CarRentalLayer carRentalLayer = new CarRentalLayer { StreetLayer = streetLayer };
         carRentalLayer.InitLayer(mapping, (_, _) => { }, (_, _) => { });
 
         CarRentalLayer = carRentalLayer;

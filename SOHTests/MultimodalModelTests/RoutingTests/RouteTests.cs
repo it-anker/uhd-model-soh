@@ -8,6 +8,7 @@ using Mars.Interfaces.Model;
 using Mars.Interfaces.Model.Options;
 using NetTopologySuite.Features;
 using NetTopologySuite.Geometries;
+using SOHModel.Car.Parking;
 using SOHModel.Domain.Graph;
 using SOHTests.Commons.Agent;
 using SOHTests.Commons.Layer;
@@ -24,7 +25,7 @@ public class RouteTests
 
     public RouteTests()
     {
-        var environment = new SpatialGraphEnvironment(new SpatialGraphOptions
+        SpatialGraphEnvironment environment = new SpatialGraphEnvironment(new SpatialGraphOptions
         {
             GraphImports = new List<Input>
             {
@@ -49,7 +50,7 @@ public class RouteTests
 
         _street = environment;
 
-        var carParkingLayer = new CarParkingLayerFixture(new StreetLayer { Environment = _street }).CarParkingLayer;
+        CarParkingLayer carParkingLayer = new CarParkingLayerFixture(new StreetLayer { Environment = _street }).CarParkingLayer;
         _multimodalLayer = new TestMultimodalLayer(_street)
         {
             CarParkingLayer = carParkingLayer
@@ -58,14 +59,14 @@ public class RouteTests
 
     private Route FindRouteByHops(ISpatialNode startNode, ISpatialNode goalNode)
     {
-        var route = _street.FindRoute(startNode, goalNode);
+        Route? route = _street.FindRoute(startNode, goalNode);
 
         if (route == null)
         {
             const int hops = 3;
-            foreach (var tempStartNode in _street.NearestNodes(startNode.Position, double.MaxValue, hops))
+            foreach (ISpatialNode tempStartNode in _street.NearestNodes(startNode.Position, double.MaxValue, hops))
             {
-                foreach (var tempGoalNode in _street.NearestNodes(goalNode.Position, double.MaxValue, hops))
+                foreach (ISpatialNode tempGoalNode in _street.NearestNodes(goalNode.Position, double.MaxValue, hops))
                 {
                     route = _street.FindRoute(tempStartNode, tempGoalNode);
                     if (route != null) break;
@@ -81,7 +82,7 @@ public class RouteTests
     [Fact]
     public void TestRouteAlongEnvironment()
     {
-        var sidewalk = new SpatialGraphEnvironment(new Input
+        SpatialGraphEnvironment sidewalk = new SpatialGraphEnvironment(new Input
         {
             File = ResourcesConstants.WalkGraphAltonaAltstadt,
             InputConfiguration = new InputConfiguration
@@ -90,10 +91,10 @@ public class RouteTests
             }
         });
 
-        var box = sidewalk.BoundingBox;
+        BoundingBox box = sidewalk.BoundingBox;
 
 
-        var ring = new LinearRing(new[]
+        LinearRing ring = new LinearRing(new[]
         {
             new Coordinate(box.MinX, box.MinY),
             new Coordinate(box.MinX, box.MaxY),
@@ -102,21 +103,21 @@ public class RouteTests
             new Coordinate(box.MinX, box.MinY)
         });
 
-        var routes = new List<Route>();
-        for (var i = 0; i < 30; i++)
+        List<Route> routes = new List<Route>();
+        for (int i = 0; i < 30; i++)
         {
-            var source = ring.RandomPositionFromGeometry();
-            var target = ring.RandomPositionFromGeometry();
-            var route = sidewalk.FindShortestRoute(sidewalk.NearestNode(source), _street.NearestNode(target));
+            Position? source = ring.RandomPositionFromGeometry();
+            Position? target = ring.RandomPositionFromGeometry();
+            Route route = sidewalk.FindShortestRoute(sidewalk.NearestNode(source), _street.NearestNode(target));
             Assert.NotNull(route);
             routes.Add(route);
         }
 
-        var collection = new FeatureCollection();
+        FeatureCollection collection = new FeatureCollection();
 
         collection.AddRange(routes.Select((route, i) =>
         {
-            var feature = route.ToFeature();
+            IFeature feature = route.ToFeature();
             feature.Attributes.Add("routeId", i);
             return feature;
         }));
@@ -125,12 +126,12 @@ public class RouteTests
     [Fact]
     public void CheckRouteLengthForDistanceComparison()
     {
-        var start = Position.CreateGeoPosition(9.9494707, 53.5611236);
-        var goal = Position.CreateGeoPosition(9.9325976, 53.5447923);
+        Position? start = Position.CreateGeoPosition(9.9494707, 53.5611236);
+        Position? goal = Position.CreateGeoPosition(9.9325976, 53.5447923);
 
-        var distance = start.DistanceInMTo(goal);
+        double distance = start.DistanceInMTo(goal);
 
-        var agent = new TestMultiCapableAgent
+        TestMultiCapableAgent agent = new TestMultiCapableAgent
         {
             StartPosition = start,
             GoalPosition = goal,
@@ -138,7 +139,7 @@ public class RouteTests
         };
         agent.Init(_multimodalLayer);
 
-        var multimodalRoute = agent.MultimodalRoute;
+        MultimodalRoute multimodalRoute = agent.MultimodalRoute;
 
         Assert.InRange(distance, 0, multimodalRoute.RouteLength);
     }
@@ -146,19 +147,19 @@ public class RouteTests
     [Fact]
     public void CheckSpecificCarRoute()
     {
-        var start = Position.CreatePosition(9.9511281, 53.5464907);
-        var goal = Position.CreatePosition(9.9472114, 53.5612867);
+        Position? start = Position.CreatePosition(9.9511281, 53.5464907);
+        Position? goal = Position.CreatePosition(9.9472114, 53.5612867);
         // var start = Position.CreateGeoPosition(9.9384069, 53.5522083);
         // var goal = Position.CreateGeoPosition(9.9472114, 53.5612867);
         // var startLatLon = start.ToLatLonString();
         // var goalLatLon = goal.ToLatLonString();
 
         // cannot find direct route
-        var startNode = _street.NearestNode(start);
-        var goalNode = _street.NearestNode(goal);
+        ISpatialNode startNode = _street.NearestNode(start);
+        ISpatialNode goalNode = _street.NearestNode(goal);
         Assert.NotEqual(startNode, goalNode);
 
-        var carRoute = _street.FindShortestRoute(startNode, goalNode,
+        Route carRoute = _street.FindShortestRoute(startNode, goalNode,
             edge => edge.Modalities.Contains(SpatialModalityType.CarDriving));
 
         Assert.Null(carRoute);
@@ -167,7 +168,7 @@ public class RouteTests
         // Assert.NotNull(carRoute);
 
         //try to find multimodal route
-        var agent = new TestMultiCapableAgent
+        TestMultiCapableAgent agent = new TestMultiCapableAgent
         {
             StartPosition = start,
             GoalPosition = goal,
@@ -175,21 +176,21 @@ public class RouteTests
         };
         agent.Init(_multimodalLayer);
 
-        var multimodalRoute = agent.MultimodalRoute;
+        MultimodalRoute multimodalRoute = agent.MultimodalRoute;
 
-        var distance = start.DistanceInMTo(goal);
+        double distance = start.DistanceInMTo(goal);
         Assert.InRange(distance, 0, multimodalRoute.RouteLength);
     }
 
     [Fact]
     public void FindRouteByCheckingNearbyNodes()
     {
-        var start = Position.CreateGeoPosition(9.9348281, 53.5477416);
-        var goal = Position.CreateGeoPosition(9.9511738, 53.5463914);
-        var startNode = _street.NearestNode(start);
-        var goalNode = _street.NearestNode(goal);
+        Position? start = Position.CreateGeoPosition(9.9348281, 53.5477416);
+        Position? goal = Position.CreateGeoPosition(9.9511738, 53.5463914);
+        ISpatialNode startNode = _street.NearestNode(start);
+        ISpatialNode goalNode = _street.NearestNode(goal);
 
-        var route = FindRouteByHops(startNode, goalNode);
+        Route route = FindRouteByHops(startNode, goalNode);
 
         Assert.NotNull(route);
     }

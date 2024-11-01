@@ -5,6 +5,7 @@ using Mars.Core.Data;
 using Mars.Interfaces;
 using Mars.Interfaces.Data;
 using Mars.Interfaces.Layers;
+using Mars.Interfaces.Model;
 using SOHModel.Car.Parking;
 using SOHModel.Multimodal.Layers;
 using SOHModel.Multimodal.Multimodal;
@@ -37,11 +38,11 @@ public class CitizenLayer : AbstractMultimodalLayer
     {
         base.InitLayer(layerInitData, registerAgentHandle, unregisterAgent);
 
-        var agentInitConfig = layerInitData.AgentInitConfigs.FirstOrDefault();
+        AgentMapping? agentInitConfig = layerInitData.AgentInitConfigs.FirstOrDefault();
         if (agentInitConfig?.IndividualMapping == null) return false;
 
-        var agentManager = layerInitData.Container.Resolve<IAgentManager>();
-        var dependencies = new List<IModelObject>
+        IAgentManager? agentManager = layerInitData.Container.Resolve<IAgentManager>();
+        List<IModelObject> dependencies = new List<IModelObject>
         {
             MediatorLayer, SpatialGraphMediatorLayer, 
             CarParkingLayer, BicycleRentalLayer, FerryStationLayer
@@ -50,11 +51,11 @@ public class CitizenLayer : AbstractMultimodalLayer
         _agents = agentManager.Spawn<Citizen, CitizenLayer>(dependencies)
             .ToDictionary(citizen => citizen.ID, citizen => citizen);
 
-        var layerParameters = layerInitData.LayerInitConfig.ParameterMapping;
-        if (layerParameters.TryGetValue("ParkingOccupancy", out var mapping))
+        IDictionary<string, IndividualMapping>? layerParameters = layerInitData.LayerInitConfig.ParameterMapping;
+        if (layerParameters.TryGetValue("ParkingOccupancy", out IndividualMapping? mapping))
         {
-            var occupiedParkingPercentage = mapping.Value.Value<double>();
-            var carCount = _agents.Values.Count(p => p.CapabilityDrivingOwnCar);
+            double occupiedParkingPercentage = mapping.Value.Value<double>();
+            int carCount = _agents.Values.Count(p => p.CapabilityDrivingOwnCar);
             CarParkingLayer?.UpdateOccupancy(occupiedParkingPercentage, carCount);
         }
 

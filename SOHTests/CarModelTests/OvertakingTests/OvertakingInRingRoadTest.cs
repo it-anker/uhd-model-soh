@@ -11,16 +11,16 @@ public class OvertakingInRingRoadTest
     [Fact]
     public void OvertakingDeactivated()
     {
-        var graph = new SpatialGraphEnvironment(ResourcesConstants.RingNetwork);
-        var context = SimulationContext.Start2020InSeconds;
+        SpatialGraphEnvironment graph = new SpatialGraphEnvironment(ResourcesConstants.RingNetwork);
+        SimulationContext? context = SimulationContext.Start2020InSeconds;
 
-        var slowDriver = new InfiniteSteeringDriver(context, 20, graph, 0, 5);
-        var fastDriver = new InfiniteSteeringDriver(context, 0, graph, 0, 10);
+        InfiniteSteeringDriver slowDriver = new InfiniteSteeringDriver(context, 20, graph, 0, 5);
+        InfiniteSteeringDriver fastDriver = new InfiniteSteeringDriver(context, 0, graph, 0, 10);
 
         Assert.False(fastDriver.OvertakingActivated);
         Assert.False(slowDriver.OvertakingActivated);
 
-        for (var i = 0; i < 1000; i++, context.UpdateStep())
+        for (int i = 0; i < 1000; i++, context.UpdateStep())
         {
             fastDriver.Tick();
             slowDriver.Tick();
@@ -35,17 +35,17 @@ public class OvertakingInRingRoadTest
     [Fact]
     public void OvertakeOneCarOnOtherwiseFreeEdge()
     {
-        var graph = new SpatialGraphEnvironment(ResourcesConstants.RingNetwork);
-        var context = SimulationContext.Start2020InSeconds;
+        SpatialGraphEnvironment graph = new SpatialGraphEnvironment(ResourcesConstants.RingNetwork);
+        SimulationContext? context = SimulationContext.Start2020InSeconds;
 
-        var slowDriver = new InfiniteSteeringDriver(context, 30, graph, 0, 5);
-        var fastDriver = new InfiniteSteeringDriver(context, 0, graph, 0, 10)
+        InfiniteSteeringDriver slowDriver = new InfiniteSteeringDriver(context, 30, graph, 0, 5);
+        InfiniteSteeringDriver fastDriver = new InfiniteSteeringDriver(context, 0, graph, 0, 10)
         {
             OvertakingActivated = true
         };
 
-        var slowCarInFront = true;
-        for (var i = 0; i < 1000; i++, context.UpdateStep())
+        bool slowCarInFront = true;
+        for (int i = 0; i < 1000; i++, context.UpdateStep())
         {
             fastDriver.Tick();
             slowDriver.Tick();
@@ -66,21 +66,25 @@ public class OvertakingInRingRoadTest
     [Fact]
     public void CarFollowsCarOvertakingDisabled()
     {
-        var graph = new SpatialGraphEnvironment(ResourcesConstants.RingNetwork);
-        var context = SimulationContext.Start2020InSeconds;
+        SpatialGraphEnvironment graph = new SpatialGraphEnvironment(ResourcesConstants.RingNetwork);
+        SimulationContext? context = SimulationContext.Start2020InSeconds;
 
-        var slowDriver = new InfiniteSteeringDriver(context, 30, graph, 0, 5);
-        var fastDriver = new InfiniteSteeringDriver(context, 0, graph, 0, 10)
+        InfiniteSteeringDriver slowDriver = new InfiniteSteeringDriver(context, 30, graph, 0, 5);
+        InfiniteSteeringDriver fastDriver = new InfiniteSteeringDriver(context, 0, graph, 0, 10)
         {
             OvertakingActivated = false
         };
         fastDriver.Car.MaxSpeed = 10;
-        var driver = new[] { slowDriver, fastDriver };
+        InfiniteSteeringDriver[] driver = new[] { slowDriver, fastDriver };
 
         const int ticks = 360;
-        for (var i = 0; i < ticks; i++, context.UpdateStep())
-            foreach (var infiniteDriver in driver)
+        for (int i = 0; i < ticks; i++, context.UpdateStep())
+        {
+            foreach (InfiniteSteeringDriver infiniteDriver in driver)
+            {
                 infiniteDriver.Tick();
+            }
+        }
 
         Assert.InRange(slowDriver.Velocity, slowDriver.MaxSpeed - 1, slowDriver.MaxSpeed);
         Assert.InRange(fastDriver.Velocity, slowDriver.MaxSpeed - 1, slowDriver.MaxSpeed);
@@ -90,22 +94,26 @@ public class OvertakingInRingRoadTest
     [Fact]
     public void CarFollowsCarOvertakingActivated()
     {
-        var graph = new SpatialGraphEnvironment(ResourcesConstants.RingNetwork);
-        var context = SimulationContext.Start2020InSeconds;
+        SpatialGraphEnvironment graph = new SpatialGraphEnvironment(ResourcesConstants.RingNetwork);
+        SimulationContext? context = SimulationContext.Start2020InSeconds;
 
-        var slowDriver = new InfiniteSteeringDriver(context, 30, graph, 0, 5);
-        var fastDriver = new InfiniteSteeringDriver(context, 0, graph, 0, 10)
+        InfiniteSteeringDriver slowDriver = new InfiniteSteeringDriver(context, 30, graph, 0, 5);
+        InfiniteSteeringDriver fastDriver = new InfiniteSteeringDriver(context, 0, graph, 0, 10)
         {
             OvertakingActivated = true
         };
         Assert.False(slowDriver.OvertakingActivated);
         Assert.True(fastDriver.OvertakingActivated);
-        var driver = new[] { slowDriver, fastDriver };
+        InfiniteSteeringDriver[] driver = new[] { slowDriver, fastDriver };
 
         const int ticks = 360;
-        for (var i = 0; i < ticks; i++, context.UpdateStep())
-            foreach (var infiniteDriver in driver)
+        for (int i = 0; i < ticks; i++, context.UpdateStep())
+        {
+            foreach (InfiniteSteeringDriver infiniteDriver in driver)
+            {
                 infiniteDriver.Tick();
+            }
+        }
 
         Assert.InRange(slowDriver.Velocity, slowDriver.MaxSpeed - 1, slowDriver.MaxSpeed);
         Assert.InRange(fastDriver.Velocity, fastDriver.MaxSpeed - 1, fastDriver.MaxSpeed);
@@ -115,10 +123,10 @@ public class OvertakingInRingRoadTest
     [Fact]
     public void CarOvertakingMultipleCarsOnDifferentLanes()
     {
-        var graph = new SpatialGraphEnvironment(ResourcesConstants.RingNetwork);
-        var context = SimulationContext.Start2020InSeconds;
+        SpatialGraphEnvironment graph = new SpatialGraphEnvironment(ResourcesConstants.RingNetwork);
+        SimulationContext? context = SimulationContext.Start2020InSeconds;
 
-        var driver = new List<InfiniteSteeringDriver>
+        List<InfiniteSteeringDriver> driver = new List<InfiniteSteeringDriver>
         {
             new(context, 120, graph, 2, 5),
             new(context, 80, graph, 1, 5),
@@ -140,8 +148,12 @@ public class OvertakingInRingRoadTest
         };
 
         const int ticks = 300;
-        for (var i = 0; i < ticks; i++, context.UpdateStep())
-            foreach (var infiniteDriver in driver)
+        for (int i = 0; i < ticks; i++, context.UpdateStep())
+        {
+            foreach (InfiniteSteeringDriver infiniteDriver in driver)
+            {
                 infiniteDriver.Tick();
+            }
+        }
     }
 }

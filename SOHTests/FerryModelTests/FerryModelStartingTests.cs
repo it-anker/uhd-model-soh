@@ -24,15 +24,15 @@ public class FerryModelStartingTests : IClassFixture<FerryRouteLayerFixture>
     [Fact]
     public void TestStartupFerryEngine()
     {
-        var layer = new FerryLayer(_routeLayerFixture.FerryRouteLayer);
-        var isRegistered = false;
+        FerryLayer layer = new FerryLayer(_routeLayerFixture.FerryRouteLayer);
+        bool isRegistered = false;
 
-        var context = SimulationContext.Start2020InSeconds;
+        SimulationContext? context = SimulationContext.Start2020InSeconds;
 
 
-        var manager = new EntityManagerImpl(CsvReader.MapData(ResourcesConstants.FerryCsv));
+        EntityManagerImpl manager = new EntityManagerImpl(CsvReader.MapData(ResourcesConstants.FerryCsv));
 
-        var containerMock = new Mock<ISimulationContainer>();
+        Mock<ISimulationContainer> containerMock = new Mock<ISimulationContainer>();
         containerMock.Setup(container => container.Resolve<IEntityManager>()).Returns(() => manager);
 
         Assert.True(layer.InitLayer(new LayerInitData
@@ -70,11 +70,11 @@ public class FerryModelStartingTests : IClassFixture<FerryRouteLayerFixture>
 
         Assert.True(isRegistered);
         Assert.Single(layer.Driver);
-        var driver = layer.Driver.Values.First();
+        FerryDriver driver = layer.Driver.Values.First();
         Assert.Equal(61, driver.Line);
 
-        for (var i = 0; i < 5000; i++, context.UpdateStep())
-            foreach (var ferryDriver in layer.Driver)
+        for (int i = 0; i < 5000; i++, context.UpdateStep())
+            foreach (KeyValuePair<Guid, FerryDriver> ferryDriver in layer.Driver)
                 ferryDriver.Value.Tick();
     }
 }

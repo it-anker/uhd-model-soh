@@ -61,7 +61,7 @@ public class Tour : IEnumerator<Trip>
     /// <returns>Returns true, when the cursor moved to the next trip.</returns>
     public bool MoveNext()
     {
-        var nextAction = _index < Trips.Count - 1 ? Trips[_index + 1] : null;
+        Trip? nextAction = _index < Trips.Count - 1 ? Trips[_index + 1] : null;
 
         if (_context.CurrentTimePoint >= nextAction?.StartTime)
         {

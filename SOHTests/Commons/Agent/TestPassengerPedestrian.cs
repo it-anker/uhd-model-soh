@@ -1,6 +1,8 @@
 using Mars.Interfaces.Environments;
 using SOHModel.Ferry.Model;
+using SOHModel.Ferry.Station;
 using SOHModel.Train.Model;
+using SOHModel.Train.Station;
 
 namespace SOHTests.Commons.Agent;
 
@@ -16,9 +18,9 @@ public class TestPassengerPedestrian : TestMultiCapableAgent
     {
         if (modalChoice == ModalChoice.Ferry)
         {
-            var ferryStation = FerryStationLayer.Nearest(Position);
-            var ferry = ferryStation.Find(route.Goal);
-            var result = TryEnterVehicleAsPassenger(ferry, this);
+            FerryStation ferryStation = FerryStationLayer.Nearest(Position);
+            Ferry ferry = ferryStation.Find(route.Goal);
+            bool result = TryEnterVehicleAsPassenger(ferry, this);
             if (result)
             {
                 UsedFerry = ferry;
@@ -30,9 +32,9 @@ public class TestPassengerPedestrian : TestMultiCapableAgent
 
         if (modalChoice == ModalChoice.Train)
         {
-            var station = TrainStationLayer.Nearest(Position);
-            var train = station.Find(route.Goal);
-            var result = TryEnterVehicleAsPassenger(train, this);
+            TrainStation station = TrainStationLayer.Nearest(Position);
+            Train train = station.Find(route.Goal);
+            bool result = TryEnterVehicleAsPassenger(train, this);
             if (result)
             {
                 UsedTrain = train;

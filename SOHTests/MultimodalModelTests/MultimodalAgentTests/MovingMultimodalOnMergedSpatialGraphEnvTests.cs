@@ -1,13 +1,19 @@
 using System.Collections.Generic;
 using Mars.Components.Environments;
 using Mars.Interfaces.Environments;
+using Mars.Interfaces.Layers;
 using Mars.Interfaces.Model;
 using Mars.Interfaces.Model.Options;
+using NetTopologySuite.Geometries;
+using SOHModel.Bicycle.Rental;
+using SOHModel.Car.Model;
+using SOHModel.Car.Parking;
 using SOHModel.Domain.Graph;
 using SOHModel.Multimodal.Multimodal;
 using SOHTests.Commons.Agent;
 using SOHTests.Commons.Layer;
 using Xunit;
+using Position = Mars.Interfaces.Environments.Position;
 
 namespace SOHTests.MultimodalModelTests.MultimodalAgentTests;
 
@@ -56,19 +62,19 @@ public class MovingMultimodalOnMergedSpatialGraphEnvTests
     [Fact]
     public void AllRentalStationNodesCanReachEachOther()
     {
-        var environment = new SpatialGraphEnvironment(_options);
-        var bicycleRentalLayer = new BicycleRentalLayerFixture(environment).BicycleRentalLayer;
+        SpatialGraphEnvironment environment = new SpatialGraphEnvironment(_options);
+        BicycleRentalLayer bicycleRentalLayer = new BicycleRentalLayerFixture(environment).BicycleRentalLayer;
 
-        foreach (var start in bicycleRentalLayer.Features)
-        foreach (var target in bicycleRentalLayer.Features)
+        foreach (IVectorFeature start in bicycleRentalLayer.Features)
+        foreach (IVectorFeature target in bicycleRentalLayer.Features)
         {
             if (start == target) continue;
 
-            var startPoint = start.VectorStructured.Geometry.Centroid;
-            var startNode = environment.NearestNode(Position.CreateGeoPosition(startPoint.X, startPoint.Y));
-            var targetPoint = target.VectorStructured.Geometry.Centroid;
-            var targetNode = environment.NearestNode(Position.CreateGeoPosition(targetPoint.X, targetPoint.Y));
-            var route = environment.FindRoute(startNode, targetNode);
+            Point? startPoint = start.VectorStructured.Geometry.Centroid;
+            ISpatialNode startNode = environment.NearestNode(Position.CreateGeoPosition(startPoint.X, startPoint.Y));
+            Point? targetPoint = target.VectorStructured.Geometry.Centroid;
+            ISpatialNode targetNode = environment.NearestNode(Position.CreateGeoPosition(targetPoint.X, targetPoint.Y));
+            Route route = environment.FindRoute(startNode, targetNode);
             Assert.NotNull(route);
         }
     }
@@ -76,22 +82,22 @@ public class MovingMultimodalOnMergedSpatialGraphEnvTests
     [Fact]
     public void DriveOnDrivingLane()
     {
-        var environment = new SpatialGraphEnvironment(_options);
-        var bicycleRentalLayer = new BicycleRentalLayerFixture(environment).BicycleRentalLayer;
-        var carParkingLayer = new CarParkingLayerFixture(new StreetLayer { Environment = environment })
+        SpatialGraphEnvironment environment = new SpatialGraphEnvironment(_options);
+        BicycleRentalLayer bicycleRentalLayer = new BicycleRentalLayerFixture(environment).BicycleRentalLayer;
+        CarParkingLayer carParkingLayer = new CarParkingLayerFixture(new StreetLayer { Environment = environment })
             .CarParkingLayer;
 
-        var start = Position.CreateGeoPosition(9.9546178, 53.557155);
-        var goal = Position.CreateGeoPosition(9.9418041, 53.5480482);
+        Position? start = Position.CreateGeoPosition(9.9546178, 53.557155);
+        Position? goal = Position.CreateGeoPosition(9.9418041, 53.5480482);
 
-        var car = carParkingLayer.CreateOwnCarNear(start);
+        Car car = carParkingLayer.CreateOwnCarNear(start);
 
-        var layer = new TestMultimodalLayer(environment)
+        TestMultimodalLayer layer = new TestMultimodalLayer(environment)
         {
             CarParkingLayer = carParkingLayer,
             BicycleRentalLayer = bicycleRentalLayer
         };
-        var agent = new TestMultiCapableAgent
+        TestMultiCapableAgent agent = new TestMultiCapableAgent
         {
             StartPosition = start,
             GoalPosition = goal,
@@ -111,14 +117,14 @@ public class MovingMultimodalOnMergedSpatialGraphEnvTests
 
         Assert.False(agent.GoalReached);
         const int ticks = 5000;
-        for (var tick = 0; tick < ticks && !agent.GoalReached; tick++)
+        for (int tick = 0; tick < ticks && !agent.GoalReached; tick++)
         {
             agent.Tick();
 
-            var edge = agent.Car.CurrentEdge;
+            ISpatialEdge? edge = agent.Car.CurrentEdge;
             if (edge?.Modalities.Contains(SpatialModalityType.CarDriving) ?? false)
             {
-                var (minLane, maxLane) = edge.ModalityLaneRanges[SpatialModalityType.CarDriving];
+                (int minLane, int maxLane) = edge.ModalityLaneRanges[SpatialModalityType.CarDriving];
                 if (agent.CurrentlyCarDriving)
                     Assert.InRange(agent.Car.LaneOnCurrentEdge, minLane, maxLane);
                 else
@@ -136,17 +142,17 @@ public class MovingMultimodalOnMergedSpatialGraphEnvTests
     [Fact]
     public void CycleOnCyclingLane()
     {
-        var environment = new SpatialGraphEnvironment(_options);
-        var bicycleRentalLayer = new BicycleRentalLayerFixture(environment).BicycleRentalLayer;
+        SpatialGraphEnvironment environment = new SpatialGraphEnvironment(_options);
+        BicycleRentalLayer bicycleRentalLayer = new BicycleRentalLayerFixture(environment).BicycleRentalLayer;
 
-        var start = Position.CreateGeoPosition(9.9546178, 53.557155);
-        var goal = Position.CreateGeoPosition(9.9418041, 53.5480482);
+        Position? start = Position.CreateGeoPosition(9.9546178, 53.557155);
+        Position? goal = Position.CreateGeoPosition(9.9418041, 53.5480482);
 
-        var layer = new TestMultimodalLayer(environment)
+        TestMultimodalLayer layer = new TestMultimodalLayer(environment)
         {
             BicycleRentalLayer = bicycleRentalLayer
         };
-        var agent = new TestMultiCapableAgent
+        TestMultiCapableAgent agent = new TestMultiCapableAgent
         {
             StartPosition = start,
             GoalPosition = goal,
@@ -159,7 +165,7 @@ public class MovingMultimodalOnMergedSpatialGraphEnvTests
         Assert.Equal(start, agent.Position);
         Assert.Equal(ModalChoice.CyclingRentalBike, agent.RouteMainModalChoice);
 
-        var route = agent.MultimodalRoute;
+        MultimodalRoute route = agent.MultimodalRoute;
         Assert.NotEmpty(route);
         Assert.True(route.RouteLength > 0);
         Assert.Equal(3, route.Count);
@@ -167,16 +173,16 @@ public class MovingMultimodalOnMergedSpatialGraphEnvTests
         Assert.False(agent.GoalReached);
         const int ticks = 5000;
 
-        for (var tick = 0; tick < ticks; tick++)
+        for (int tick = 0; tick < ticks; tick++)
         {
             agent.Tick();
 
             if (agent.RentalBicycle == null) continue;
 
-            var edge = agent.RentalBicycle.CurrentEdge;
+            ISpatialEdge? edge = agent.RentalBicycle.CurrentEdge;
             if (edge?.Modalities.Contains(SpatialModalityType.Cycling) ?? false)
             {
-                var (minLane, maxLane) = edge.ModalityLaneRanges[SpatialModalityType.Cycling];
+                (int minLane, int maxLane) = edge.ModalityLaneRanges[SpatialModalityType.Cycling];
                 Assert.InRange(agent.RentalBicycle.LaneOnCurrentEdge, minLane, maxLane);
             }
         }

@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System.Data;
 using System.Linq;
 using Mars.Common.IO.Csv;
 using Mars.Components.Environments;
@@ -65,14 +66,14 @@ public class MovingWithSingleModalityOnMergedSpatialGraphEnvTests
     [Fact]
     public void GraphEnvironmentHoldsLaneForWalkingCyclingCarDriving()
     {
-        var environment = new SpatialGraphEnvironment(_options);
+        SpatialGraphEnvironment environment = new SpatialGraphEnvironment(_options);
 
         Assert.Equal(3, environment.Nodes.Count);
         Assert.Equal(3, environment.Edges.Count);
-        var edge = environment.Edges.Values.First();
+        ISpatialEdge edge = environment.Edges.Values.First();
         Assert.Equal(3, edge.LaneCount);
         Assert.IsType<SpatialEdge>(edge);
-        var spatialEdge = (SpatialEdge)edge;
+        SpatialEdge spatialEdge = (SpatialEdge)edge;
 
         Assert.Contains(SpatialModalityType.Cycling, spatialEdge.Modalities);
         Assert.Contains(SpatialModalityType.Walking, spatialEdge.Modalities);
@@ -84,14 +85,14 @@ public class MovingWithSingleModalityOnMergedSpatialGraphEnvTests
     [Fact]
     public void WalkOnWalkingLane()
     {
-        var environment = new SpatialGraphEnvironment(_options);
-        var start = environment.Nodes.First();
-        var goal = environment.Nodes.Last();
+        SpatialGraphEnvironment environment = new SpatialGraphEnvironment(_options);
+        ISpatialNode start = environment.Nodes.First();
+        ISpatialNode goal = environment.Nodes.Last();
 
-        var (minLane, maxLane) = environment.Edges.First().Value.ModalityLaneRanges[SpatialModalityType.Walking];
+        (int minLane, int maxLane) = environment.Edges.First().Value.ModalityLaneRanges[SpatialModalityType.Walking];
 
-        var layer = new TestMultimodalLayer(environment);
-        var agent = new TestWalkingPedestrian
+        TestMultimodalLayer layer = new TestMultimodalLayer(environment);
+        TestWalkingPedestrian agent = new TestWalkingPedestrian
         {
             StartPosition = start.Position,
             GoalPosition = goal.Position
@@ -104,7 +105,7 @@ public class MovingWithSingleModalityOnMergedSpatialGraphEnvTests
         Assert.NotEmpty(agent.MultimodalRoute);
         Assert.True(agent.MultimodalRoute.RouteLength > 0);
         const int ticks = 1000;
-        for (var tick = 0; tick < ticks && !agent.GoalReached; tick++)
+        for (int tick = 0; tick < ticks && !agent.GoalReached; tick++)
         {
             agent.Tick();
             Assert.InRange(agent.WalkingShoes.LaneOnCurrentEdge, minLane, maxLane);
@@ -117,20 +118,20 @@ public class MovingWithSingleModalityOnMergedSpatialGraphEnvTests
     [Fact]
     public void DriveOnDrivingLane()
     {
-        var environment = new SpatialGraphEnvironment(_options);
-        var start = environment.Nodes.First();
-        var goal = environment.Nodes.Last();
+        SpatialGraphEnvironment environment = new SpatialGraphEnvironment(_options);
+        ISpatialNode start = environment.Nodes.First();
+        ISpatialNode goal = environment.Nodes.Last();
 
-        var (minLane, maxLane) = environment.Edges.First().Value.ModalityLaneRanges[SpatialModalityType.CarDriving];
+        (int minLane, int maxLane) = environment.Edges.First().Value.ModalityLaneRanges[SpatialModalityType.CarDriving];
 
-        var carParkingLayer = CreateParkingLayer(environment);
-        var car = carParkingLayer.CreateOwnCarNear(start.Position);
+        CarParkingLayer carParkingLayer = CreateParkingLayer(environment);
+        Car car = carParkingLayer.CreateOwnCarNear(start.Position);
 
-        var layer = new TestMultimodalLayer(environment)
+        TestMultimodalLayer layer = new TestMultimodalLayer(environment)
         {
             CarParkingLayer = carParkingLayer
         };
-        var agent = new TestMultiCapableAgent
+        TestMultiCapableAgent agent = new TestMultiCapableAgent
         {
             StartPosition = start.Position,
             GoalPosition = goal.Position,
@@ -149,7 +150,7 @@ public class MovingWithSingleModalityOnMergedSpatialGraphEnvTests
 
         Assert.False(agent.GoalReached);
         const int ticks = 1000;
-        for (var tick = 0; tick < ticks && !agent.GoalReached; tick++)
+        for (int tick = 0; tick < ticks && !agent.GoalReached; tick++)
         {
             agent.Tick();
             Assert.InRange(car.LaneOnCurrentEdge, minLane, maxLane);
@@ -163,17 +164,17 @@ public class MovingWithSingleModalityOnMergedSpatialGraphEnvTests
 
     private static CarParkingLayer CreateParkingLayer(ISpatialGraphEnvironment environment)
     {
-        var features = environment.Nodes.Select(node => new VectorStructuredData
+        IEnumerable<VectorStructuredData> features = environment.Nodes.Select(node => new VectorStructuredData
         {
             Data = new Dictionary<string, object> { { "area", 0 } },
             Geometry = new Point(node.Position.X, node.Position.Y)
         });
-        var dataTable = new CsvReader(ResourcesConstants.CarCsv, true).ToTable();
-        var entityManagerImpl = new EntityManagerImpl((typeof(Car), dataTable));
-        var mock = new Mock<ISimulationContainer>();
+        DataTable? dataTable = new CsvReader(ResourcesConstants.CarCsv, true).ToTable();
+        EntityManagerImpl entityManagerImpl = new EntityManagerImpl((typeof(Car), dataTable));
+        Mock<ISimulationContainer> mock = new Mock<ISimulationContainer>();
 
         mock.Setup(container => container.Resolve<IEntityManager>()).Returns(entityManagerImpl);
-        var mapping = new LayerInitData
+        LayerInitData mapping = new LayerInitData
         {
             LayerInitConfig = new LayerMapping
             {
@@ -182,7 +183,7 @@ public class MovingWithSingleModalityOnMergedSpatialGraphEnvTests
             Container = mock.Object
         };
 
-        var carParkingLayer = new CarParkingLayer { StreetLayer = new StreetLayer { Environment = environment } };
+        CarParkingLayer carParkingLayer = new CarParkingLayer { StreetLayer = new StreetLayer { Environment = environment } };
         carParkingLayer.InitLayer(mapping);
         return carParkingLayer;
     }
@@ -191,20 +192,20 @@ public class MovingWithSingleModalityOnMergedSpatialGraphEnvTests
     [Fact(Skip = "TODO")]
     public void CycleOnCyclingLane()
     {
-        var environment = new SpatialGraphEnvironment(_options);
-        var start = environment.Nodes.First();
-        var goal = environment.Nodes.Last();
+        SpatialGraphEnvironment environment = new SpatialGraphEnvironment(_options);
+        ISpatialNode start = environment.Nodes.First();
+        ISpatialNode goal = environment.Nodes.Last();
 
 
         // var (minLane, maxLane) = environment.Edges.First().Value.ModalityLaneRanges[SpatialModalityType.Cycling];
 
-        var bicycleRentalLayer = CreateRentalCyclingLayer(environment);
+        BicycleRentalLayer bicycleRentalLayer = CreateRentalCyclingLayer(environment);
 
-        var layer = new TestMultimodalLayer(environment)
+        TestMultimodalLayer layer = new TestMultimodalLayer(environment)
         {
             BicycleRentalLayer = bicycleRentalLayer
         };
-        var agent = new TestMultiCapableAgent
+        TestMultiCapableAgent agent = new TestMultiCapableAgent
         {
             StartPosition = start.Position,
             GoalPosition = goal.Position,
@@ -222,7 +223,7 @@ public class MovingWithSingleModalityOnMergedSpatialGraphEnvTests
 
         Assert.False(agent.GoalReached);
         const int ticks = 1000;
-        for (var tick = 0; tick < ticks && !agent.GoalReached; tick++) agent.Tick();
+        for (int tick = 0; tick < ticks && !agent.GoalReached; tick++) agent.Tick();
 
         Assert.True(agent.GoalReached);
 
@@ -232,17 +233,17 @@ public class MovingWithSingleModalityOnMergedSpatialGraphEnvTests
 
     private static BicycleRentalLayer CreateRentalCyclingLayer(ISpatialGraphEnvironment environment)
     {
-        var features = environment.Nodes.Select(node => new VectorStructuredData
+        IEnumerable<VectorStructuredData> features = environment.Nodes.Select(node => new VectorStructuredData
         {
             Data = new Dictionary<string, object> { { "Anzahl", 10 }, { "name", node.Index } },
             Geometry = new Point(node.Position.X, node.Position.Y)
         });
-        var dataTable = new CsvReader(ResourcesConstants.BicycleCsv, true).ToTable();
-        var entityManagerImpl = new EntityManagerImpl((typeof(RentalBicycle), dataTable));
-        var mock = new Mock<ISimulationContainer>();
+        DataTable? dataTable = new CsvReader(ResourcesConstants.BicycleCsv, true).ToTable();
+        EntityManagerImpl entityManagerImpl = new EntityManagerImpl((typeof(RentalBicycle), dataTable));
+        Mock<ISimulationContainer> mock = new Mock<ISimulationContainer>();
 
         mock.Setup(container => container.Resolve<IEntityManager>()).Returns(entityManagerImpl);
-        var mapping = new LayerInitData
+        LayerInitData mapping = new LayerInitData
         {
             LayerInitConfig = new LayerMapping
             {
@@ -251,7 +252,7 @@ public class MovingWithSingleModalityOnMergedSpatialGraphEnvTests
             Container = mock.Object
         };
 
-        var rentalLayer = new BicycleRentalLayer
+        BicycleRentalLayer rentalLayer = new BicycleRentalLayer
         {
             SpatialGraphMediatorLayer = new SpatialGraphMediatorLayer
             {

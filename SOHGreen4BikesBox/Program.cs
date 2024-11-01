@@ -7,6 +7,7 @@ using System.Threading;
 using Mars.Common.Core.Logging;
 using Mars.Components.Starter;
 using Mars.Core.Simulation;
+using Mars.Core.Simulation.Entities;
 using Mars.Interfaces;
 using Mars.Interfaces.Model;
 using SOHModel.Bicycle.Rental;
@@ -27,7 +28,7 @@ internal static class Program
         Thread.CurrentThread.CurrentCulture = new CultureInfo("EN-US");
         LoggerFactory.SetLogLevel(LogLevel.Off);
 
-        var description = new ModelDescription();
+        ModelDescription description = new ModelDescription();
 
         description.AddLayer<SpatialGraphMediatorLayer>(new[] { typeof(ISpatialGraphLayer) });
         description.AddLayer<GatewayLayer>();
@@ -46,15 +47,15 @@ internal static class Program
         }
         else
         {
-            var file = File.ReadAllText("config.json");
-            var simConfig = SimulationConfig.Deserialize(file);
+            string file = File.ReadAllText("config.json");
+            SimulationConfig? simConfig = SimulationConfig.Deserialize(file);
             application = SimulationStarter.BuildApplication(description, simConfig);
         }
 
-        var simulation = application.Resolve<ISimulation>();
+        ISimulation? simulation = application.Resolve<ISimulation>();
 
-        var watch = Stopwatch.StartNew();
-        var state = simulation.StartSimulation();
+        Stopwatch watch = Stopwatch.StartNew();
+        SimulationWorkflowState? state = simulation.StartSimulation();
         watch.Stop();
 
         Console.WriteLine($"Executed iterations {state.Iterations} lasted {watch.Elapsed}");

@@ -68,10 +68,10 @@ public abstract partial class Vehicle<TSteeringCapable, TPassengerCapable, TStee
     /// <param name="passengerMessage">Notification message for all passengers.</param>
     public virtual void NotifyPassengers(PassengerMessage passengerMessage)
     {
-        //TODO test if driver and passengers are notified when leaving the vehicle
+        // TODO test if driver and passengers are notified when leaving the vehicle
         Driver?.Notify(passengerMessage);
 
-        foreach (var passenger in Passengers.ToArray()) passenger.Notify(passengerMessage);
+        foreach (IPassengerCapable passenger in Passengers.ToArray()) passenger.Notify(passengerMessage);
     }
 
     public virtual void LeaveVehicle(TPassengerCapable passenger)

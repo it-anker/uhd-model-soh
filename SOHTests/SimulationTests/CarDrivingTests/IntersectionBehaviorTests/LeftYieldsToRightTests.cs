@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Data;
 using System.IO;
 using System.Linq;
 using Mars.Common.Collections.Graph;
@@ -7,6 +8,7 @@ using Mars.Common.Core;
 using Mars.Common.IO.Csv;
 using Mars.Components.Environments;
 using Mars.Components.Starter;
+using Mars.Core.Simulation.Entities;
 using Mars.Interfaces.Model;
 using SOHModel.Car.Model;
 using SOHModel.Domain.Common;
@@ -18,7 +20,7 @@ public class SpatialGraphFixture : IDisposable
 {
     public SpatialGraphFixture()
     {
-        var env = new SpatialGraphEnvironment(ResourcesConstants.DriveGraphFourWayIntersection);
+        SpatialGraphEnvironment env = new SpatialGraphEnvironment(ResourcesConstants.DriveGraphFourWayIntersection);
         DriveGraphFourWayIntersection = env.Graph;
 
         env = new SpatialGraphEnvironment(ResourcesConstants.DriveGraphAltonaAltstadt);
@@ -47,13 +49,13 @@ public class LeftYieldsToRightTests : IClassFixture<SpatialGraphFixture>
     [Fact]
     public void CarReducesItsVelocityBeforeCrossingTest()
     {
-        var modelDescription = new ModelDescription();
+        ModelDescription modelDescription = new ModelDescription();
         modelDescription.AddLayer<CarLayer>();
         modelDescription.AddAgent<CarDriver, CarLayer>();
         modelDescription.AddEntity<Car>();
 
-        var start = DateTime.Parse("2020-01-01T00:00:00");
-        var config = new SimulationConfig
+        DateTime start = DateTime.Parse("2020-01-01T00:00:00");
+        SimulationConfig config = new SimulationConfig
         {
             Globals =
             {
@@ -99,8 +101,8 @@ public class LeftYieldsToRightTests : IClassFixture<SpatialGraphFixture>
                 }
             }
         };
-        var starter = SimulationStarter.Start(modelDescription, config);
-        var workflowState = starter.Run();
+        SimulationStarter starter = SimulationStarter.Start(modelDescription, config);
+        SimulationWorkflowState workflowState = starter.Run();
 
         Assert.Equal(120, workflowState.Iterations);
 
@@ -119,13 +121,13 @@ public class LeftYieldsToRightTests : IClassFixture<SpatialGraphFixture>
         //               |      |
         //               |      |
 
-        var table = CsvReader.MapData(Path.Combine(GetType().Name,
+        DataTable? table = CsvReader.MapData(Path.Combine(GetType().Name,
             $"{nameof(CarDriver)}{nameof(CarReducesItsVelocityBeforeCrossingTest)}.csv"));
         Assert.NotNull(table);
 
         //check that the car has reduced its speed before crossing
-        var closerThanTenMeter = table.Select("Convert(RemainingDistanceOnEdge, System.Decimal) < 10 AND " +
-                                              "Convert(CurrentEdgeId, 'System.Int32') = 22");
+        DataRow[] closerThanTenMeter = table.Select("Convert(RemainingDistanceOnEdge, System.Decimal) < 10 AND " +
+                                                    "Convert(CurrentEdgeId, 'System.Int32') = 22");
 
         Assert.True(closerThanTenMeter[0]["Velocity"].Value<double>() < VehicleConstants.IntersectionSpeed + 0.1);
         Assert.True(closerThanTenMeter[0]["Velocity"].Value<double>() > VehicleConstants.IntersectionSpeed - 0.1);
@@ -134,13 +136,13 @@ public class LeftYieldsToRightTests : IClassFixture<SpatialGraphFixture>
     [Fact]
     public void LeftYieldsToRightFourCarsTest()
     {
-        var modelDescription = new ModelDescription();
+        ModelDescription modelDescription = new ModelDescription();
         modelDescription.AddLayer<CarLayer>();
         modelDescription.AddAgent<CarDriver, CarLayer>();
         modelDescription.AddEntity<Car>();
 
-        var start = DateTime.Parse("2020-01-01T00:00:00");
-        var config = new SimulationConfig
+        DateTime start = DateTime.Parse("2020-01-01T00:00:00");
+        SimulationConfig config = new SimulationConfig
         {
             Globals =
             {
@@ -180,8 +182,8 @@ public class LeftYieldsToRightTests : IClassFixture<SpatialGraphFixture>
                 }
             }
         };
-        var starter = SimulationStarter.Start(modelDescription, config);
-        var workflowState = starter.Run();
+        SimulationStarter starter = SimulationStarter.Start(modelDescription, config);
+        SimulationWorkflowState workflowState = starter.Run();
 
         Assert.Equal(120, workflowState.Iterations);
 
@@ -200,29 +202,29 @@ public class LeftYieldsToRightTests : IClassFixture<SpatialGraphFixture>
         //               |      |
         //               |      |
 
-        var table = CsvReader.MapData(Path.Combine(GetType().Name,
+        DataTable? table = CsvReader.MapData(Path.Combine(GetType().Name,
             $"{nameof(CarDriver)}{nameof(LeftYieldsToRightFourCarsTest)}.csv"));
         Assert.NotNull(table);
 
         //check that no deadlock occured
-        var car1 = table.Select("Convert(RemainingDistanceOnEdge, System.Decimal) < 50 AND " +
-                                "Convert(CurrentEdgeId, 'System.Int32') = 41 AND " +
-                                "StableId = '64eae14b-3976-4dd1-b324-e73f1e70a001'");
+        DataRow[] car1 = table.Select("Convert(RemainingDistanceOnEdge, System.Decimal) < 50 AND " +
+                                      "Convert(CurrentEdgeId, 'System.Int32') = 41 AND " +
+                                      "StableId = '64eae14b-3976-4dd1-b324-e73f1e70a001'");
         Assert.True(car1.Any());
 
-        var car2 = table.Select("Convert(RemainingDistanceOnEdge, System.Decimal) < 50 AND " +
-                                "Convert(CurrentEdgeId, 'System.Int32') = 31 AND " +
-                                "StableId = '64eae14b-3976-4dd1-b324-e73f1e70a002'");
+        DataRow[] car2 = table.Select("Convert(RemainingDistanceOnEdge, System.Decimal) < 50 AND " +
+                                      "Convert(CurrentEdgeId, 'System.Int32') = 31 AND " +
+                                      "StableId = '64eae14b-3976-4dd1-b324-e73f1e70a002'");
         Assert.True(car2.Any());
 
-        var car3 = table.Select("Convert(RemainingDistanceOnEdge, System.Decimal) < 50 AND " +
-                                "Convert(CurrentEdgeId, 'System.Int32') = 11 AND " +
-                                "StableId = '64eae14b-3976-4dd1-b324-e73f1e70a003'");
+        DataRow[] car3 = table.Select("Convert(RemainingDistanceOnEdge, System.Decimal) < 50 AND " +
+                                      "Convert(CurrentEdgeId, 'System.Int32') = 11 AND " +
+                                      "StableId = '64eae14b-3976-4dd1-b324-e73f1e70a003'");
         Assert.True(car3.Any());
 
-        var car4 = table.Select("Convert(RemainingDistanceOnEdge, System.Decimal) < 50 AND " +
-                                "Convert(CurrentEdgeId, 'System.Int32') = 21 AND " +
-                                "StableId = '64eae14b-3976-4dd1-b324-e73f1e70a004'");
+        DataRow[] car4 = table.Select("Convert(RemainingDistanceOnEdge, System.Decimal) < 50 AND " +
+                                      "Convert(CurrentEdgeId, 'System.Int32') = 21 AND " +
+                                      "StableId = '64eae14b-3976-4dd1-b324-e73f1e70a004'");
         Assert.True(car4.Any());
     }
 
@@ -230,13 +232,13 @@ public class LeftYieldsToRightTests : IClassFixture<SpatialGraphFixture>
     public void LeftYieldsToRightThreeCarsTest()
     {
         //LoggerFactory.SetLogLevel(LogLevel.Off);
-        var modelDescription = new ModelDescription();
+        ModelDescription modelDescription = new ModelDescription();
         modelDescription.AddLayer<CarLayer>();
         modelDescription.AddAgent<CarDriver, CarLayer>();
         modelDescription.AddEntity<Car>();
 
-        var start = DateTime.Parse("2020-01-01T00:00:00");
-        var config = new SimulationConfig
+        DateTime start = DateTime.Parse("2020-01-01T00:00:00");
+        SimulationConfig config = new SimulationConfig
         {
             Globals =
             {
@@ -276,8 +278,8 @@ public class LeftYieldsToRightTests : IClassFixture<SpatialGraphFixture>
                 }
             }
         };
-        var starter = SimulationStarter.Start(modelDescription, config);
-        var workflowState = starter.Run();
+        SimulationStarter starter = SimulationStarter.Start(modelDescription, config);
+        SimulationWorkflowState workflowState = starter.Run();
 
         Assert.Equal(120, workflowState.Iterations);
 
@@ -296,22 +298,22 @@ public class LeftYieldsToRightTests : IClassFixture<SpatialGraphFixture>
         //               |      |
         //               |      |
 
-        var table = CsvReader.MapData(Path.Combine(GetType().Name,
+        DataTable? table = CsvReader.MapData(Path.Combine(GetType().Name,
             $"{nameof(CarDriver)}{nameof(LeftYieldsToRightThreeCarsTest)}.csv"));
         Assert.NotNull(table);
 
         //select the last ticks in which the cars are on there respective first edge
-        var car1 = table.Select("Convert(RemainingDistanceOnEdge, System.Decimal) < 10 AND " +
-                                "Convert(CurrentEdgeId, 'System.Int32') = 22 AND " +
-                                "StableId = '64eae14b-3976-4dd1-b324-e73f1e70a001'");
+        DataRow[] car1 = table.Select("Convert(RemainingDistanceOnEdge, System.Decimal) < 10 AND " +
+                                      "Convert(CurrentEdgeId, 'System.Int32') = 22 AND " +
+                                      "StableId = '64eae14b-3976-4dd1-b324-e73f1e70a001'");
 
-        var car2 = table.Select("Convert(RemainingDistanceOnEdge, System.Decimal) < 10 AND " +
-                                "Convert(CurrentEdgeId, 'System.Int32') = 12 AND " +
-                                "StableId = '64eae14b-3976-4dd1-b324-e73f1e70a002'");
+        DataRow[] car2 = table.Select("Convert(RemainingDistanceOnEdge, System.Decimal) < 10 AND " +
+                                      "Convert(CurrentEdgeId, 'System.Int32') = 12 AND " +
+                                      "StableId = '64eae14b-3976-4dd1-b324-e73f1e70a002'");
 
-        var car3 = table.Select("Convert(RemainingDistanceOnEdge, System.Decimal) < 10 AND " +
-                                "Convert(CurrentEdgeId, 'System.Int32') = 32 AND " +
-                                "StableId = '64eae14b-3976-4dd1-b324-e73f1e70a003'");
+        DataRow[] car3 = table.Select("Convert(RemainingDistanceOnEdge, System.Decimal) < 10 AND " +
+                                      "Convert(CurrentEdgeId, 'System.Int32') = 32 AND " +
+                                      "StableId = '64eae14b-3976-4dd1-b324-e73f1e70a003'");
 
 
         //check that car 2 crosses first as it comes from the right
@@ -325,13 +327,13 @@ public class LeftYieldsToRightTests : IClassFixture<SpatialGraphFixture>
     [Fact]
     public void LeftYieldsToRightTrafficFromRightTest()
     {
-        var modelDescription = new ModelDescription();
+        ModelDescription modelDescription = new ModelDescription();
         modelDescription.AddLayer<CarLayer>();
         modelDescription.AddAgent<CarDriver, CarLayer>();
         modelDescription.AddEntity<Car>();
 
-        var start = DateTime.Parse("2020-01-01T00:00:00");
-        var config = new SimulationConfig
+        DateTime start = DateTime.Parse("2020-01-01T00:00:00");
+        SimulationConfig config = new SimulationConfig
         {
             Globals =
             {
@@ -372,12 +374,12 @@ public class LeftYieldsToRightTests : IClassFixture<SpatialGraphFixture>
                 }
             }
         };
-        var starter = SimulationStarter.Start(modelDescription, config);
-        var workflowState = starter.Run();
+        SimulationStarter starter = SimulationStarter.Start(modelDescription, config);
+        SimulationWorkflowState workflowState = starter.Run();
 
         Assert.Equal(120, workflowState.Iterations);
 
-        var table = CsvReader.MapData(Path.Combine(GetType().Name,
+        DataTable? table = CsvReader.MapData(Path.Combine(GetType().Name,
             $"{nameof(CarDriver)}{nameof(LeftYieldsToRightTrafficFromRightTest)}.csv"));
         Assert.NotNull(table);
 
@@ -399,13 +401,13 @@ public class LeftYieldsToRightTests : IClassFixture<SpatialGraphFixture>
 
 
         //select the last ticks in which the cars are on there respective first edge
-        var car1 = table.Select("Convert(RemainingDistanceOnEdge, System.Decimal) < 10 AND " +
-                                "Convert(CurrentEdgeId, 'System.Int32') = 22 AND " +
-                                "StableId = '64eae14b-3976-4dd1-b324-e73f1e70a001'");
+        DataRow[] car1 = table.Select("Convert(RemainingDistanceOnEdge, System.Decimal) < 10 AND " +
+                                      "Convert(CurrentEdgeId, 'System.Int32') = 22 AND " +
+                                      "StableId = '64eae14b-3976-4dd1-b324-e73f1e70a001'");
 
-        var car2 = table.Select("Convert(RemainingDistanceOnEdge, System.Decimal) < 10 AND " +
-                                "Convert(CurrentEdgeId, 'System.Int32') = 12 AND " +
-                                "StableId = '64eae14b-3976-4dd1-b324-e73f1e70a002'");
+        DataRow[] car2 = table.Select("Convert(RemainingDistanceOnEdge, System.Decimal) < 10 AND " +
+                                      "Convert(CurrentEdgeId, 'System.Int32') = 12 AND " +
+                                      "StableId = '64eae14b-3976-4dd1-b324-e73f1e70a002'");
 
         //Check that car 2 crosses first as it comes from the right
         Assert.True(Convert.ToInt32(car1[0]["Step"]) > Convert.ToInt32(car2[0]["Step"]));

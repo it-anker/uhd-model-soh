@@ -1,6 +1,7 @@
 using Mars.Interfaces.Data;
-using Mars.Interfaces.Environments;
 using Mars.Interfaces.Layers;
+using NetTopologySuite.Geometries;
+using Position = Mars.Interfaces.Environments.Position;
 
 namespace SOHModel.Multimodal.Routing;
 
@@ -24,7 +25,7 @@ public class GatewayPoint : IVectorFeature
     public void Update(VectorStructuredData data)
     {
         VectorStructured = data;
-        var centroid = VectorStructured.Geometry.Centroid;
+        Point? centroid = VectorStructured.Geometry.Centroid;
         Position = Position.CreateGeoPosition(centroid.X, centroid.Y);
     }
 }

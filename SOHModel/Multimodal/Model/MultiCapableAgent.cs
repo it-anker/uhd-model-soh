@@ -14,6 +14,7 @@ using SOHModel.Domain.Graph;
 using SOHModel.Domain.Model;
 using SOHModel.Domain.Steering.Capables;
 using SOHModel.Domain.Steering.Common;
+using SOHModel.Domain.Steering.Handles;
 using SOHModel.Ferry.Station;
 using SOHModel.Ferry.Steering;
 using SOHModel.Multimodal.Commons;
@@ -50,7 +51,7 @@ public abstract class MultiCapableAgent<TLayer> : MultimodalAgent<TLayer>,
         {
             if (CarParkingLayer != null)
             {
-                var radius = CarRadiusToStartPosition > 0 ? CarRadiusToStartPosition : 1000;
+                double radius = CarRadiusToStartPosition > 0 ? CarRadiusToStartPosition : 1000;
                 Car ??= CarParkingLayer.CreateOwnCarNear(StartPosition, radius);
                 Car ??= CarParkingLayer.CreateOwnCarNear(StartPosition);
             }
@@ -144,11 +145,11 @@ public abstract class MultiCapableAgent<TLayer> : MultimodalAgent<TLayer>,
 
     internal bool TryEnterWalkingShoes(Position position)
     {
-        if (!WalkingShoes.TryEnterDriver(this, out var steeringHandle)) return false;
+        if (!WalkingShoes.TryEnterDriver(this, out WalkingSteeringHandle steeringHandle)) return false;
 
         ActiveSteering = steeringHandle;
 
-        var nearestNode = EnvironmentLayer.Environment.NearestNode(position);
+        ISpatialNode? nearestNode = EnvironmentLayer.Environment.NearestNode(position);
         if (!EnvironmentLayer.Environment.Insert(WalkingShoes, nearestNode))
             throw new ApplicationException("Pedestrian could not be added to SpatialGraphEnvironment");
 
@@ -220,7 +221,7 @@ public abstract class MultiCapableAgent<TLayer> : MultimodalAgent<TLayer>,
             if (MultimodalRoute.Stops.All(stop => stop.ModalChoice == ModalChoice.Walking))
                 return (int)MultimodalRoute.RouteLength;
 
-            var routeStop = MultimodalRoute.Stops.FirstOrDefault(stop => stop.ModalChoice != ModalChoice.Walking);
+            RouteStop? routeStop = MultimodalRoute.Stops.FirstOrDefault(stop => stop.ModalChoice != ModalChoice.Walking);
             if (routeStop != null) return (int)routeStop.Route.RouteLength;
             return 0;
         }
@@ -275,9 +276,9 @@ public abstract class MultiCapableAgent<TLayer> : MultimodalAgent<TLayer>,
                     if (Car == null) return false;
                     return TryEnterVehicleAsDriver(Car, this) && TryLeaveCarParkingLayer() && SetRoute(route);
                 case ModalChoice.CarRentalDriving:
-                    //TODO reserve car when starting with route
-                    //TODO rental cars on parking spots
-                    var car = RentCar(Position);
+                    // TODO reserve car when starting with route
+                    // TODO rental cars on parking spots
+                    RentalCar? car = RentCar(Position);
                     if (car == null) return false;
                     return TryEnterVehicleAsDriver(car, this) && SetRoute(route);
                 case ModalChoice.CyclingOwnBike:
@@ -289,14 +290,14 @@ public abstract class MultiCapableAgent<TLayer> : MultimodalAgent<TLayer>,
                     return TryEnterVehicleAsDriver(RentalBicycle, this) && TryLeaveRentalStation() &&
                            SetRoute(route);
                 case ModalChoice.Ferry:
-                    var ferryStation = FerryStationLayer.Nearest(Position);
+                    FerryStation? ferryStation = FerryStationLayer.Nearest(Position);
                     if (ferryStation == null) return false;
-                    var ferry = ferryStation.Find(route.Goal);
+                    Ferry.Model.Ferry ferry = ferryStation.Find(route.Goal);
                     return TryEnterVehicleAsPassenger(ferry, this);
                 case ModalChoice.Train:
-                    var trainStation = TrainStationLayer.Nearest(Position);
+                    TrainStation? trainStation = TrainStationLayer.Nearest(Position);
                     if (trainStation == null) return false;
-                    var train = trainStation.Find(route.Goal);
+                    Train.Model.Train train = trainStation.Find(route.Goal);
                     return TryEnterVehicleAsPassenger(train, this);
                 default:
                     throw new ArgumentOutOfRangeException();
@@ -329,7 +330,7 @@ public abstract class MultiCapableAgent<TLayer> : MultimodalAgent<TLayer>,
         {
             ModalChoice.Walking => TryLeaveVehicle(this) && TryLeaveSidewalk(),
             ModalChoice.CarDriving => TryEnterCarParkingLayer() && TryLeaveVehicle(this),
-            ModalChoice.CarRentalDriving => TryLeaveVehicle(this), //TODO enter parking layer
+            ModalChoice.CarRentalDriving => TryLeaveVehicle(this), // TODO enter parking layer
             ModalChoice.CyclingRentalBike => TryEnterBicycleRentalStation() && TryLeaveVehicle(this),
             ModalChoice.CyclingOwnBike => TryParkOwnBicycle() && TryLeaveVehicle(this),
             ModalChoice.Ferry => TryLeaveVehicle(this),
@@ -374,7 +375,7 @@ public abstract class MultiCapableAgent<TLayer> : MultimodalAgent<TLayer>,
     {
         if (OnCarParkingLayer || Car.CarParkingLayer == null) return true;
 
-        var carParkingSpace = Car.CarParkingLayer.Nearest(Position);
+        CarParkingSpace? carParkingSpace = Car.CarParkingLayer.Nearest(Position);
         if (carParkingSpace == null) return false;
 
         // var nearestNodeParkingSpace = EnvironmentLayer.StreetEnvironment.NearestNode(carParkingSpace.Position);
@@ -383,9 +384,9 @@ public abstract class MultiCapableAgent<TLayer> : MultimodalAgent<TLayer>,
         //     .Equals(nearestNodePos);
         // if (!arrived) 
         //     return false;
-        //TODO should be eliminated by improvements on the graph
+        // TODO should be eliminated by improvements on the graph
 
-        var enteredSuccessfully = carParkingSpace.Enter(Car);
+        bool enteredSuccessfully = carParkingSpace.Enter(Car);
         if (!enteredSuccessfully) return false;
         return EnvironmentLayer.Environment.Entities.ContainsKey(Car)
                && EnvironmentLayer.Environment.Remove(Car);
@@ -395,11 +396,11 @@ public abstract class MultiCapableAgent<TLayer> : MultimodalAgent<TLayer>,
     {
         if (!OnCarParkingLayer)
             return true;
-        var carParkingSpace = Car.CarParkingSpace;
+        CarParkingSpace? carParkingSpace = Car.CarParkingSpace;
 
-        var insertedInEvn = EnvironmentLayer.Environment.Entities.ContainsKey(Car) ||
-                            EnvironmentLayer.Environment
-                                .Insert(Car, EnvironmentLayer.Environment.NearestNode(carParkingSpace.Position));
+        bool insertedInEvn = EnvironmentLayer.Environment.Entities.ContainsKey(Car) ||
+                             EnvironmentLayer.Environment
+                                 .Insert(Car, EnvironmentLayer.Environment.NearestNode(carParkingSpace.Position));
         return insertedInEvn && carParkingSpace.Leave(Car);
     }
 
@@ -410,11 +411,11 @@ public abstract class MultiCapableAgent<TLayer> : MultimodalAgent<TLayer>,
     {
         if (RentalBicycle == null) return true;
 
-        var rentalStation = BicycleRentalLayer.Nearest(Position, false);
+        BicycleRentalStation? rentalStation = BicycleRentalLayer.Nearest(Position, false);
         if (rentalStation == null) throw new ApplicationException("Should always find a Bicycle rental station.");
 
-        var success = rentalStation.Enter(RentalBicycle) &&
-                      EnvironmentLayer.Environment.Remove(RentalBicycle);
+        bool success = rentalStation.Enter(RentalBicycle) &&
+                       EnvironmentLayer.Environment.Remove(RentalBicycle);
         if (success) RentalBicycle = null;
         return success;
     }
@@ -449,24 +450,24 @@ public abstract class MultiCapableAgent<TLayer> : MultimodalAgent<TLayer>,
     private bool TryLeaveRentalStation()
     {
         if (RentalBicycle.BicycleRentalStation == null) return true;
-        var rentalStation = RentalBicycle.BicycleRentalStation;
+        BicycleRentalStation rentalStation = RentalBicycle.BicycleRentalStation;
 
 
-        var env = EnvironmentLayer.Environment ??
-                  throw new InvalidOperationException(
-                      "No street or cycle path environment is provided for bicycle rental action");
+        ISpatialGraphEnvironment env = EnvironmentLayer.Environment ??
+                                       throw new InvalidOperationException(
+                                           "No street or cycle path environment is provided for bicycle rental action");
 
-        var insertedInEvn = env.Entities.ContainsKey(RentalBicycle) ||
-                            env.Insert(RentalBicycle,
-                                env.NearestNode(rentalStation.Position));
+        bool insertedInEvn = env.Entities.ContainsKey(RentalBicycle) ||
+                             env.Insert(RentalBicycle,
+                                 env.NearestNode(rentalStation.Position));
         return insertedInEvn && rentalStation.Leave(RentalBicycle);
     }
 
     protected RentalBicycle RentBicycle(Position position)
     {
-        var station = BicycleRentalLayer.Nearest(position, true);
+        BicycleRentalStation? station = BicycleRentalLayer.Nearest(position, true);
 
-        var bicycle = station?.RentAny();
+        IRentalBicycle? bicycle = station?.RentAny();
         if (bicycle == null) return null;
 
         bicycle.BicycleRentalLayer = BicycleRentalLayer;
@@ -476,7 +477,7 @@ public abstract class MultiCapableAgent<TLayer> : MultimodalAgent<TLayer>,
 
     private RentalCar RentCar(Position position)
     {
-        var rentalCar = CarRentalLayer.Nearest(position);
+        RentalCar rentalCar = CarRentalLayer.Nearest(position);
         return CarRentalLayer.Remove(rentalCar) ? rentalCar : null;
     }
 
@@ -487,27 +488,27 @@ public abstract class MultiCapableAgent<TLayer> : MultimodalAgent<TLayer>,
     /// <summary>
     ///     Holds a personal <see cref="Bicycle" /> if the agent possesses one.
     /// </summary>
-    public Bicycle.Model.Bicycle Bicycle { get; protected set; }
+    public Bicycle.Model.Bicycle? Bicycle { get; protected set; }
 
     /// <summary>
     ///     Holds a <see cref="RentalBicycle" /> if one is leased.
     /// </summary>
-    public RentalBicycle RentalBicycle { get; private set; }
+    public RentalBicycle? RentalBicycle { get; private set; }
 
 
-    public Car.Model.Car Car { get; set; }
+    public Car.Model.Car? Car { get; set; }
 
-    [PropertyDescription] public IFerryStationLayer FerryStationLayer { get; set; }
+    [PropertyDescription] public IFerryStationLayer FerryStationLayer { get; set; } = default!;
 
-    [PropertyDescription] public ITrainStationLayer TrainStationLayer { get; set; }
+    [PropertyDescription] public ITrainStationLayer TrainStationLayer { get; set; } = default!;
 
-    [PropertyDescription] public IBicycleRentalLayer BicycleRentalLayer { get; set; }
+    [PropertyDescription] public IBicycleRentalLayer BicycleRentalLayer { get; set; } = default!;
 
-    [PropertyDescription] public ICarRentalLayer CarRentalLayer { get; set; }
-    
-    [PropertyDescription] public ICarParkingLayer CarParkingLayer { get; set; }
+    [PropertyDescription] public ICarRentalLayer CarRentalLayer { get; set; } = default!;
 
-    [PropertyDescription] public IBusStationLayer BusStationLayer { get; }
+    [PropertyDescription] public ICarParkingLayer CarParkingLayer { get; set; } = default!;
+
+    [PropertyDescription] public IBusStationLayer BusStationLayer { get; } = default!;
 
     /// <summary>
     ///     The currently active modal type.
@@ -543,14 +544,12 @@ public abstract class MultiCapableAgent<TLayer> : MultimodalAgent<TLayer>,
         get
         {
             if (_walkingShoes != null) return _walkingShoes;
-            var walkingSpeed = PedestrianAverageSpeedGenerator.CalculateWalkingSpeed(Gender);
-            var runningSpeed = PedestrianAverageSpeedGenerator.CalculateRunningSpeed(Gender);
+            double walkingSpeed = PedestrianAverageSpeedGenerator.CalculateWalkingSpeed(Gender);
+            double runningSpeed = PedestrianAverageSpeedGenerator.CalculateRunningSpeed(Gender);
             return _walkingShoes = new WalkingShoes(EnvironmentLayer, walkingSpeed, runningSpeed);
         }
         private set => _walkingShoes = value;
     }
 
     #endregion
-
-    
 }

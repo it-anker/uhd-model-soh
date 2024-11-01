@@ -11,7 +11,7 @@ namespace SOHTests.Commons.Agent;
 /// </summary>
 public class TestMultiCapableAgent : MultiCapableAgent<TestMultimodalLayer>
 {
-    public Position GoalPosition { get; set; }
+    public Position? GoalPosition { get; set; }
     public ModalChoice ModalChoice { get; set; }
 
     public bool HasUsedCar { get; private set; }

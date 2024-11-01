@@ -1,4 +1,5 @@
 using Mars.Interfaces.Environments;
+using SOHModel.Car.Parking;
 using SOHModel.Domain.Graph;
 using SOHModel.Multimodal.Multimodal;
 using SOHTests.Commons.Agent;
@@ -17,11 +18,11 @@ public class MultimodalAgentTests
 
     public MultimodalAgentTests()
     {
-        var fourNodeGraphEnv = new FourNodeGraphEnv();
+        FourNodeGraphEnv fourNodeGraphEnv = new FourNodeGraphEnv();
         _start = FourNodeGraphEnv.Node1Pos;
         _goal = FourNodeGraphEnv.Node4Pos;
 
-        var streetLayer = new StreetLayer
+        StreetLayer streetLayer = new StreetLayer
         {
             Environment = fourNodeGraphEnv.GraphEnvironment
         };
@@ -42,11 +43,11 @@ public class MultimodalAgentTests
     [Fact]
     public void CycleToGoal()
     {
-        var route = _layer.Search(_agent, _start, _goal, ModalChoice.CyclingRentalBike);
+        MultimodalRoute route = _layer.Search(_agent, _start, _goal, ModalChoice.CyclingRentalBike);
         _agent.MultimodalRoute = route;
         Assert.Equal(ModalChoice.CyclingRentalBike, _agent.RouteMainModalChoice);
 
-        for (var tick = 0; tick < 500 && !_agent.GoalReached; tick++, _layer.Context.UpdateStep()) _agent.Tick();
+        for (int tick = 0; tick < 500 && !_agent.GoalReached; tick++, _layer.Context.UpdateStep()) _agent.Tick();
 
         Assert.True(_agent.GoalReached);
         Assert.Equal(Whereabouts.Offside, _agent.Whereabouts);
@@ -58,10 +59,10 @@ public class MultimodalAgentTests
     [Fact]
     public void DriveToGoal()
     {
-        var route = _layer.Search(_agent, _start, _goal, ModalChoice.CarDriving);
+        MultimodalRoute route = _layer.Search(_agent, _start, _goal, ModalChoice.CarDriving);
         _agent.MultimodalRoute = route;
 
-        for (var tick = 0; tick < 10000 && !_agent.GoalReached; tick++, _layer.Context.UpdateStep()) _agent.Tick();
+        for (int tick = 0; tick < 10000 && !_agent.GoalReached; tick++, _layer.Context.UpdateStep()) _agent.Tick();
 
         Assert.True(_agent.GoalReached);
         Assert.Equal(_agent.Position, route.Goal);
@@ -71,18 +72,18 @@ public class MultimodalAgentTests
     [Fact]
     public void DrivingLeavesParkingAndEntersGoalParkingAgain()
     {
-        var route = _layer.Search(_agent, _start, _goal, ModalChoice.CarDriving);
+        MultimodalRoute route = _layer.Search(_agent, _start, _goal, ModalChoice.CarDriving);
         _agent.MultimodalRoute = route;
 
-        var startCarParkingSpace = _agent.Car.CarParkingSpace;
+        CarParkingSpace? startCarParkingSpace = _agent.Car.CarParkingSpace;
         Assert.NotNull(startCarParkingSpace);
         Assert.Contains(_agent.Car, startCarParkingSpace.ParkingVehicles.Keys);
 
-        var goalCarParkingSpace = _agent.Car.CarParkingLayer.Nearest(_goal);
+        CarParkingSpace? goalCarParkingSpace = _agent.Car.CarParkingLayer.Nearest(_goal);
         Assert.Empty(goalCarParkingSpace.ParkingVehicles);
 
-        var wasDriving = false;
-        for (var tick = 0; tick < 10000 && !_agent.GoalReached; tick++, _layer.Context.UpdateStep())
+        bool wasDriving = false;
+        for (int tick = 0; tick < 10000 && !_agent.GoalReached; tick++, _layer.Context.UpdateStep())
         {
             _agent.Tick();
             if (!wasDriving && _agent.Whereabouts == Whereabouts.Vehicle)
@@ -103,19 +104,19 @@ public class MultimodalAgentTests
     [Fact]
     public void SwitchBetweenAllWhereabouts()
     {
-        var fourNodeGraphEnv = new FourNodeGraphEnv();
-        var environment = fourNodeGraphEnv.GraphEnvironment;
+        FourNodeGraphEnv fourNodeGraphEnv = new FourNodeGraphEnv();
+        ISpatialGraphEnvironment environment = fourNodeGraphEnv.GraphEnvironment;
 
         _agent.StartPosition = FourNodeGraphEnv.Node1Pos;
 
         Assert.Equal(Whereabouts.Offside, _agent.Whereabouts);
 
-        var route = environment.FindRoute(fourNodeGraphEnv.Node1, fourNodeGraphEnv.Node2);
+        Route? route = environment.FindRoute(fourNodeGraphEnv.Node1, fourNodeGraphEnv.Node2);
         _agent.MultimodalRoute = new MultimodalRoute(route, ModalChoice.Walking);
         _agent.Move();
         Assert.Equal(Whereabouts.Sidewalk, _agent.Whereabouts);
 
-        var car = new TestCarWithoutRangeCheck(environment);
+        TestCarWithoutRangeCheck car = new TestCarWithoutRangeCheck(environment);
         Assert.True(environment.Insert(car, fourNodeGraphEnv.Node1));
         Assert.True(_agent.TryEnterVehicleAsDriver(car, _agent));
         Assert.Equal(Whereabouts.Vehicle, _agent.Whereabouts);
@@ -127,11 +128,11 @@ public class MultimodalAgentTests
     [Fact]
     public void WalkEmptyRoute()
     {
-        var route = _layer.Search(_agent, _start, _start, ModalChoice.Walking);
+        MultimodalRoute route = _layer.Search(_agent, _start, _start, ModalChoice.Walking);
         _agent.MultimodalRoute = route;
         Assert.True(_agent.GoalReached);
 
-        for (var tick = 0;
+        for (int tick = 0;
              tick < 10 && !_agent.GoalReached;
              tick++, _layer.Context.UpdateStep()) _agent.Tick();
 
@@ -141,10 +142,10 @@ public class MultimodalAgentTests
     [Fact]
     public void WalkToGoal()
     {
-        var route = _layer.Search(_agent, _start, _goal, ModalChoice.Walking);
+        MultimodalRoute route = _layer.Search(_agent, _start, _goal, ModalChoice.Walking);
         _agent.MultimodalRoute = route;
 
-        for (var tick = 0; tick < 10000 && !_agent.GoalReached; tick++, _layer.Context.UpdateStep())
+        for (int tick = 0; tick < 10000 && !_agent.GoalReached; tick++, _layer.Context.UpdateStep())
         {
             _agent.Tick();
             Assert.Equal(ModalChoice.Walking, _agent.ActiveCapability);

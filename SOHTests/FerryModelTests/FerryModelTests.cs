@@ -10,12 +10,12 @@ public class FerryModelTests
     [Fact]
     public void TestGetOutputPropertiesForFerry()
     {
-        var type = new EntityType(typeof(Ferry))
+        EntityType type = new EntityType(typeof(Ferry))
         {
             Mapping = new EntityMapping { OutputKind = OutputKind.FullWithIgnored }
         };
 
-        var outputProperties = type.OutputProperties.Select(propertyType => propertyType.Name).ToArray();
+        string[] outputProperties = type.OutputProperties.Select(propertyType => propertyType.Name).ToArray();
 
         Assert.Contains("Length", outputProperties);
         Assert.Contains("MaxSpeed", outputProperties);

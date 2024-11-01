@@ -1,4 +1,5 @@
 using System;
+using SOHModel.Bicycle.Steering;
 using Xunit;
 
 namespace SOHTests.BicycleModelTests;
@@ -8,15 +9,15 @@ public partial class VehicleTest
     [Fact]
     public void EnterDriverAsPassenger()
     {
-        var vehicle = new TestBicycle(new Random().Next());
+        TestBicycle vehicle = new TestBicycle(new Random().Next());
 
-        var driver = new TestBicycleDriver();
-        var result = vehicle.TryEnterDriver(driver, out var driverVehicle);
+        TestBicycleDriver driver = new TestBicycleDriver();
+        bool result = vehicle.TryEnterDriver(driver, out BicycleSteeringHandle driverVehicle);
         Assert.True(result);
         Assert.NotNull(driverVehicle);
         Assert.Equal(driver, vehicle.Driver);
 
-        var result2 = vehicle.TryEnterPassenger(driver, out var driverVehicle2);
+        bool result2 = vehicle.TryEnterPassenger(driver, out BicyclePassengerHandle driverVehicle2);
         Assert.False(result2);
         Assert.Null(driverVehicle2);
         Assert.DoesNotContain(driver, vehicle.Passengers);
@@ -25,10 +26,10 @@ public partial class VehicleTest
     [Fact]
     public void EnterDriverInEmptyVehicle()
     {
-        var vehicle = new TestBicycle(new Random().Next());
+        TestBicycle vehicle = new TestBicycle(new Random().Next());
 
-        var driver = new TestBicycleDriver();
-        var result = vehicle.TryEnterDriver(driver, out var driverVehicle);
+        TestBicycleDriver driver = new TestBicycleDriver();
+        bool result = vehicle.TryEnterDriver(driver, out BicycleSteeringHandle driverVehicle);
         Assert.True(result);
         Assert.NotNull(driverVehicle);
         Assert.Equal(driver, vehicle.Driver);
@@ -37,16 +38,16 @@ public partial class VehicleTest
     [Fact]
     public void EnterDriverInOccupiedVehicle()
     {
-        var vehicle = new TestBicycle(new Random().Next());
+        TestBicycle vehicle = new TestBicycle(new Random().Next());
 
-        var firstDriver = new TestBicycleDriver();
-        var result = vehicle.TryEnterDriver(firstDriver, out var driverVehicle);
+        TestBicycleDriver firstDriver = new TestBicycleDriver();
+        bool result = vehicle.TryEnterDriver(firstDriver, out BicycleSteeringHandle driverVehicle);
         Assert.True(result);
         Assert.NotNull(driverVehicle);
         Assert.Equal(firstDriver, vehicle.Driver);
 
-        var secondDriver = new TestBicycleDriver();
-        var result2 = vehicle.TryEnterDriver(secondDriver, out var driverVehicle2);
+        TestBicycleDriver secondDriver = new TestBicycleDriver();
+        bool result2 = vehicle.TryEnterDriver(secondDriver, out BicycleSteeringHandle driverVehicle2);
         Assert.False(result2);
         Assert.Null(driverVehicle2);
         Assert.NotEqual(secondDriver, vehicle.Driver);
@@ -55,15 +56,15 @@ public partial class VehicleTest
     [Fact]
     public void EnterDriverTwice()
     {
-        var vehicle = new TestBicycle(new Random().Next());
+        TestBicycle vehicle = new TestBicycle(new Random().Next());
 
-        var driver = new TestBicycleDriver();
-        var result = vehicle.TryEnterDriver(driver, out var driverVehicle);
+        TestBicycleDriver driver = new TestBicycleDriver();
+        bool result = vehicle.TryEnterDriver(driver, out BicycleSteeringHandle driverVehicle);
         Assert.True(result);
         Assert.NotNull(driverVehicle);
         Assert.Equal(driver, vehicle.Driver);
 
-        var result2 = vehicle.TryEnterDriver(driver, out var driverVehicle2);
+        bool result2 = vehicle.TryEnterDriver(driver, out BicycleSteeringHandle driverVehicle2);
         Assert.False(result2);
         Assert.Null(driverVehicle2);
         Assert.Equal(driver, vehicle.Driver);
@@ -72,15 +73,15 @@ public partial class VehicleTest
     [Fact]
     public void EnterPassengerAsDriver()
     {
-        var vehicle = new TestBicycle(1);
+        TestBicycle vehicle = new TestBicycle(1);
 
-        var passenger = new TestBicycleDriver();
-        var result = vehicle.TryEnterPassenger(passenger, out var passengerVehicle);
+        TestBicycleDriver passenger = new TestBicycleDriver();
+        bool result = vehicle.TryEnterPassenger(passenger, out BicyclePassengerHandle passengerVehicle);
         Assert.True(result);
         Assert.NotNull(passengerVehicle);
         Assert.Contains(passenger, vehicle.Passengers);
 
-        var result2 = vehicle.TryEnterDriver(passenger, out var driverVehicle);
+        bool result2 = vehicle.TryEnterDriver(passenger, out BicycleSteeringHandle driverVehicle);
         Assert.False(result2);
         Assert.Null(driverVehicle);
         Assert.NotEqual(passenger, vehicle.Driver);
@@ -89,10 +90,10 @@ public partial class VehicleTest
     [Fact]
     public void EnterPassengerInVehicleWithFreeSeats()
     {
-        var vehicle = new TestBicycle(2);
+        TestBicycle vehicle = new TestBicycle(2);
 
-        var passenger = new TestBicycleDriver();
-        var result = vehicle.TryEnterPassenger(passenger, out var passengerVehicle);
+        TestBicycleDriver passenger = new TestBicycleDriver();
+        bool result = vehicle.TryEnterPassenger(passenger, out BicyclePassengerHandle passengerVehicle);
         Assert.True(result);
         Assert.NotNull(passengerVehicle);
         Assert.Contains(passenger, vehicle.Passengers);
@@ -114,16 +115,16 @@ public partial class VehicleTest
     [Fact]
     public void EnterPassengerInVehicleWithoutFreeSeats()
     {
-        var vehicle = new TestBicycle(1);
+        TestBicycle vehicle = new TestBicycle(1);
 
-        var passenger = new TestBicycleDriver();
-        var result = vehicle.TryEnterPassenger(passenger, out var passengerVehicle);
+        TestBicycleDriver passenger = new TestBicycleDriver();
+        bool result = vehicle.TryEnterPassenger(passenger, out BicyclePassengerHandle passengerVehicle);
         Assert.True(result);
         Assert.NotNull(passengerVehicle);
         Assert.Contains(passenger, vehicle.Passengers);
 
-        var passenger2 = new TestBicycleDriver();
-        var result2 = vehicle.TryEnterPassenger(passenger2, out var passengerVehicle2);
+        TestBicycleDriver passenger2 = new TestBicycleDriver();
+        bool result2 = vehicle.TryEnterPassenger(passenger2, out BicyclePassengerHandle passengerVehicle2);
         Assert.False(result2);
         Assert.Null(passengerVehicle2);
         Assert.DoesNotContain(passenger2, vehicle.Passengers);
@@ -132,15 +133,15 @@ public partial class VehicleTest
     [Fact]
     public void EnterPassengerTwice()
     {
-        var vehicle = new TestBicycle(1);
+        TestBicycle vehicle = new TestBicycle(1);
 
-        var passenger = new TestBicycleDriver();
-        var result = vehicle.TryEnterPassenger(passenger, out var passengerVehicle);
+        TestBicycleDriver passenger = new TestBicycleDriver();
+        bool result = vehicle.TryEnterPassenger(passenger, out BicyclePassengerHandle passengerVehicle);
         Assert.True(result);
         Assert.NotNull(passengerVehicle);
         Assert.Contains(passenger, vehicle.Passengers);
 
-        var result2 = vehicle.TryEnterPassenger(passenger, out var passengerVehicle2);
+        bool result2 = vehicle.TryEnterPassenger(passenger, out BicyclePassengerHandle passengerVehicle2);
         Assert.False(result2);
         Assert.Null(passengerVehicle2);
         Assert.Contains(passenger, vehicle.Passengers);

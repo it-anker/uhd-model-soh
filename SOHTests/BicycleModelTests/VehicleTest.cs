@@ -25,16 +25,16 @@ public partial class VehicleTest
     [Fact]
     public void RentBicycleParallel()
     {
-        var entityManager = new Mock<IEntityManager>();
+        Mock<IEntityManager> entityManager = new Mock<IEntityManager>();
         entityManager.Setup(manager => manager.Create<RentalBicycle>("type", "city", null))
             .Returns(() => new RentalBicycle());
 
-        var bicycleRentalLayer = new BicycleRentalLayer();
-        var container = new Mock<ISimulationContainer>();
+        BicycleRentalLayer bicycleRentalLayer = new BicycleRentalLayer();
+        Mock<ISimulationContainer> container = new Mock<ISimulationContainer>();
         container.Setup(simulationContainer => simulationContainer.Resolve<IEntityManager>())
             .Returns(entityManager.Object);
 
-        var layerInitData = new LayerInitData
+        LayerInitData layerInitData = new LayerInitData
         {
             Container = container.Object
         };
@@ -45,9 +45,9 @@ public partial class VehicleTest
             Environment = new SpatialGraphEnvironment()
         };
 
-        var attributes = new Dictionary<string, object> { { "Anzahl", 100 }, { "name", "Hbf" } };
+        Dictionary<string, object> attributes = new Dictionary<string, object> { { "Anzahl", 100 }, { "name", "Hbf" } };
 
-        var bicycleRentalStation = new BicycleRentalStation();
+        BicycleRentalStation bicycleRentalStation = new BicycleRentalStation();
         bicycleRentalStation.Init(bicycleRentalLayer,
             new VectorStructuredData
             {
@@ -64,7 +64,7 @@ public partial class VehicleTest
 
 internal class TestBicycleDriver : IBicycleSteeringCapable
 {
-    public Bicycle Bicycle { get; set; }
+    public Bicycle Bicycle { get; set; } = default!;
 
     public bool OvertakingActivated => false;
 
@@ -74,25 +74,21 @@ internal class TestBicycleDriver : IBicycleSteeringCapable
         set { }
     }
 
-    public Position Position { get; set; }
-
-    public void Notify(PassengerMessage passengerMessage)
-    {
-        if (Bicycle != null && passengerMessage.Equals(PassengerMessage.NoDriver))
-        {
-            //todo
-//                Assert.Null(Vehicle. Driver);
-        }
-    }
+    public Position Position { get; set; } = default!;
 
     public double DriverRandom => HandleDriverType.DetermineDriverRand(DriverType);
-    public DriverType DriverType => DriverType.Normal;
 
+    public DriverType DriverType => DriverType.Normal;
+    
     public double CyclingPower { get; } = new FastGaussianDistribution(75, 3)
         .Next(RandomHelper.Random);
 
     public double Mass { get; } = 80;
     public double Gradient { get; } = 0;
+
+    public void Notify(PassengerMessage passengerMessage)
+    {
+    }
 }
 
 internal class TestBicycle : Bicycle

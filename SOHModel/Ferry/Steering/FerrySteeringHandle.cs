@@ -23,16 +23,16 @@ public class FerrySteeringHandle : VehicleSteeringHandle<IFerrySteeringCapable, 
     protected override double HandleIntersectionAhead(SpatialGraphExploreResult exploreResult,
         double biggestDeceleration)
     {
-        var exploreResults = exploreResult.EdgeExplores;
+        List<EdgeExploreResult>? exploreResults = exploreResult.EdgeExplores;
 
         if (exploreResults.Count == 1)
         {
-            var edgeExploreResult = exploreResults.First();
-            var distanceToStation = edgeExploreResult.IntersectionDistance;
+            EdgeExploreResult edgeExploreResult = exploreResults.First();
+            double distanceToStation = edgeExploreResult.IntersectionDistance;
 
             if (distanceToStation < UrbanSafetyDistanceInM)
             {
-                var speedChange = CalculateSpeedChange(Vehicle.Velocity, SpeedLimit,
+                double speedChange = CalculateSpeedChange(Vehicle.Velocity, SpeedLimit,
                     distanceToStation, 0, 0);
                 return Math.Min(speedChange, biggestDeceleration);
             }
@@ -50,9 +50,9 @@ public class FerrySteeringHandle : VehicleSteeringHandle<IFerrySteeringCapable, 
 
         if (_driver is FerryDriver ferryDriver)
         {
-            var tripTime = ferryDriver.CurrentFerryRouteEntry.Minutes * 60d -
-                           ferryDriver.MinimumBoardingTimeInSeconds * 2;
-            var distance = Route.RouteLength / tripTime;
+            double tripTime = ferryDriver.CurrentFerryRouteEntry.Minutes * 60d -
+                              ferryDriver.MinimumBoardingTimeInSeconds * 2;
+            double distance = Route.RouteLength / tripTime;
 
             if (distance > Route.RemainingRouteDistanceToGoal) // Make last step to goal
                 return Route.RemainingRouteDistanceToGoal;

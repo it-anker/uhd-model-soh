@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using Mars.Components.Environments;
+using Mars.Interfaces;
 using Mars.Interfaces.Environments;
 using Mars.Interfaces.Model;
 using Mars.Interfaces.Model.Options;
@@ -19,16 +20,16 @@ public class PedestrianBicycleTests
     private static void CompareCyclistAndPedestrian(TestMultimodalLayer multimodalLayer, Position start,
         Position goal, bool pedestrianArrivesFirst)
     {
-        var simulationContext = multimodalLayer.Context;
+        ISimulationContext simulationContext = multimodalLayer.Context;
 
-        var pedestrian = new TestWalkingPedestrian
+        TestWalkingPedestrian pedestrian = new TestWalkingPedestrian
         {
             StartPosition = start,
             GoalPosition = goal
         };
         pedestrian.Init(multimodalLayer);
 
-        var cyclist = new TestMultiCapableAgent
+        TestMultiCapableAgent cyclist = new TestMultiCapableAgent
         {
             StartPosition = start,
             GoalPosition = goal,
@@ -36,7 +37,7 @@ public class PedestrianBicycleTests
         };
         cyclist.Init(multimodalLayer);
 
-        var agents = new List<MultimodalAgent<TestMultimodalLayer>>
+        List<MultimodalAgent<TestMultimodalLayer>> agents = new List<MultimodalAgent<TestMultimodalLayer>>
         {
             pedestrian,
             cyclist
@@ -44,8 +45,8 @@ public class PedestrianBicycleTests
         Assert.Equal(ModalChoice.Walking, pedestrian.RouteMainModalChoice);
         Assert.Equal(ModalChoice.CyclingRentalBike, cyclist.RouteMainModalChoice);
 
-        var cyclistArrivedGoal = false;
-        for (var tick = 0; tick < 10000 && !agents.All(agent => agent.GoalReached); tick++)
+        bool cyclistArrivedGoal = false;
+        for (int tick = 0; tick < 10000 && !agents.All(agent => agent.GoalReached); tick++)
         {
             // foreach (var agent in agents) agent.Tick();
             pedestrian.Tick();
@@ -62,7 +63,7 @@ public class PedestrianBicycleTests
         Assert.True(agents.All(agent => agent.GoalReached));
         Assert.True(agents.All(agent => agent.Whereabouts == Whereabouts.Offside));
 
-        foreach (var agent in agents)
+        foreach (MultimodalAgent<TestMultimodalLayer> agent in agents)
         {
             Assert.Equal(goal.Longitude, agent.Position.Longitude, 2);
             Assert.Equal(goal.Latitude, agent.Position.Latitude, 2);
@@ -71,8 +72,8 @@ public class PedestrianBicycleTests
 
     private static (Position, Position) FindPedestrianBlockingCyclistTour()
     {
-        var start = Position.CreateGeoPosition(9.950500, 53.555871);
-        var goal = Position.CreateGeoPosition(9.942655, 53.555227);
+        Position? start = Position.CreateGeoPosition(9.950500, 53.555871);
+        Position? goal = Position.CreateGeoPosition(9.942655, 53.555227);
         return (start, goal);
     }
 
@@ -82,7 +83,7 @@ public class PedestrianBicycleTests
         Assert.NotNull(bicycleLayer);
         Assert.Equal(BicycleRentalStation.StandardAmount, bicycleLayer.Nearest(start, false).Count);
 
-        var cyclist = new TestMultiCapableAgent
+        TestMultiCapableAgent cyclist = new TestMultiCapableAgent
         {
             StartPosition = start,
             GoalPosition = goal,
@@ -90,24 +91,24 @@ public class PedestrianBicycleTests
         };
         cyclist.Init(layer);
 
-        var goalBicycleParkingSpace = bicycleLayer.Nearest(goal, false);
+        BicycleRentalStation? goalBicycleParkingSpace = bicycleLayer.Nearest(goal, false);
         Assert.Equal(BicycleRentalStation.StandardAmount, goalBicycleParkingSpace.Count);
 
-        for (var tick = 0; tick < 10000 && !cyclist.GoalReached; tick++) cyclist.Tick();
+        for (int tick = 0; tick < 10000 && !cyclist.GoalReached; tick++) cyclist.Tick();
 
         Assert.Equal(BicycleRentalStation.StandardAmount + 1, goalBicycleParkingSpace.Count);
     }
 
     private void GoalReachedByBicycle(TestMultimodalLayer layer, Position start, Position goal)
     {
-        var cyclist = new TestMultiCapableAgent
+        TestMultiCapableAgent cyclist = new TestMultiCapableAgent
         {
             StartPosition = start,
             GoalPosition = goal,
             ModalChoice = ModalChoice.CyclingRentalBike
         };
         cyclist.Init(layer);
-        for (var tick = 0; tick < 10000 && !cyclist.GoalReached; tick++, layer.Context.UpdateStep()) cyclist.Tick();
+        for (int tick = 0; tick < 10000 && !cyclist.GoalReached; tick++, layer.Context.UpdateStep()) cyclist.Tick();
 
         Assert.True(cyclist.GoalReached);
 
@@ -119,16 +120,16 @@ public class PedestrianBicycleTests
     [Fact]
     public void BicycleIsReturnedForCycleOnly()
     {
-        var fourNodeGraphEnv = new FourNodeGraphEnv();
-        var streetLayer = new CarLayer(fourNodeGraphEnv.GraphEnvironment);
-        var bicycleLayer = new FourNodeBicycleRentalLayerFixture(streetLayer).BicycleRentalLayer;
-        var layer = new TestMultimodalLayer(fourNodeGraphEnv.GraphEnvironment, bicycleLayer)
+        FourNodeGraphEnv fourNodeGraphEnv = new FourNodeGraphEnv();
+        CarLayer streetLayer = new CarLayer(fourNodeGraphEnv.GraphEnvironment);
+        BicycleRentalLayer bicycleLayer = new FourNodeBicycleRentalLayerFixture(streetLayer).BicycleRentalLayer;
+        TestMultimodalLayer layer = new TestMultimodalLayer(fourNodeGraphEnv.GraphEnvironment, bicycleLayer)
         {
             BicycleRentalLayer = bicycleLayer
         };
 
-        var start = fourNodeGraphEnv.Node2.Position;
-        var goal = fourNodeGraphEnv.Node3.Position;
+        Position? start = fourNodeGraphEnv.Node2.Position;
+        Position? goal = fourNodeGraphEnv.Node3.Position;
 
         BicycleIsReturned(layer, bicycleLayer, start, goal);
     }
@@ -136,13 +137,13 @@ public class PedestrianBicycleTests
     [Fact]
     public void BicycleIsReturnedForCycleWalk()
     {
-        var fourNodeGraphEnv = new FourNodeGraphEnv();
-        var streetLayer = new CarLayer(fourNodeGraphEnv.GraphEnvironment);
-        var bicycleLayer = new FourNodeBicycleRentalLayerFixture(streetLayer).BicycleRentalLayer;
-        var layer = new TestMultimodalLayer(fourNodeGraphEnv.GraphEnvironment, bicycleLayer);
+        FourNodeGraphEnv fourNodeGraphEnv = new FourNodeGraphEnv();
+        CarLayer streetLayer = new CarLayer(fourNodeGraphEnv.GraphEnvironment);
+        BicycleRentalLayer bicycleLayer = new FourNodeBicycleRentalLayerFixture(streetLayer).BicycleRentalLayer;
+        TestMultimodalLayer layer = new TestMultimodalLayer(fourNodeGraphEnv.GraphEnvironment, bicycleLayer);
 
-        var start = fourNodeGraphEnv.Node2.Position;
-        var goal = fourNodeGraphEnv.Node4.Position;
+        Position? start = fourNodeGraphEnv.Node2.Position;
+        Position? goal = fourNodeGraphEnv.Node4.Position;
 
         BicycleIsReturned(layer, bicycleLayer, start, goal);
     }
@@ -150,13 +151,13 @@ public class PedestrianBicycleTests
     [Fact]
     public void BicycleIsReturnedForWalkCycle()
     {
-        var fourNodeGraphEnv = new FourNodeGraphEnv();
-        var streetLayer = new CarLayer(fourNodeGraphEnv.GraphEnvironment);
-        var bicycleLayer = new FourNodeBicycleRentalLayerFixture(streetLayer).BicycleRentalLayer;
-        var layer = new TestMultimodalLayer(fourNodeGraphEnv.GraphEnvironment, bicycleLayer);
+        FourNodeGraphEnv fourNodeGraphEnv = new FourNodeGraphEnv();
+        CarLayer streetLayer = new CarLayer(fourNodeGraphEnv.GraphEnvironment);
+        BicycleRentalLayer bicycleLayer = new FourNodeBicycleRentalLayerFixture(streetLayer).BicycleRentalLayer;
+        TestMultimodalLayer layer = new TestMultimodalLayer(fourNodeGraphEnv.GraphEnvironment, bicycleLayer);
 
-        var start = FourNodeGraphEnv.Node1Pos;
-        var goal = FourNodeGraphEnv.Node3Pos;
+        Position start = FourNodeGraphEnv.Node1Pos;
+        Position goal = FourNodeGraphEnv.Node3Pos;
 
         BicycleIsReturned(layer, bicycleLayer, start, goal);
     }
@@ -164,13 +165,13 @@ public class PedestrianBicycleTests
     [Fact]
     public void BicycleIsReturnedForWalkCycleWalk()
     {
-        var fourNodeGraphEnv = new FourNodeGraphEnv();
-        var streetLayer = new CarLayer(fourNodeGraphEnv.GraphEnvironment);
-        var bicycleLayer = new FourNodeBicycleRentalLayerFixture(streetLayer).BicycleRentalLayer;
-        var layer = new TestMultimodalLayer(fourNodeGraphEnv.GraphEnvironment, bicycleLayer);
+        FourNodeGraphEnv fourNodeGraphEnv = new FourNodeGraphEnv();
+        CarLayer streetLayer = new CarLayer(fourNodeGraphEnv.GraphEnvironment);
+        BicycleRentalLayer bicycleLayer = new FourNodeBicycleRentalLayerFixture(streetLayer).BicycleRentalLayer;
+        TestMultimodalLayer layer = new TestMultimodalLayer(fourNodeGraphEnv.GraphEnvironment, bicycleLayer);
 
-        var start = FourNodeGraphEnv.Node1Pos;
-        var goal = FourNodeGraphEnv.Node4Pos;
+        Position start = FourNodeGraphEnv.Node1Pos;
+        Position goal = FourNodeGraphEnv.Node4Pos;
 
         BicycleIsReturned(layer, bicycleLayer, start, goal);
     }
@@ -179,18 +180,18 @@ public class PedestrianBicycleTests
     public void CyclistCannotSurpassPedestrianOnBlockingRoute()
     {
         // we only have one environment for both
-        var environment = new SpatialGraphEnvironment(ResourcesConstants.WalkGraphAltonaAltstadt);
-        var bicycleLayer = new BicycleRentalLayerFixture(environment).BicycleRentalLayer;
-        var layer = new TestMultimodalLayer(environment, bicycleLayer);
+        SpatialGraphEnvironment environment = new SpatialGraphEnvironment(ResourcesConstants.WalkGraphAltonaAltstadt);
+        BicycleRentalLayer bicycleLayer = new BicycleRentalLayerFixture(environment).BicycleRentalLayer;
+        TestMultimodalLayer layer = new TestMultimodalLayer(environment, bicycleLayer);
 
-        var (start, goal) = FindPedestrianBlockingCyclistTour();
+        (Position start, Position goal) = FindPedestrianBlockingCyclistTour();
         CompareCyclistAndPedestrian(layer, start, goal, true);
     }
 
     [Fact]
     public void CyclistCanSurpassPedestrianOnBlockingRoute()
     {
-        var environment = new SpatialGraphEnvironment(new SpatialGraphOptions
+        SpatialGraphEnvironment environment = new SpatialGraphEnvironment(new SpatialGraphOptions
         {
             GraphImports = new List<Input>
             {
@@ -211,23 +212,23 @@ public class PedestrianBicycleTests
 
 
         //we have two environments, so cyclist can surpass pedestrian
-        var bicycleLayer = new BicycleRentalLayerFixture(environment).BicycleRentalLayer;
-        var layer = new TestMultimodalLayer(environment, bicycleLayer);
+        BicycleRentalLayer bicycleLayer = new BicycleRentalLayerFixture(environment).BicycleRentalLayer;
+        TestMultimodalLayer layer = new TestMultimodalLayer(environment, bicycleLayer);
 
-        var (start, goal) = FindPedestrianBlockingCyclistTour();
+        (Position start, Position goal) = FindPedestrianBlockingCyclistTour();
         CompareCyclistAndPedestrian(layer, start, goal, false);
     }
 
     [Fact]
     public void GoalReachedByCycleOnly()
     {
-        var fourNodeGraphEnv = new FourNodeGraphEnv();
-        var carLayer = new CarLayer(fourNodeGraphEnv.GraphEnvironment);
-        var bicycleLayer = new FourNodeBicycleRentalLayerFixture(carLayer).BicycleRentalLayer;
-        var layer = new TestMultimodalLayer(fourNodeGraphEnv.GraphEnvironment, bicycleLayer);
+        FourNodeGraphEnv fourNodeGraphEnv = new FourNodeGraphEnv();
+        CarLayer carLayer = new CarLayer(fourNodeGraphEnv.GraphEnvironment);
+        BicycleRentalLayer bicycleLayer = new FourNodeBicycleRentalLayerFixture(carLayer).BicycleRentalLayer;
+        TestMultimodalLayer layer = new TestMultimodalLayer(fourNodeGraphEnv.GraphEnvironment, bicycleLayer);
 
-        var start = FourNodeGraphEnv.Node2Pos;
-        var goal = FourNodeGraphEnv.Node3Pos;
+        Position start = FourNodeGraphEnv.Node2Pos;
+        Position goal = FourNodeGraphEnv.Node3Pos;
 
         GoalReachedByBicycle(layer, start, goal);
     }
@@ -235,13 +236,13 @@ public class PedestrianBicycleTests
     [Fact]
     public void GoalReachedByCycleWalk()
     {
-        var fourNodeGraphEnv = new FourNodeGraphEnv();
-        var carLayer = new CarLayer(fourNodeGraphEnv.GraphEnvironment);
-        var bicycleLayer = new FourNodeBicycleRentalLayerFixture(carLayer).BicycleRentalLayer;
-        var layer = new TestMultimodalLayer(fourNodeGraphEnv.GraphEnvironment, bicycleLayer);
+        FourNodeGraphEnv fourNodeGraphEnv = new FourNodeGraphEnv();
+        CarLayer carLayer = new CarLayer(fourNodeGraphEnv.GraphEnvironment);
+        BicycleRentalLayer bicycleLayer = new FourNodeBicycleRentalLayerFixture(carLayer).BicycleRentalLayer;
+        TestMultimodalLayer layer = new TestMultimodalLayer(fourNodeGraphEnv.GraphEnvironment, bicycleLayer);
 
-        var start = FourNodeGraphEnv.Node2Pos;
-        var goal = FourNodeGraphEnv.Node4Pos;
+        Position start = FourNodeGraphEnv.Node2Pos;
+        Position goal = FourNodeGraphEnv.Node4Pos;
 
         GoalReachedByBicycle(layer, start, goal);
     }
@@ -249,13 +250,13 @@ public class PedestrianBicycleTests
     [Fact]
     public void GoalReachedByWalkCycle()
     {
-        var fourNodeGraphEnv = new FourNodeGraphEnv();
-        var carLayer = new CarLayer(fourNodeGraphEnv.GraphEnvironment);
-        var bicycleLayer = new FourNodeBicycleRentalLayerFixture(carLayer).BicycleRentalLayer;
-        var layer = new TestMultimodalLayer(fourNodeGraphEnv.GraphEnvironment, bicycleLayer);
+        FourNodeGraphEnv fourNodeGraphEnv = new FourNodeGraphEnv();
+        CarLayer carLayer = new CarLayer(fourNodeGraphEnv.GraphEnvironment);
+        BicycleRentalLayer bicycleLayer = new FourNodeBicycleRentalLayerFixture(carLayer).BicycleRentalLayer;
+        TestMultimodalLayer layer = new TestMultimodalLayer(fourNodeGraphEnv.GraphEnvironment, bicycleLayer);
 
-        var start = FourNodeGraphEnv.Node1Pos;
-        var goal = FourNodeGraphEnv.Node3Pos;
+        Position start = FourNodeGraphEnv.Node1Pos;
+        Position goal = FourNodeGraphEnv.Node3Pos;
 
         GoalReachedByBicycle(layer, start, goal);
     }
@@ -263,13 +264,13 @@ public class PedestrianBicycleTests
     [Fact]
     public void GoalReachedByWalkCycleWalk()
     {
-        var fourNodeGraphEnv = new FourNodeGraphEnv();
-        var carLayer = new CarLayer(fourNodeGraphEnv.GraphEnvironment);
-        var bicycleLayer = new FourNodeBicycleRentalLayerFixture(carLayer).BicycleRentalLayer;
-        var layer = new TestMultimodalLayer(fourNodeGraphEnv.GraphEnvironment, bicycleLayer);
+        FourNodeGraphEnv fourNodeGraphEnv = new FourNodeGraphEnv();
+        CarLayer carLayer = new CarLayer(fourNodeGraphEnv.GraphEnvironment);
+        BicycleRentalLayer bicycleLayer = new FourNodeBicycleRentalLayerFixture(carLayer).BicycleRentalLayer;
+        TestMultimodalLayer layer = new TestMultimodalLayer(fourNodeGraphEnv.GraphEnvironment, bicycleLayer);
 
-        var start = FourNodeGraphEnv.Node1Pos;
-        var goal = FourNodeGraphEnv.Node4Pos;
+        Position start = FourNodeGraphEnv.Node1Pos;
+        Position goal = FourNodeGraphEnv.Node4Pos;
 
         GoalReachedByBicycle(layer, start, goal);
     }
@@ -277,15 +278,15 @@ public class PedestrianBicycleTests
     [Fact]
     public void StartIsGoal()
     {
-        var fourNodeGraphEnv = new FourNodeGraphEnv();
-        var carLayer = new CarLayer(fourNodeGraphEnv.GraphEnvironment);
-        var bicycleLayer = new FourNodeBicycleRentalLayerFixture(carLayer).BicycleRentalLayer;
-        var layer = new TestMultimodalLayer(fourNodeGraphEnv.GraphEnvironment, bicycleLayer);
+        FourNodeGraphEnv fourNodeGraphEnv = new FourNodeGraphEnv();
+        CarLayer carLayer = new CarLayer(fourNodeGraphEnv.GraphEnvironment);
+        BicycleRentalLayer bicycleLayer = new FourNodeBicycleRentalLayerFixture(carLayer).BicycleRentalLayer;
+        TestMultimodalLayer layer = new TestMultimodalLayer(fourNodeGraphEnv.GraphEnvironment, bicycleLayer);
 
-        var start = FourNodeGraphEnv.Node2Pos;
-        var goal = start;
+        Position start = FourNodeGraphEnv.Node2Pos;
+        Position goal = start;
 
-        var cyclist = new TestMultiCapableAgent
+        TestMultiCapableAgent cyclist = new TestMultiCapableAgent
         {
             StartPosition = start,
             GoalPosition = goal,
@@ -293,7 +294,7 @@ public class PedestrianBicycleTests
         };
         cyclist.Init(layer);
 
-        for (var tick = 0; tick < 10000 && !cyclist.GoalReached; tick++) cyclist.Tick();
+        for (int tick = 0; tick < 10000 && !cyclist.GoalReached; tick++) cyclist.Tick();
 
         Assert.True(cyclist.GoalReached);
 

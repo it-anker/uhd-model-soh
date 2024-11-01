@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Data;
 using System.IO;
 using Mars.Common.Core;
 using Mars.Common.Core.Logging;
@@ -22,15 +23,15 @@ public class GreenLightTests
     {
         LoggerFactory.SetLogLevel(LogLevel.Warning);
 
-        var modelDescription = new ModelDescription();
+        ModelDescription modelDescription = new ModelDescription();
 
         modelDescription.AddLayer<CarLayer>();
         modelDescription.AddAgent<CarDriver, CarLayer>();
         modelDescription.AddLayer<StaticTrafficLightLayer>();
         modelDescription.AddEntity<Car>();
 
-        var start = DateTime.Parse("2020-01-01T00:00:00");
-        var config = new SimulationConfig
+        DateTime start = DateTime.Parse("2020-01-01T00:00:00");
+        SimulationConfig config = new SimulationConfig
         {
             Globals =
             {
@@ -82,26 +83,26 @@ public class GreenLightTests
                 }
             }
         };
-        var starter = SimulationStarter.Start(modelDescription, config);
+        SimulationStarter starter = SimulationStarter.Start(modelDescription, config);
         starter.Run();
 
-        var table = CsvReader.MapData(Path.Combine(GetType().Name, nameof(CarDriver) + ".csv"));
+        DataTable? table = CsvReader.MapData(Path.Combine(GetType().Name, nameof(CarDriver) + ".csv"));
         Assert.NotNull(table);
 
         //make sure that the car has detected the traffic light and thinks that it is green
-        var colorRes = table.Select("CurrentEdgeId = '1' AND" +
-                                    " Convert(RemainingDistanceOnEdge, 'System.Decimal') < '100.0' AND" +
-                                    " Convert(RemainingDistanceOnEdge, 'System.Decimal') > '0'");
-        foreach (var dataRow in colorRes)
+        DataRow[] colorRes = table.Select("CurrentEdgeId = '1' AND" +
+                                          " Convert(RemainingDistanceOnEdge, 'System.Decimal') < '100.0' AND" +
+                                          " Convert(RemainingDistanceOnEdge, 'System.Decimal') > '0'");
+        foreach (DataRow dataRow in colorRes)
             Assert.Equal(TrafficLightPhase.Green.ToString(), dataRow["NextTrafficLightPhase"]);
 
         //check if the car changes its speed after accelerating to max speed (this shouldn't happen)
-        var speedRes = table.Select("Convert(Tick, 'System.Int32') > 50 AND " +
-                                    "Convert(Tick, 'System.Int32') < 150");
+        DataRow[] speedRes = table.Select("Convert(Tick, 'System.Int32') > 50 AND " +
+                                          "Convert(Tick, 'System.Int32') < 150");
 
-        foreach (var dataRow in speedRes)
+        foreach (DataRow dataRow in speedRes)
         {
-            var velocity = dataRow["Velocity"].Value<double>();
+            double velocity = dataRow["Velocity"].Value<double>();
             Assert.True(13.85 < velocity);
             Assert.True(13.95 > velocity);
         }

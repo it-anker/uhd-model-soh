@@ -1,5 +1,6 @@
 using Mars.Common;
 using Mars.Components.Layers;
+using Mars.Interfaces.Environments;
 
 namespace SOHModel.Demonstration;
 
@@ -11,20 +12,20 @@ public class DemonstratorSchedulerLayer(DemonstrationLayer demonstrationLayer) :
     {
         if (RegisterAgent == null) return;
         
-        var source = dataRow.SourceGeometry.RandomPositionFromGeometry();
-        var target = dataRow.TargetGeometry.RandomPositionFromGeometry();
-        var isRadical = Convert.ToBoolean(dataRow.Data["isRadical"]);
+        Position? source = dataRow.SourceGeometry.RandomPositionFromGeometry();
+        Position? target = dataRow.TargetGeometry.RandomPositionFromGeometry();
+        bool isRadical = Convert.ToBoolean(dataRow.Data["isRadical"]);
 
         if (isRadical)
         {
-            var demonstrator = new RadicalDemonstrator { Source = source, Target = target };
+            RadicalDemonstrator demonstrator = new RadicalDemonstrator { Source = source, Target = target };
             demonstrator.Init(DemonstrationLayer);
             DemonstrationLayer.RadicalDemonstratorMap[demonstrator.ID] = demonstrator;
             RegisterAgent(DemonstrationLayer, demonstrator);
         }
         else
         {
-            var demonstrator = new Demonstrator { Source = source, Target = target };
+            Demonstrator demonstrator = new Demonstrator { Source = source, Target = target };
             demonstrator.Init(DemonstrationLayer);
             DemonstrationLayer.DemonstratorMap[demonstrator.ID] = demonstrator;
             RegisterAgent(DemonstrationLayer, demonstrator);

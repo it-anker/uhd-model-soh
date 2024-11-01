@@ -118,12 +118,12 @@ public class TripsLine : LineString
         //Convert to array, then access array directly, to avoid the function-call overhead
         //of calling Getter millions of times. ToArray may be inefficient for
         //non-BasicCoordinateSequence CoordinateSequences. [Jon Aquino]
-        var coordinates = _points;
-        var minx = coordinates[0].X;
-        var miny = coordinates[0].Y;
-        var maxx = coordinates[0].X;
-        var maxy = coordinates[0].Y;
-        for (var i = 1; i < coordinates.Length; i++)
+        TripPosition[] coordinates = _points;
+        double minx = coordinates[0].X;
+        double miny = coordinates[0].Y;
+        double maxx = coordinates[0].X;
+        double maxy = coordinates[0].Y;
+        for (int i = 1; i < coordinates.Length; i++)
         {
             minx = minx < coordinates[i].X ? minx : coordinates[i].X;
             maxx = maxx > coordinates[i].X ? maxx : coordinates[i].X;
@@ -144,11 +144,11 @@ public class TripsLine : LineString
         if (!IsEquivalentClass(other))
             return false;
 
-        var otherLineString = (LineString)other;
+        LineString otherLineString = (LineString)other;
         if (_points.Length != otherLineString.NumPoints)
             return false;
 
-        var cec = Factory.GeometryServices.CoordinateEqualityComparer;
+        CoordinateEqualityComparer? cec = Factory.GeometryServices.CoordinateEqualityComparer;
         return !_points.Where((t, i) =>
             !cec.Equals(t, otherLineString.GetCoordinateN(i), tolerance)).Any();
     }
@@ -158,7 +158,7 @@ public class TripsLine : LineString
     /// <param name="filter"></param>
     public override void Apply(ICoordinateFilter filter)
     {
-        foreach (var t in _points) filter.Filter(t);
+        foreach (TripPosition t in _points) filter.Filter(t);
     }
 
     /// <summary>
@@ -203,7 +203,7 @@ public class TripsLine : LineString
     protected override Geometry CopyInternal()
 
     {
-        var points = (TripPosition[])_points.Clone();
+        TripPosition[] points = (TripPosition[])_points.Clone();
         return new TripsLine(points);
     }
 

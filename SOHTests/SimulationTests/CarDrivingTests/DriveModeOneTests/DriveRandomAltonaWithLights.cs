@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using Mars.Common.Core.Logging;
 using Mars.Components.Environments;
 using Mars.Components.Starter;
+using Mars.Core.Simulation.Entities;
 using Mars.Interfaces.Model;
 using SOHModel.Car.Model;
 using SOHModel.Multimodal.Layers.TrafficLight;
@@ -26,14 +27,14 @@ public class DriveRandomAltonaWithLights : IClassFixture<SpatialGraphFixture>
     {
         LoggerFactory.SetLogLevel(LogLevel.Info);
 
-        var modelDescription = new ModelDescription();
+        ModelDescription modelDescription = new ModelDescription();
         modelDescription.AddLayer<CarLayer>();
         modelDescription.AddLayer<TrafficLightLayer>();
         modelDescription.AddAgent<CarDriver, CarLayer>();
         modelDescription.AddEntity<Car>();
 
-        var start = DateTime.Parse("2020-01-01T00:00:00");
-        var config = new SimulationConfig
+        DateTime start = DateTime.Parse("2020-01-01T00:00:00");
+        SimulationConfig config = new SimulationConfig
         {
             Execution =
             {
@@ -82,8 +83,8 @@ public class DriveRandomAltonaWithLights : IClassFixture<SpatialGraphFixture>
             }
         };
 
-        var starter = SimulationStarter.Start(modelDescription, config);
-        var workflowState = starter.Run();
+        SimulationStarter starter = SimulationStarter.Start(modelDescription, config);
+        SimulationWorkflowState workflowState = starter.Run();
 
         Assert.Equal(600, workflowState.Iterations);
     }

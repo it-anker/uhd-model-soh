@@ -121,7 +121,7 @@ public class RadicalDemonstrator : Demonstrator
                 BrokeOutCounter += 1;
                 SetRunning();
                 State = RadicalDemonstratorStates.BreakingOut;
-                var goal = EnvironmentLayer.Environment.GetRandomNode().Position;
+                Position? goal = EnvironmentLayer.Environment.GetRandomNode().Position;
                 MultimodalRoute = MultimodalLayer.Search(this, Position, goal, ModalChoice.Walking);
             }
         }
@@ -152,7 +152,7 @@ public class RadicalDemonstrator : Demonstrator
             State = RadicalDemonstratorStates.Returning;
             ReturningCounter += 1;
             _currentBreakoutCounter = 0;
-            var nearestReturnPosition = GetReturnPosition();
+            Position nearestReturnPosition = GetReturnPosition();
             MultimodalRoute = MultimodalLayer.Search(this, Position, nearestReturnPosition, ModalChoice.Walking);
             SetWalking();
         }
@@ -160,7 +160,7 @@ public class RadicalDemonstrator : Demonstrator
         // Breaking out and goal reached. Find a new goal and continue breaking out
         if (State == RadicalDemonstratorStates.BreakingOut && GoalReached)
         {
-            var goal = EnvironmentLayer.Environment.GetRandomNode().Position;
+            Position? goal = EnvironmentLayer.Environment.GetRandomNode().Position;
             MultimodalRoute = MultimodalLayer.Search(this, Position, goal, ModalChoice.Walking);
         }
 
@@ -194,11 +194,11 @@ public class RadicalDemonstrator : Demonstrator
      */
     private List<EdgeStop> GetDemoRouteEdgeStops()
     {
-        var demoRouteEdgeStops = new List<EdgeStop>();
+        List<EdgeStop> demoRouteEdgeStops = new List<EdgeStop>();
 
-        foreach (var routeStop in MultimodalRoute.Stops)
+        foreach (RouteStop? routeStop in MultimodalRoute.Stops)
         {
-            foreach (var edgeStop in routeStop.Route)
+            foreach (EdgeStop? edgeStop in routeStop.Route)
             {
                 demoRouteEdgeStops.Add(edgeStop);
             }
@@ -212,15 +212,15 @@ public class RadicalDemonstrator : Demonstrator
      */
     private Position GetReturnPosition()
     {
-        var nearestPosition = new Position();
-        var minDistance = double.MaxValue;
+        Position? nearestPosition = new Position();
+        double minDistance = double.MaxValue;
 
         if (_demoRouteEdgeStops is not null)
         {
-            foreach (var edgeStop in _demoRouteEdgeStops)
+            foreach (EdgeStop edgeStop in _demoRouteEdgeStops)
             {
-                var currentPosition = edgeStop.Edge.Geometry[0];
-                var currentDistance = Position.DistanceInMTo(currentPosition);
+                Position? currentPosition = edgeStop.Edge.Geometry[0];
+                double currentDistance = Position.DistanceInMTo(currentPosition);
 
                 if (currentDistance < minDistance)
                 {
@@ -247,13 +247,13 @@ public class RadicalDemonstrator : Demonstrator
     */
     private Route CreateNewDemoRoute()
     {
-        var startPosition = GetReturnPosition();
-        var newDemoRoute = new Route();
-        var routeFlag = false;
+        Position startPosition = GetReturnPosition();
+        Route newDemoRoute = new Route();
+        bool routeFlag = false;
 
         if (_demoRouteEdgeStops is not null)
         {
-            foreach (var edgeStop in _demoRouteEdgeStops)
+            foreach (EdgeStop edgeStop in _demoRouteEdgeStops)
             {
                 //if (Position.DistanceInMTo(edgeStop.Edge.Geometry[0]) < 10 || routeFlag)
                 if (startPosition.Equals(edgeStop.Edge.Geometry[0]) || routeFlag)

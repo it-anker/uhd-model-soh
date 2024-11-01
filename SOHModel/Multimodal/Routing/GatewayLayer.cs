@@ -30,9 +30,9 @@ public class GatewayLayer : VectorLayer<GatewayPoint>
     /// <returns>A start and a goal position that is located within the environment and may function as gateway point.</returns>
     public (Position, Position) Validate(Position start, Position goal)
     {
-        var box = Environment.BoundingBox;
-        var startInside = box.Contains(start.ToCoordinate());
-        var goalInside = box.Contains(goal.ToCoordinate());
+        BoundingBox? box = Environment.BoundingBox;
+        bool startInside = box.Contains(start.ToCoordinate());
+        bool goalInside = box.Contains(goal.ToCoordinate());
 
         if (startInside)
             return goalInside ? (start, goal) : (start, FindGatewayPoint(start, goal));
@@ -41,14 +41,14 @@ public class GatewayLayer : VectorLayer<GatewayPoint>
 
     private Position? FindGatewayPoint(Position start, Position goal)
     {
-        var nearestPositionWithinEnv = Environment.NearestNode(goal).Position;
+        Position? nearestPositionWithinEnv = Environment.NearestNode(goal).Position;
         if (WithinWalkingDistance(goal.DistanceInKmTo(nearestPositionWithinEnv))) return nearestPositionWithinEnv;
 
         if (Features == null || !Features.Any())
             throw new ApplicationException("GatewayLayer has no valid features. Check input vector file!");
 
-        var gatewayPoint = Nearest(start.PositionArray);
-        var gateWayPosition = gatewayPoint?.Position;
+        GatewayPoint? gatewayPoint = Nearest(start.PositionArray);
+        Position? gateWayPosition = gatewayPoint?.Position;
         return gateWayPosition == null ? null : Environment.NearestNode(gateWayPosition).Position;
     }
 

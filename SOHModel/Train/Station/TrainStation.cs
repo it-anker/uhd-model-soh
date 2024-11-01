@@ -1,12 +1,13 @@
 using System.Collections.Concurrent;
 using Mars.Common.Core;
 using Mars.Interfaces.Data;
-using Mars.Interfaces.Environments;
 using Mars.Interfaces.Layers;
 using Mars.Numerics;
+using NetTopologySuite.Geometries;
 using ServiceStack;
 using SOHModel.Domain.Steering.Capables;
 using SOHModel.Train.Model;
+using Position = Mars.Interfaces.Environments.Position;
 
 namespace SOHModel.Train.Station;
 
@@ -59,7 +60,7 @@ public class TrainStation : IVectorFeature
     public void Update(VectorStructuredData data)
     {
         VectorStructured = data;
-        var centroid = VectorStructured.Geometry.Centroid;
+        Point? centroid = VectorStructured.Geometry.Centroid;
         Position = Position.CreatePosition(centroid.X, centroid.Y);
         Id = VectorStructured.Data["id"].Value<string>();
         Name = VectorStructured.Data["short_name"].Value<string>();
@@ -88,7 +89,7 @@ public class TrainStation : IVectorFeature
     /// <returns>True if train is not on this station any more.</returns>
     public bool Leave(Model.Train train)
     {
-        var success = !Trains.ContainsKey(train) || Trains.TryRemove(train, out _);
+        bool success = !Trains.ContainsKey(train) || Trains.TryRemove(train, out _);
         if (success) train.TrainStation = null;
 
         return success;
@@ -101,7 +102,7 @@ public class TrainStation : IVectorFeature
     /// <returns>The next train that drives to that goal, null if none found</returns>
     public Model.Train Find(Position goal)
     {
-        foreach (var train in Trains.Keys)
+        foreach (Model.Train train in Trains.Keys)
             if (train.Driver is TrainDriver trainDriver)
                 if (trainDriver.RemainingStations
                     .Any(entry => Distance.Haversine(entry.To.Position.PositionArray, goal.PositionArray) < 30))

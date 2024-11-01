@@ -19,7 +19,7 @@ public class PedestrianUsesFerryWithDriverTests : IClassFixture<FerryRouteLayerF
 
     public PedestrianUsesFerryWithDriverTests(FerryRouteLayerFixture routeLayerFixture)
     {
-        var environment = new SpatialGraphEnvironment(new SpatialGraphOptions
+        SpatialGraphEnvironment environment = new SpatialGraphEnvironment(new SpatialGraphOptions
         {
             GraphImports = new List<Input>
             {
@@ -60,24 +60,24 @@ public class PedestrianUsesFerryWithDriverTests : IClassFixture<FerryRouteLayerF
     [Fact]
     public void UseFerryAndWalkToGoal()
     {
-        var start = Position.CreateGeoPosition(9.97101959, 53.54489498); //Landungsbrücken
-        var goal = Position.CreateGeoPosition(9.94951, 53.53170); //Container Terminal Tollerort
+        Position? start = Position.CreateGeoPosition(9.97101959, 53.54489498); //Landungsbrücken
+        Position? goal = Position.CreateGeoPosition(9.94951, 53.53170); //Container Terminal Tollerort
 
-        var dockWorker = new TestPassengerPedestrian
+        TestPassengerPedestrian dockWorker = new TestPassengerPedestrian
         {
             StartPosition = start
         };
         dockWorker.Init(_travelerLayer);
         dockWorker.MultimodalRoute = _travelerLayer.Search(dockWorker, start, goal, ModalChoice.Ferry);
 
-        var driver = new FerryDriver(_ferryLayer, (_, _) => { })
+        FerryDriver driver = new FerryDriver(_ferryLayer, (_, _) => { })
         {
             Line = 61,
             MinimumBoardingTimeInSeconds = 20
         };
 
         Assert.False(dockWorker.HasUsedFerry);
-        for (var tick = 0; tick < 2000; tick++, _travelerLayer.Context.UpdateStep())
+        for (int tick = 0; tick < 2000; tick++, _travelerLayer.Context.UpdateStep())
         {
             driver.Tick();
             dockWorker.Tick();

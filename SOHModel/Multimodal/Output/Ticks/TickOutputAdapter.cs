@@ -20,7 +20,7 @@ public class TickOutputAdapter
 
     private int GetTime(ITickOutputAgent agent)
     {
-        var clock = agent.Context.CurrentTimePoint.GetValueOrDefault();
+        DateTime clock = agent.Context.CurrentTimePoint.GetValueOrDefault();
         return (int)clock.Subtract(ReferenceDateTime).TotalSeconds;
     }
 

@@ -29,10 +29,10 @@ public class MultimodalPedestrianTests
     [Fact]
     public void WalkAndCheckSpecificRoute()
     {
-        var start = Position.CreateGeoPosition(9.9527061, 53.5460391);
-        var goal = Position.CreateGeoPosition(9.9348362, 53.5479922);
+        Position? start = Position.CreateGeoPosition(9.9527061, 53.5460391);
+        Position? goal = Position.CreateGeoPosition(9.9348362, 53.5479922);
 
-        var agent = new TestMultiCapableAgent
+        TestMultiCapableAgent agent = new TestMultiCapableAgent
         {
             StartPosition = start,
             GoalPosition = goal,
@@ -43,16 +43,16 @@ public class MultimodalPedestrianTests
         agent.MultimodalRoute =
             _multimodalLayer.RouteFinder.Search(agent, agent.Position, goal, ModalChoice.Walking);
 
-        var routeCount = agent.MultimodalRoute.Stops.Count;
-        var routeStopCount = agent.MultimodalRoute.First().Route.Stops.Count;
+        int routeCount = agent.MultimodalRoute.Stops.Count;
+        int routeStopCount = agent.MultimodalRoute.First().Route.Stops.Count;
         Assert.Equal(1, routeCount);
 
-        var expectedTravelTime = agent.MultimodalRoute.ExpectedTravelTime(agent);
+        int expectedTravelTime = agent.MultimodalRoute.ExpectedTravelTime(agent);
         Assert.Equal(1156, expectedTravelTime);
 
         Assert.Equal(Whereabouts.Offside, agent.Whereabouts);
 
-        for (var tick = 0; tick < 3000 && !agent.GoalReached; tick++, ContextImpl.UpdateStep())
+        for (int tick = 0; tick < 3000 && !agent.GoalReached; tick++, ContextImpl.UpdateStep())
         {
             agent.Tick();
             if (!agent.GoalReached) Assert.Equal(Whereabouts.Sidewalk, agent.Whereabouts);
@@ -70,28 +70,28 @@ public class MultimodalPedestrianTests
     [Fact]
     public void WalkToGoalsAndBeOffsideAfterwards()
     {
-        var agent = new TestMultiCapableAgent
+        TestMultiCapableAgent agent = new TestMultiCapableAgent
         {
             Gender = GenderType.Female,
             StartPosition = _sidewalk.GetRandomNode().Position
         };
         agent.Init(_multimodalLayer);
 
-        for (var run = 0; run < 3; run++)
+        for (int run = 0; run < 3; run++)
         {
-            var goal = _sidewalk.GetRandomNode().Position;
+            Position? goal = _sidewalk.GetRandomNode().Position;
             agent.MultimodalRoute =
                 _multimodalLayer.RouteFinder.Search(agent, agent.Position, goal, ModalChoice.Walking);
 
-            var routeCount = agent.MultimodalRoute.Stops.Count;
-            var routeStopCount = agent.MultimodalRoute.First().Route.Stops.Count;
+            int routeCount = agent.MultimodalRoute.Stops.Count;
+            int routeStopCount = agent.MultimodalRoute.First().Route.Stops.Count;
             Assert.Equal(1, routeCount);
 
-            var expectedTravelTime = agent.MultimodalRoute.ExpectedTravelTime(agent);
+            int expectedTravelTime = agent.MultimodalRoute.ExpectedTravelTime(agent);
 
             Assert.Equal(Whereabouts.Offside, agent.Whereabouts);
 
-            for (var tick = 0; tick < 3000 && !agent.GoalReached; tick++, ContextImpl.UpdateStep())
+            for (int tick = 0; tick < 3000 && !agent.GoalReached; tick++, ContextImpl.UpdateStep())
             {
                 agent.Tick();
                 if (!agent.GoalReached) Assert.Equal(Whereabouts.Sidewalk, agent.Whereabouts);
@@ -110,20 +110,20 @@ public class MultimodalPedestrianTests
     [Fact]
     public void WalkToGoalsAndSwitchGoalInBetween()
     {
-        var agent = new TestMultiCapableAgent
+        TestMultiCapableAgent agent = new TestMultiCapableAgent
         {
             Gender = GenderType.Female,
             StartPosition = _sidewalk.GetRandomNode().Position
         };
         agent.Init(_multimodalLayer);
 
-        var goal = _sidewalk.GetRandomNode().Position;
+        Position? goal = _sidewalk.GetRandomNode().Position;
         agent.MultimodalRoute =
             _multimodalLayer.RouteFinder.Search(agent, agent.Position, goal, ModalChoice.Walking);
 
         Assert.Equal(Whereabouts.Offside, agent.Whereabouts);
 
-        for (var tick = 0; tick < 3000 && !agent.GoalReached; tick++, ContextImpl.UpdateStep())
+        for (int tick = 0; tick < 3000 && !agent.GoalReached; tick++, ContextImpl.UpdateStep())
         {
             agent.Tick();
             if (tick == 10 && !agent.GoalReached)

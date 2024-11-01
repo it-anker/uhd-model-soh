@@ -5,9 +5,11 @@ using Mars.Interfaces.Annotations;
 using Mars.Interfaces.Data;
 using Mars.Interfaces.Environments;
 using Mars.Interfaces.Layers;
+using NetTopologySuite.Geometries;
 using SOHModel.Car.Model;
 using SOHModel.Car.Parking;
 using SOHModel.Domain.Graph;
+using Position = Mars.Interfaces.Environments.Position;
 
 namespace SOHModel.Car.Rental;
 
@@ -62,7 +64,7 @@ public class CarRentalLayer : AbstractLayer, ICarRentalLayer
     public override bool InitLayer(LayerInitData layerInitData, RegisterAgent registerAgentHandle = null,
         UnregisterAgent unregisterAgent = null)
     {
-        var initialized = base.InitLayer(layerInitData, registerAgentHandle, unregisterAgent);
+        bool initialized = base.InitLayer(layerInitData, registerAgentHandle, unregisterAgent);
 
         _entityManager = layerInitData?.Container?.Resolve<IEntityManager>();
         if (_entityManager == null)
@@ -71,18 +73,18 @@ public class CarRentalLayer : AbstractLayer, ICarRentalLayer
         if (StreetLayer == null)
             throw new ArgumentException($"{nameof(CarParkingLayer)} requires {nameof(StreetLayer)}");
 
-        var environment = StreetLayer.Environment;
+        ISpatialGraphEnvironment environment = StreetLayer.Environment;
         HashEnvironment = GeoHashEnvironment<RentalCar>.BuildByBBox(environment.BoundingBox, -1);
 
         if (layerInitData?.LayerInitConfig.File != null || layerInitData?.LayerInitConfig.Value != null)
         {
-            //TODO if raster data or different data?
-            var vectorLayer = new VectorLayer();
+            // TODO if raster data or different data?
+            VectorLayer vectorLayer = new VectorLayer();
             vectorLayer.InitLayer(layerInitData);
-            foreach (var entity in vectorLayer.Features)
+            foreach (IVectorFeature entity in vectorLayer.Features)
             {
-                var centroid = entity.VectorStructured.Geometry.Centroid;
-                var rentalCar = EntityManager.Create<RentalCar>(CarKeyAttributeName, CarValueToMatch);
+                Point? centroid = entity.VectorStructured.Geometry.Centroid;
+                RentalCar? rentalCar = EntityManager.Create<RentalCar>(CarKeyAttributeName, CarValueToMatch);
                 rentalCar.Position = Position.CreateGeoPosition(centroid.X, centroid.Y);
                 rentalCar.Environment = environment;
                 environment.Insert(rentalCar, environment.NearestNode(rentalCar.Position));

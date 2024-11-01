@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System.Data;
 using System.Linq;
 using Mars.Common.IO.Csv;
 using Mars.Core.Data;
@@ -23,17 +24,20 @@ public class ParkingSpaceOccupancyTests
 
     static ParkingSpaceOccupancyTests()
     {
-        var features = new List<IFeature>();
-        for (var i = 0; i < CountSpaces; i++)
+        List<IFeature> features = new List<IFeature>();
+        for (int i = 0; i < CountSpaces; i++)
+        {
             features.Add(new VectorStructuredData
             {
                 Data = new Dictionary<string, object> { { "area", 0 } },
                 Geometry = new Point(10.00553, 53.56310)
             });
-        var dataTable = CsvReader.MapData(ResourcesConstants.CarCsv);
-        var manager = new EntityManagerImpl(dataTable);
+        }
 
-        var mock = new Mock<ISimulationContainer>();
+        DataTable? dataTable = CsvReader.MapData(ResourcesConstants.CarCsv);
+        EntityManagerImpl manager = new EntityManagerImpl(dataTable);
+
+        Mock<ISimulationContainer> mock = new Mock<ISimulationContainer>();
         mock.Setup(container => container.Resolve<IEntityManager>()).Returns(manager);
         Mapping = new LayerInitData
         {
@@ -53,7 +57,7 @@ public class ParkingSpaceOccupancyTests
     [Fact]
     public void TestOccupyAll()
     {
-        var spaces = _parkingLayer.Features.OfType<CarParkingSpace>().ToList();
+        List<CarParkingSpace> spaces = _parkingLayer.Features.OfType<CarParkingSpace>().ToList();
         Assert.Equal(CountSpaces, spaces.Count);
 
         Assert.All(spaces, s => Assert.True(s.HasCapacity));
@@ -68,26 +72,26 @@ public class ParkingSpaceOccupancyTests
     [Fact]
     public void TestOccupyByAgentCount()
     {
-        var spaces = _parkingLayer.Features.OfType<CarParkingSpace>().ToList();
-        var count = spaces.Count;
+        List<CarParkingSpace> spaces = _parkingLayer.Features.OfType<CarParkingSpace>().ToList();
+        int count = spaces.Count;
 
-        //for as many cars as available parking spaces
+        // for as many cars as available parking spaces
         const int carCount = (int)(CountSpaces / 2.0);
         _parkingLayer.UpdateOccupancy(0, carCount);
         Assert.All(spaces, s => Assert.True(s.HasCapacity));
         Assert.Equal(CountSpaces, count);
 
-        //for half the cars to available parking spaces
+        // for half the cars to available parking spaces
         _parkingLayer.UpdateOccupancy(1.0, carCount);
-        var freeSpaces = spaces.Where(s => s.HasCapacity);
+        IEnumerable<CarParkingSpace> freeSpaces = spaces.Where(s => s.HasCapacity);
         Assert.InRange(freeSpaces.Count(), count * 0.45, count * 0.55);
 
-        //without cars
+        // without cars
         _parkingLayer.UpdateOccupancy(1.0);
         freeSpaces = spaces.Where(s => s.HasCapacity);
         Assert.InRange(freeSpaces.Count(), 0, CountSpaces * 0.1);
 
-        //full occupancy but used with cars, so effectively no occupancy at all
+        // full occupancy but used with cars, so effectively no occupancy at all
         _parkingLayer.UpdateOccupancy(1.0, CountSpaces);
         freeSpaces = spaces.Where(s => s.HasCapacity);
         Assert.InRange(freeSpaces.Count(), CountSpaces * 0.99, CountSpaces);
@@ -96,36 +100,36 @@ public class ParkingSpaceOccupancyTests
     [Fact]
     public void TestOccupyHalf()
     {
-        var spaces = _parkingLayer.Features.OfType<CarParkingSpace>().ToList();
-        var overallCount = spaces.Count;
+        List<CarParkingSpace> spaces = _parkingLayer.Features.OfType<CarParkingSpace>().ToList();
+        int overallCount = spaces.Count;
         Assert.Equal(CountSpaces, overallCount);
         Assert.All(spaces, s => Assert.True(s.HasCapacity));
 
         _parkingLayer.UpdateOccupancy(0.5);
-        var freeSpaces = spaces.Where(s => s.HasCapacity);
+        IEnumerable<CarParkingSpace> freeSpaces = spaces.Where(s => s.HasCapacity);
         Assert.InRange(freeSpaces.Count(), overallCount * 0.40, overallCount * 0.60);
     }
 
     [Fact]
     public void TestDoNotFindOccupiedParkingSpace()
     {
-        var position = Position.CreateGeoPosition(9.931294, 53.554248);
-        var space = _parkingLayer.Nearest(position);
+        Position? position = Position.CreateGeoPosition(9.931294, 53.554248);
+        CarParkingSpace? space = _parkingLayer.Nearest(position);
         Assert.NotNull(space);
-        Assert.True(space.HasCapacity);
+        Assert.True(space!.HasCapacity);
         space.Occupied = true;
 
-        var parkingSpace = _parkingLayer.Nearest(position);
+        CarParkingSpace? parkingSpace = _parkingLayer.Nearest(position);
         Assert.NotEqual(space, parkingSpace);
     }
 
     [Fact]
     public void TestDoNotFindOccupancyProbability()
     {
-        var parkingLayer = new CarParkingLayer { StreetLayer = new StreetLayer(), OccupancyProbability = 100 };
+        CarParkingLayer parkingLayer = new CarParkingLayer { StreetLayer = new StreetLayer(), OccupancyProbability = 100 };
         parkingLayer.InitLayer(Mapping);
 
-        var space = parkingLayer.Nearest(Position.CreatePosition(9.931294, 53.554248));
+        CarParkingSpace? space = parkingLayer.Nearest(Position.CreatePosition(9.931294, 53.554248));
         Assert.Null(space);
     }
 }

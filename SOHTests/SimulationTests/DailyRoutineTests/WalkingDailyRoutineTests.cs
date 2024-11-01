@@ -4,6 +4,8 @@ using System.Linq;
 using Mars.Common.Core.Logging;
 using Mars.Components.Starter;
 using Mars.Core.Simulation;
+using Mars.Core.Simulation.Entities;
+using Mars.Interfaces;
 using Mars.Interfaces.Environments;
 using Mars.Interfaces.Model;
 using SOHModel.Domain.Graph;
@@ -19,7 +21,7 @@ public class WalkingDailyRoutineTests
     [Fact]
     public void SimulateOneDay()
     {
-        var description = new ModelDescription();
+        ModelDescription description = new ModelDescription();
         description.AddLayer<SpatialGraphMediatorLayer>(new[] { typeof(ISpatialGraphLayer) });
 
         description.AddLayer<VectorBuildingsLayer>();
@@ -30,8 +32,8 @@ public class WalkingDailyRoutineTests
         description.AddLayer<CitizenLayer>();
         description.AddAgent<Citizen, CitizenLayer>();
 
-        var startPoint = DateTime.Parse("2020-01-01T00:00:00");
-        var config = new SimulationConfig
+        DateTime startPoint = DateTime.Parse("2020-01-01T00:00:00");
+        SimulationConfig config = new SimulationConfig
         {
             Execution =
             {
@@ -113,17 +115,17 @@ public class WalkingDailyRoutineTests
         };
 
         LoggerFactory.SetLogLevel(LogLevel.Off);
-        var application = SimulationStarter.BuildApplication(description, config);
-        var simulation = application.Resolve<ISimulation>();
+        ISimulationContainer application = SimulationStarter.BuildApplication(description, config);
+        ISimulation? simulation = application.Resolve<ISimulation>();
 
-        var state = simulation.StartSimulation();
+        SimulationWorkflowState? state = simulation.StartSimulation();
 
         Assert.Equal(86400, state.Iterations);
 
         Assert.Single(state.Model.ExecutionGroups);
         Assert.Single(state.Model.ExecutionGroups[1]);
 
-        var citizen = state.Model.ExecutionGroups[1].OfType<Citizen>().First();
+        Citizen citizen = state.Model.ExecutionGroups[1].OfType<Citizen>().First();
 
         Assert.NotNull(citizen.Home);
         Assert.NotNull(citizen.Work);

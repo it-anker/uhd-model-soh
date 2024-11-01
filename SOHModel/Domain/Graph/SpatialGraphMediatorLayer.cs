@@ -3,6 +3,7 @@ using Mars.Components.Layers;
 using Mars.Interfaces.Data;
 using Mars.Interfaces.Environments;
 using Mars.Interfaces.Layers;
+using Mars.Interfaces.Model;
 using Mars.Interfaces.Model.Options;
 
 namespace SOHModel.Domain.Graph;
@@ -19,7 +20,7 @@ public class SpatialGraphMediatorLayer : AbstractLayer, ISpatialGraphLayer, IDat
     {
         base.InitLayer(layerInitData, registerAgentHandle, unregisterAgent);
 
-        var inputs = layerInitData.LayerInitConfig.Inputs;
+        List<Input>? inputs = layerInitData.LayerInitConfig.Inputs;
 
         if (inputs != null && inputs.Count != 0)
         {

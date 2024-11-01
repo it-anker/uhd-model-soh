@@ -23,22 +23,22 @@ public class FourNodeGraphEnv
         Node4 = GraphEnvironment.AddNode(ToDict(Node4Pos));
 
         //Edges
-        var e1 = GraphEnvironment.AddEdge(Node1, Node2,
+        ISpatialEdge? e1 = GraphEnvironment.AddEdge(Node1, Node2,
             new Dictionary<string, object> { { "lanes", 3 } });
         AddModalities(e1);
-        var e2 = GraphEnvironment.AddEdge(Node2, Node1,
+        ISpatialEdge? e2 = GraphEnvironment.AddEdge(Node2, Node1,
             new Dictionary<string, object> { { "lanes", 3 } });
         AddModalities(e2);
-        var e3 = GraphEnvironment.AddEdge(Node2, Node3,
+        ISpatialEdge? e3 = GraphEnvironment.AddEdge(Node2, Node3,
             new Dictionary<string, object> { { "lanes", 2 } });
         AddModalities(e3);
-        var e4 = GraphEnvironment.AddEdge(Node3, Node2,
+        ISpatialEdge? e4 = GraphEnvironment.AddEdge(Node3, Node2,
             new Dictionary<string, object> { { "lanes", 2 } });
         AddModalities(e4);
-        var e5 = GraphEnvironment.AddEdge(Node3, Node4,
+        ISpatialEdge? e5 = GraphEnvironment.AddEdge(Node3, Node4,
             new Dictionary<string, object> { { "lanes", 2 } });
         AddModalities(e5);
-        var e6 = GraphEnvironment.AddEdge(Node4, Node3,
+        ISpatialEdge? e6 = GraphEnvironment.AddEdge(Node4, Node3,
             new Dictionary<string, object> { { "lanes", 2 } });
         AddModalities(e6);
     }

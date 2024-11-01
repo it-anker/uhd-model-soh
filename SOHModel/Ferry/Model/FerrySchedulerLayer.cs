@@ -22,15 +22,15 @@ public class FerrySchedulerLayer : SchedulerLayer
     {
         const string ferryTypeKey = "ferryType";
 
-        var ferryType = dataRow.Data.TryGetValue(ferryTypeKey, out var type) ? type.Value<string>() : "Typ2000";
+        string? ferryType = dataRow.Data.TryGetValue(ferryTypeKey, out object? type) ? type.Value<string>() : "Typ2000";
 
         if (!dataRow.Data.ContainsKey("line"))
             throw new ArgumentException("Missing line number for ferry of field 'line' in input");
 
-        var driver = new FerryDriver(_ferryLayer, UnregisterAgent, ferryType)
+        FerryDriver driver = new FerryDriver(_ferryLayer, UnregisterAgent, ferryType)
         {
             Line = dataRow.Data["line"].Value<int>(),
-            MinimumBoardingTimeInSeconds = dataRow.Data.TryGetValue("minimumBoardingTimeInSeconds", out var wait)
+            MinimumBoardingTimeInSeconds = dataRow.Data.TryGetValue("minimumBoardingTimeInSeconds", out object? wait)
                 ? wait.Value<int>()
                 : 0
         };

@@ -1,3 +1,4 @@
+using System.Data;
 using Mars.Common.IO.Csv;
 using Mars.Core.Data;
 using Mars.Interfaces;
@@ -12,15 +13,15 @@ public class CarLayerFixture
 {
     public CarLayerFixture(ISpatialGraphEnvironment environment = null)
     {
-        var simulationContext = SimulationContext.Start2020InSeconds;
+        SimulationContext? simulationContext = SimulationContext.Start2020InSeconds;
         CarLayer = new CarLayer(environment);
 
-        var dataTable = CsvReader.MapData(ResourcesConstants.CarCsv);
-        var manager = new EntityManagerImpl(dataTable);
+        DataTable? dataTable = CsvReader.MapData(ResourcesConstants.CarCsv);
+        EntityManagerImpl manager = new EntityManagerImpl(dataTable);
 
-        var mock = new Mock<ISimulationContainer>();
+        Mock<ISimulationContainer> mock = new Mock<ISimulationContainer>();
         mock.Setup(container => container.Resolve<IEntityManager>()).Returns(manager);
-        var layerInitData = new LayerInitData(simulationContext)
+        LayerInitData layerInitData = new LayerInitData(simulationContext)
         {
             Container = mock.Object
         };

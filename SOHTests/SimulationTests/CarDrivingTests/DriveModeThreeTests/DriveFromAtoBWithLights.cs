@@ -1,11 +1,13 @@
 using System;
 using System.Collections.Generic;
+using System.Data;
 using System.IO;
 using Mars.Common.Core;
 using Mars.Common.Core.Logging;
 using Mars.Common.IO.Csv;
 using Mars.Components.Environments;
 using Mars.Components.Starter;
+using Mars.Core.Simulation.Entities;
 using Mars.Interfaces.Environments;
 using Mars.Interfaces.Model;
 using SOHModel.Car.Model;
@@ -30,17 +32,17 @@ public class DriveFromAtoBWithLights : IClassFixture<SpatialGraphFixture>
     {
         LoggerFactory.SetLogLevel(LogLevel.Warning);
 
-        var modelDescription = new ModelDescription();
+        ModelDescription modelDescription = new ModelDescription();
 
         modelDescription.AddLayer<TrafficLightLayer>();
         modelDescription.AddLayer<CarLayer>();
         modelDescription.AddAgent<CarDriver, CarLayer>();
         modelDescription.AddEntity<Car>();
 
-        var startTime = DateTime.Parse("2020-01-01T00:00:00");
-        var start = Position.CreateGeoPosition(9.937944800, 53.547771400);
-        var goal = Position.CreateGeoPosition(9.948982100, 53.552160201);
-        var config = new SimulationConfig
+        DateTime startTime = DateTime.Parse("2020-01-01T00:00:00");
+        Position? start = Position.CreateGeoPosition(9.937944800, 53.547771400);
+        Position? goal = Position.CreateGeoPosition(9.948982100, 53.552160201);
+        SimulationConfig config = new SimulationConfig
         {
             Globals =
             {
@@ -89,23 +91,23 @@ public class DriveFromAtoBWithLights : IClassFixture<SpatialGraphFixture>
             }
         };
 
-        var starter = SimulationStarter.Start(modelDescription, config);
-        var workflowState = starter.Run();
+        SimulationStarter starter = SimulationStarter.Start(modelDescription, config);
+        SimulationWorkflowState workflowState = starter.Run();
 
         Assert.Equal(3600, workflowState.Iterations);
 
-        var table = CsvReader.MapData(Path.Combine(GetType().Name, nameof(CarDriver) + ".csv"));
+        DataTable? table = CsvReader.MapData(Path.Combine(GetType().Name, nameof(CarDriver) + ".csv"));
         Assert.NotNull(table);
 
-        var firstRow = table.Select("Tick = '0'")[0];
-        var posAfterFirstTick =
+        DataRow firstRow = table.Select("Tick = '0'")[0];
+        Position? posAfterFirstTick =
             Position.CreateGeoPosition(firstRow["Longitude"].Value<double>(), firstRow["Latitude"].Value<double>());
         Assert.InRange(posAfterFirstTick.DistanceInMTo(start), 0, 5);
 
-        var lastRow = table.Select("Tick = '276'")[0];
+        DataRow lastRow = table.Select("Tick = '276'")[0];
         Assert.Equal("True", lastRow["GoalReached"]);
         Assert.InRange(lastRow["RemainingRouteDistanceToGoal"].Value<double>(), -0.1, 0.1);
-        var reachedGoal =
+        Position? reachedGoal =
             Position.CreateGeoPosition(lastRow["Longitude"].Value<double>(), lastRow["Latitude"].Value<double>());
         Assert.InRange(reachedGoal.DistanceInMTo(goal), 0, 3);
     }

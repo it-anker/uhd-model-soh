@@ -1,9 +1,11 @@
 using System;
 using System.Collections.Generic;
+using System.Data;
 using System.Globalization;
 using System.IO;
 using Mars.Common.IO.Csv;
 using Mars.Components.Starter;
+using Mars.Core.Simulation.Entities;
 using Mars.Interfaces.Model;
 using SOHModel.Car.Model;
 using SOHTests.Commons;
@@ -29,14 +31,14 @@ public class AccelerationTests : IClassFixture<SpatialGraphFixture>
     {
         _testOutputHelper.WriteLine(Directory.GetCurrentDirectory());
         CultureInfo.CurrentCulture = CultureInfo.InvariantCulture;
-        var modelDescription = new ModelDescription();
+        ModelDescription modelDescription = new ModelDescription();
         modelDescription.AddLayer<CarLayer>();
         modelDescription.AddLayer<StaticTrafficLightLayer>();
         modelDescription.AddAgent<CarDriver, CarLayer>();
         modelDescription.AddEntity<Car>();
 
-        var start = DateTime.Parse("2020-01-01T00:00:00");
-        var config = new SimulationConfig
+        DateTime start = DateTime.Parse("2020-01-01T00:00:00");
+        SimulationConfig config = new SimulationConfig
         {
             Globals =
             {
@@ -83,15 +85,15 @@ public class AccelerationTests : IClassFixture<SpatialGraphFixture>
                 }
             }
         };
-        var starter = SimulationStarter.Start(modelDescription, config);
-        var workflowState = starter.Run();
+        SimulationStarter starter = SimulationStarter.Start(modelDescription, config);
+        SimulationWorkflowState workflowState = starter.Run();
 
         Assert.Equal(210, workflowState.Iterations);
 
-        var table = CsvReader.MapData(Path.Combine(GetType().Name, nameof(CarDriver) + ".csv"), ',');
+        DataTable? table = CsvReader.MapData(Path.Combine(GetType().Name, nameof(CarDriver) + ".csv"), ',');
         Assert.NotNull(table);
 
-        var res = table.Select("Velocity = '13.87'");
+        DataRow[] res = table.Select("Velocity = '13.87'");
         Assert.Equal("39", res[0]["Step"]);
     }
 }

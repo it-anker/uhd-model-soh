@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Data;
 using Mars.Common.IO.Csv;
 using Mars.Core.Data;
 using Mars.Interfaces;
@@ -19,7 +20,7 @@ public class FourNodeCarParkingLayerFixture : IDisposable
 {
     public FourNodeCarParkingLayerFixture(ISpatialGraphLayer streetLayer)
     {
-        var features = new List<IFeature>
+        List<IFeature> features = new List<IFeature>
         {
             new VectorStructuredData
             {
@@ -37,12 +38,12 @@ public class FourNodeCarParkingLayerFixture : IDisposable
                 Geometry = new Point(FourNodeGraphEnv.Node3Pos.X, FourNodeGraphEnv.Node3Pos.Y)
             }
         };
-        var dataTable = new CsvReader(ResourcesConstants.CarCsv, true).ToTable();
-        var entityManagerImpl = new EntityManagerImpl((typeof(Car), dataTable));
-        var mock = new Mock<ISimulationContainer>();
+        DataTable? dataTable = new CsvReader(ResourcesConstants.CarCsv, true).ToTable();
+        EntityManagerImpl entityManagerImpl = new EntityManagerImpl((typeof(Car), dataTable));
+        Mock<ISimulationContainer> mock = new Mock<ISimulationContainer>();
 
         mock.Setup(container => container.Resolve<IEntityManager>()).Returns(entityManagerImpl);
-        var mapping = new LayerInitData
+        LayerInitData mapping = new LayerInitData
         {
             LayerInitConfig = new LayerMapping
             {

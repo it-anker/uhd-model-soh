@@ -14,32 +14,32 @@ public class CarDriverTests
 {
     private static void Register(ILayer layer, ITickClient tickClient)
     {
-        //do nothing
+        // do nothing
     }
 
     private static void Unregister(ILayer layer, ITickClient tickClient)
     {
-        //do nothing
+        // do nothing
     }
 
     [Fact]
     public void DriveSimpleRoute()
     {
-        var simulationContext = SimulationContext.Start2020InSeconds;
-        var environment = new FourNodeGraphEnv();
+        SimulationContext? simulationContext = SimulationContext.Start2020InSeconds;
+        FourNodeGraphEnv environment = new FourNodeGraphEnv();
 
-        var carLayer = new CarLayerFixture(environment.GraphEnvironment).CarLayer;
+        CarLayer carLayer = new CarLayerFixture(environment.GraphEnvironment).CarLayer;
 
-        var start = FourNodeGraphEnv.Node1Pos;
-        var goal = FourNodeGraphEnv.Node4Pos;
+        Position start = FourNodeGraphEnv.Node1Pos;
+        Position goal = FourNodeGraphEnv.Node4Pos;
 
-        var driver = new CarDriver(carLayer, Register, Unregister, 3,
+        CarDriver driver = new CarDriver(carLayer, Register, Unregister, 3,
             start.Latitude, start.Longitude, goal.Latitude, goal.Longitude);
 
         Assert.Equal(start, driver.Position);
 
-        var lastDriverPosition = driver.Position;
-        for (var tick = 0; tick < 1000 && !driver.GoalReached; tick++, simulationContext.UpdateStep())
+        Position lastDriverPosition = driver.Position;
+        for (int tick = 0; tick < 1000 && !driver.GoalReached; tick++, simulationContext.UpdateStep())
         {
             driver.Tick();
 
@@ -56,13 +56,13 @@ public class CarDriverTests
     {
         const double standardSpeedLimit = 13.89;
 
-        var environment = new FourNodeGraphEnv();
-        var carLayer = new CarLayerFixture(environment.GraphEnvironment).CarLayer;
+        FourNodeGraphEnv environment = new FourNodeGraphEnv();
+        CarLayer carLayer = new CarLayerFixture(environment.GraphEnvironment).CarLayer;
 
-        var start = FourNodeGraphEnv.Node1Pos;
-        var goal = FourNodeGraphEnv.Node4Pos;
+        Position start = FourNodeGraphEnv.Node1Pos;
+        Position goal = FourNodeGraphEnv.Node4Pos;
 
-        var driver = new CarDriver(carLayer, Register, Unregister, 3, start.Latitude, start.Longitude,
+        CarDriver driver = new CarDriver(carLayer, Register, Unregister, 3, start.Latitude, start.Longitude,
             goal.Latitude, goal.Longitude);
 
         Assert.Equal(FourNodeGraphEnv.Node1Pos.Latitude, driver.Latitude);
@@ -77,9 +77,9 @@ public class CarDriverTests
 
         Assert.False(driver.GoalReached);
         Assert.True(driver.Velocity > 0);
-        var edge = environment.Node1.OutgoingEdges.Values.FirstOrDefault();
+        ISpatialEdge? edge = environment.Node1.OutgoingEdges.Values.FirstOrDefault();
         Assert.NotNull(edge);
-        Assert.Equal(edge.Length - driver.Velocity, driver.RemainingDistanceOnEdge, 1);
+        Assert.Equal(edge!.Length - driver.Velocity, driver.RemainingDistanceOnEdge, 1);
         Assert.Equal(edge.Length - driver.RemainingDistanceOnEdge, driver.PositionOnEdge, 2);
         Assert.Equal("-1", driver.CurrentEdgeId);
     }

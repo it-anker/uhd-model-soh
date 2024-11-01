@@ -1,4 +1,5 @@
 using System;
+using System.Data;
 using Mars.Common.IO.Csv;
 using Mars.Core.Data;
 using Mars.Interfaces.Data;
@@ -16,13 +17,13 @@ public class RoutingTests
 
     public RoutingTests()
     {
-        var dataTableBicycle = CsvReader.MapData(ResourcesConstants.BicycleCsv);
-        var dataTableCar = CsvReader.MapData(ResourcesConstants.CarCsv);
-        var manager =
+        DataTable? dataTableBicycle = CsvReader.MapData(ResourcesConstants.BicycleCsv);
+        DataTable? dataTableCar = CsvReader.MapData(ResourcesConstants.CarCsv);
+        EntityManagerImpl manager =
             new EntityManagerImpl((typeof(Bicycle), dataTableBicycle), (typeof(Car), dataTableCar));
 
         _carLayer = new CarLayer();
-        var initData = new LayerInitData
+        LayerInitData initData = new LayerInitData
             { LayerInitConfig = { File = ResourcesConstants.DriveGraphAltonaAltstadt } };
         _carLayer.InitLayer(initData, (_, _) => { }, (_, _) => { });
 
@@ -33,20 +34,20 @@ public class RoutingTests
     [Fact]
     public void TravelTimeHeuristicForSlowVsFastCar()
     {
-        var start = _environment.NearestNode(Position.CreateGeoPosition(9.954986699999999, 53.56093));
-        var goal = _environment.NearestNode(Position.CreateGeoPosition(9.9360853, 53.5503159));
+        ISpatialNode? start = _environment.NearestNode(Position.CreateGeoPosition(9.954986699999999, 53.56093));
+        ISpatialNode? goal = _environment.NearestNode(Position.CreateGeoPosition(9.9360853, 53.5503159));
         Assert.InRange(start.Position.DistanceInKmTo(goal.Position), 1, 2);
 
-        var slowCar = _carLayer.EntityManager.Create<Car>("type", "Golf");
+        Car? slowCar = _carLayer.EntityManager.Create<Car>("type", "Golf");
         slowCar.Environment = _environment;
         slowCar.MaxSpeed = 30 / 3.6;
 
-        var fastCar = _carLayer.EntityManager.Create<Car>("type", "Golf");
+        Car? fastCar = _carLayer.EntityManager.Create<Car>("type", "Golf");
         fastCar.Environment = _environment;
         fastCar.MaxSpeed = 50 / 3.6;
 
-        var routeWithSlowCar = _environment.FindRoute(start, goal, TravelTimeHeuristicFor(slowCar.MaxSpeed));
-        var routeWithFastCar = _environment.FindRoute(start, goal, TravelTimeHeuristicFor(fastCar.MaxSpeed));
+        Route? routeWithSlowCar = _environment.FindRoute(start, goal, TravelTimeHeuristicFor(slowCar.MaxSpeed));
+        Route? routeWithFastCar = _environment.FindRoute(start, goal, TravelTimeHeuristicFor(fastCar.MaxSpeed));
 
         Assert.NotEqual(routeWithSlowCar, routeWithFastCar);
     }
@@ -60,5 +61,5 @@ public class RoutingTests
         double vehicleMaxSpeed)
     {
         return (_, edge, _) => edge.Length / Math.Min(edge.MaxSpeed, vehicleMaxSpeed);
-    } //TODO in IRoutePlanner ziehen?
+    } // TODO in IRoutePlanner ziehen?
 }

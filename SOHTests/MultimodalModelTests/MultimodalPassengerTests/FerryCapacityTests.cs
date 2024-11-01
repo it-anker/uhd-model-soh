@@ -23,7 +23,7 @@ public class FerryCapacityTests
 
     public FerryCapacityTests()
     {
-        var environment = new SpatialGraphEnvironment(new SpatialGraphOptions
+        SpatialGraphEnvironment environment = new SpatialGraphEnvironment(new SpatialGraphOptions
         {
             GraphImports = new List<Input>
             {
@@ -50,7 +50,7 @@ public class FerryCapacityTests
             }
         });
 
-        var routeLayerFixture = new FerryRouteLayerFixture();
+        FerryRouteLayerFixture routeLayerFixture = new FerryRouteLayerFixture();
         _ferryStationLayer = routeLayerFixture.FerryRouteLayer.StationLayer;
 
         _multimodalLayer = new TestMultimodalLayer(environment)
@@ -69,13 +69,13 @@ public class FerryCapacityTests
     [Fact]
     public void PassengerCapacityOfFerryExceeded()
     {
-        var start = Position.CreateGeoPosition(9.97114, 53.54484); //Landungsbrücken
-        var goal = Position.CreateGeoPosition(9.9522322, 53.5439412); //Fischmarkt
+        Position? start = Position.CreateGeoPosition(9.97114, 53.54484); //Landungsbrücken
+        Position? goal = Position.CreateGeoPosition(9.9522322, 53.5439412); //Fischmarkt
 
-        var ferryStation = _ferryStationLayer.Nearest(start);
+        FerryStation ferryStation = _ferryStationLayer.Nearest(start);
         Assert.Equal("Landungsbrücken Brücke 1", ferryStation.Name);
 
-        var driver = new FerryDriver(_ferryLayer, (_, _) => { })
+        FerryDriver driver = new FerryDriver(_ferryLayer, (_, _) => { })
         {
             Line = 62,
             MinimumBoardingTimeInSeconds = 10
@@ -84,13 +84,13 @@ public class FerryCapacityTests
         driver.Tick();
         Assert.Single(ferryStation.Ferries);
 
-        var capacity = driver.Ferry.PassengerCapacity;
+        int capacity = driver.Ferry.PassengerCapacity;
         Assert.Equal(250, capacity);
 
         Assert.True(driver.Ferry.HasFreeCapacity());
-        for (var i = 0; i < capacity; i++)
+        for (int i = 0; i < capacity; i++)
         {
-            var agent = new TestPassengerPedestrian
+            TestPassengerPedestrian agent = new TestPassengerPedestrian
             {
                 StartPosition = start
             };
@@ -102,9 +102,9 @@ public class FerryCapacityTests
         }
 
         Assert.False(driver.Ferry.HasFreeCapacity());
-        for (var i = 0; i < capacity; i++)
+        for (int i = 0; i < capacity; i++)
         {
-            var agent = new TestPassengerPedestrian
+            TestPassengerPedestrian agent = new TestPassengerPedestrian
             {
                 StartPosition = start
             };
@@ -118,18 +118,18 @@ public class FerryCapacityTests
     [Fact]
     public void PassengerUseDifferentFerriesDueToCapacityLimitation()
     {
-        var agents = new List<TestPassengerPedestrian>();
-        var ferryDriver = new List<FerryDriver>();
+        List<TestPassengerPedestrian> agents = new List<TestPassengerPedestrian>();
+        List<FerryDriver> ferryDriver = new List<FerryDriver>();
 
-        var start = Position.CreateGeoPosition(9.97114, 53.54484); //Landungsbrücken
-        var goal = Position.CreateGeoPosition(9.9505593, 53.5462456); //near Fischmarkt
+        Position? start = Position.CreateGeoPosition(9.97114, 53.54484); //Landungsbrücken
+        Position? goal = Position.CreateGeoPosition(9.9505593, 53.5462456); //near Fischmarkt
 
-        var usedFerries = new HashSet<Ferry>();
+        HashSet<Ferry> usedFerries = new HashSet<Ferry>();
 
         const int agentCount = 400;
-        for (var i = 0; i < agentCount; i++)
+        for (int i = 0; i < agentCount; i++)
         {
-            var agent = new TestPassengerPedestrian
+            TestPassengerPedestrian agent = new TestPassengerPedestrian
             {
                 StartPosition = start
             };
@@ -141,12 +141,12 @@ public class FerryCapacityTests
         long firstGoalReachedTick = -1;
         const int spawningInterval = 300;
         const int ticks = 2000;
-        for (var tick = 0;
+        for (int tick = 0;
              tick < ticks && !agents.All(agent => agent.GoalReached);
              tick++, _multimodalLayer.Context.UpdateStep())
         {
-            foreach (var driver in ferryDriver) driver.Tick();
-            foreach (var agent in agents)
+            foreach (FerryDriver driver in ferryDriver) driver.Tick();
+            foreach (TestPassengerPedestrian agent in agents)
             {
                 agent.Tick();
                 if (agent.UsedFerry != null) usedFerries.Add(agent.UsedFerry);
@@ -156,7 +156,7 @@ public class FerryCapacityTests
 
             if (tick % spawningInterval == 0)
             {
-                var driver = new FerryDriver(_ferryLayer, (_, _) => { })
+                FerryDriver driver = new FerryDriver(_ferryLayer, (_, _) => { })
                 {
                     Line = 62,
                     MinimumBoardingTimeInSeconds = 20

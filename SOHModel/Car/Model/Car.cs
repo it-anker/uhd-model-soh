@@ -56,13 +56,13 @@ public class Car : Vehicle<ICarSteeringCapable, IPassengerCapable, CarSteeringHa
     {
         if (Position == null || passenger.Position == null) return false;
 
-        var carNode = Environment.NearestNode(Position);
-        var passengerNode = Environment.NearestNode(passenger.Position);
+        ISpatialNode? carNode = Environment.NearestNode(Position);
+        ISpatialNode? passengerNode = Environment.NearestNode(passenger.Position);
 
-        var distanceInMTo = Position.DistanceInMTo(passenger.Position);
+        double distanceInMTo = Position.DistanceInMTo(passenger.Position);
         return carNode.Equals(passengerNode) || distanceInMTo < DistanceToEnterCar;
 
-        //TODO use if entering over edge instead of entering over node
+        // TODO use if entering over edge instead of entering over node
         // return Position.DistanceInMTo(passenger.Position) < DistanceToEnterCarInM; 
     }
 }

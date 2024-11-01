@@ -16,7 +16,7 @@ public class FourNodeBicycleRentalLayerFixture : IDisposable
 
     public FourNodeBicycleRentalLayerFixture(ISpatialGraphLayer spatialGraphLayer)
     {
-        var features = new List<IFeature>
+        List<IFeature> features = new List<IFeature>
         {
             new VectorStructuredData
             {
@@ -30,7 +30,7 @@ public class FourNodeBicycleRentalLayerFixture : IDisposable
             }
         };
 
-        var mapping = new LayerInitData
+        LayerInitData mapping = new LayerInitData
         {
             LayerInitConfig = new LayerMapping
             {

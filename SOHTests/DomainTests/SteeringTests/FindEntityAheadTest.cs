@@ -1,3 +1,4 @@
+using Mars.Interfaces.Agents;
 using Mars.Interfaces.Environments;
 using SOHModel.Car.Model;
 using SOHModel.Car.Steering;
@@ -24,7 +25,7 @@ public class FindEntityAheadTest
         _carSteeringHandle = new CarSteeringHandle(Environment, _car);
         _route = Environment.FindRoute(_fourNodeGraphEnv.Node1, _fourNodeGraphEnv.Node4,
             (_, edge, _) => edge.Length);
-        foreach (var stop in _route.Stops) stop.DesiredLane = 0;
+        foreach (EdgeStop? stop in _route.Stops) stop.DesiredLane = 0;
     }
 
     private ISpatialGraphEnvironment Environment => _fourNodeGraphEnv.GraphEnvironment;
@@ -32,16 +33,16 @@ public class FindEntityAheadTest
     [Fact]
     public void TestCarOnNodeEntityAheadOnFirstEdge()
     {
-        var entityAhead = Golf.Create(Environment);
-        var edge1 = _route[0].Edge;
+        Golf entityAhead = Golf.Create(Environment);
+        ISpatialEdge? edge1 = _route[0].Edge;
         const int posEntityAhead = 10;
         Assert.True(Environment.Insert(entityAhead, edge1, posEntityAhead));
         Assert.True(Environment.Insert(_car, _fourNodeGraphEnv.Node1));
 
-        var spatialGraphExploreResult = Environment.Explore(_car, _route, ExplorationDistance);
+        SpatialGraphExploreResult? spatialGraphExploreResult = Environment.Explore(_car, _route, ExplorationDistance);
         Assert.NotNull(spatialGraphExploreResult);
 
-        var (spatialGraphEntity, distance) = _carSteeringHandle.FindEntityAhead(spatialGraphExploreResult, _route);
+        (ISpatialGraphEntity spatialGraphEntity, double distance) = _carSteeringHandle.FindEntityAhead(spatialGraphExploreResult, _route);
         Assert.Equal(entityAhead, spatialGraphEntity);
         Assert.Equal(posEntityAhead, distance);
     }
@@ -49,17 +50,17 @@ public class FindEntityAheadTest
     [Fact]
     public void TestCarOnSameEdgeSameLanePos0()
     {
-        var entityAhead = Golf.Create(Environment);
+        Golf entityAhead = Golf.Create(Environment);
         const int posEntityAhead = 10;
-        var edge1 = _route[0].Edge;
+        ISpatialEdge? edge1 = _route[0].Edge;
 
         Assert.True(Environment.Insert(entityAhead, edge1, posEntityAhead));
         Assert.True(Environment.Insert(_car, edge1));
 
-        var spatialGraphExploreResult = Environment.Explore(_car, _route, ExplorationDistance);
+        SpatialGraphExploreResult? spatialGraphExploreResult = Environment.Explore(_car, _route, ExplorationDistance);
         Assert.NotNull(spatialGraphExploreResult);
 
-        var (spatialGraphEntity, distance) = _carSteeringHandle.FindEntityAhead(spatialGraphExploreResult, _route);
+        (ISpatialGraphEntity spatialGraphEntity, double distance) = _carSteeringHandle.FindEntityAhead(spatialGraphExploreResult, _route);
         Assert.Equal(entityAhead, spatialGraphEntity);
         Assert.Equal(posEntityAhead, distance);
     }
@@ -70,16 +71,16 @@ public class FindEntityAheadTest
         const int posCar = 5;
         const int posEntityAhead = 10;
 
-        var entityAhead = Golf.Create(Environment);
-        var edge1 = _route[0].Edge;
+        Golf entityAhead = Golf.Create(Environment);
+        ISpatialEdge? edge1 = _route[0].Edge;
 
         Assert.True(Environment.Insert(entityAhead, edge1, posEntityAhead));
         Assert.True(Environment.Insert(_car, edge1, posCar));
 
-        var spatialGraphExploreResult = Environment.Explore(_car, _route, ExplorationDistance);
+        SpatialGraphExploreResult? spatialGraphExploreResult = Environment.Explore(_car, _route, ExplorationDistance);
         Assert.NotNull(spatialGraphExploreResult);
 
-        var (spatialGraphEntity, distance) = _carSteeringHandle.FindEntityAhead(spatialGraphExploreResult, _route);
+        (ISpatialGraphEntity spatialGraphEntity, double distance) = _carSteeringHandle.FindEntityAhead(spatialGraphExploreResult, _route);
         Assert.Equal(entityAhead, spatialGraphEntity);
         Assert.Equal(posEntityAhead - posCar, distance);
     }
@@ -90,17 +91,17 @@ public class FindEntityAheadTest
         const int posCar = 5;
         const int posEntityAhead = 10;
 
-        var entityAhead = Golf.Create(Environment);
-        var edge1 = _route[0].Edge;
-        var edge2 = _route[1].Edge;
+        Golf entityAhead = Golf.Create(Environment);
+        ISpatialEdge? edge1 = _route[0].Edge;
+        ISpatialEdge? edge2 = _route[1].Edge;
 
         Assert.True(Environment.Insert(entityAhead, edge2, posEntityAhead));
         Assert.True(Environment.Insert(_car, edge1, posCar));
 
-        var spatialGraphExploreResult = Environment.Explore(_car, _route, ExplorationDistance);
+        SpatialGraphExploreResult? spatialGraphExploreResult = Environment.Explore(_car, _route, ExplorationDistance);
         Assert.NotNull(spatialGraphExploreResult);
 
-        var (spatialGraphEntity, distance) = _carSteeringHandle.FindEntityAhead(spatialGraphExploreResult, _route);
+        (ISpatialGraphEntity spatialGraphEntity, double distance) = _carSteeringHandle.FindEntityAhead(spatialGraphExploreResult, _route);
         Assert.Equal(entityAhead, spatialGraphEntity);
         Assert.Equal(edge1.Length - posCar + posEntityAhead, distance);
     }
@@ -111,17 +112,17 @@ public class FindEntityAheadTest
         const int posCar = 5;
         const int posEntityAhead = 10;
 
-        var entityAhead = Golf.Create(Environment);
-        var edge1 = _route[0].Edge;
-        var edge2 = _route[1].Edge;
+        Golf entityAhead = Golf.Create(Environment);
+        ISpatialEdge? edge1 = _route[0].Edge;
+        ISpatialEdge? edge2 = _route[1].Edge;
 
         Assert.True(Environment.Insert(entityAhead, edge2, posEntityAhead, 1));
         Assert.True(Environment.Insert(_car, edge1, posCar));
 
-        var spatialGraphExploreResult = Environment.Explore(_car, _route, ExplorationDistance);
+        SpatialGraphExploreResult? spatialGraphExploreResult = Environment.Explore(_car, _route, ExplorationDistance);
         Assert.NotNull(spatialGraphExploreResult);
 
-        var (spatialGraphEntity, distance) = _carSteeringHandle.FindEntityAhead(spatialGraphExploreResult, _route);
+        (ISpatialGraphEntity spatialGraphEntity, double distance) = _carSteeringHandle.FindEntityAhead(spatialGraphExploreResult, _route);
         Assert.Null(spatialGraphEntity);
         Assert.Equal(0, distance);
     }
@@ -132,16 +133,16 @@ public class FindEntityAheadTest
         const int posCar = 5;
         const int posEntityAhead = 10;
 
-        var entityAhead = Golf.Create(Environment);
-        var edge1 = _route[0].Edge;
+        Golf entityAhead = Golf.Create(Environment);
+        ISpatialEdge? edge1 = _route[0].Edge;
 
         Assert.True(Environment.Insert(entityAhead, edge1, posEntityAhead, 1));
         Assert.True(Environment.Insert(_car, edge1, posCar));
 
-        var spatialGraphExploreResult = Environment.Explore(_car, _route, ExplorationDistance);
+        SpatialGraphExploreResult? spatialGraphExploreResult = Environment.Explore(_car, _route, ExplorationDistance);
         Assert.NotNull(spatialGraphExploreResult);
 
-        var (spatialGraphEntity, distance) = _carSteeringHandle.FindEntityAhead(spatialGraphExploreResult, _route);
+        (ISpatialGraphEntity spatialGraphEntity, double distance) = _carSteeringHandle.FindEntityAhead(spatialGraphExploreResult, _route);
         Assert.Null(spatialGraphEntity);
         Assert.Equal(0, distance);
     }

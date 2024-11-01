@@ -26,9 +26,9 @@ public sealed class CarDriver : AbstractAgent, ICarSteeringCapable
         Car.Environment = _environment;
         TrafficCode = trafficCode;
 
-        var route = CarRouteFinder.Find(_environment, driveMode,
+        Route route = CarRouteFinder.Find(_environment, driveMode,
             startLat, startLon, destLat, destLon, startingEdge, osmRoute);
-        var node = route.First().Edge.From;
+        ISpatialNode? node = route.First().Edge.From;
         _environment.Insert(Car, node);
 
         Car.TryEnterDriver(this, out _steeringHandle);
@@ -130,7 +130,7 @@ public sealed class CarDriver : AbstractAgent, ICarSteeringCapable
         {
             if (Car.CurrentEdge == null || !Car.CurrentEdge.Attributes.ContainsKey("osmid"))
                 return "-1";
-            var osmId = Car.CurrentEdge.Attributes["osmid"].ToString();
+            string? osmId = Car.CurrentEdge.Attributes["osmid"].ToString();
             return osmId[0] == '[' ? "-1" : osmId;
         }
     }

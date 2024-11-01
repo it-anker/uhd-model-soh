@@ -1,4 +1,5 @@
 using System;
+using System.Data;
 using Mars.Common.IO.Csv;
 using Mars.Core.Data;
 using SOHModel.Bicycle.Common;
@@ -12,10 +13,10 @@ public class CyclistTest
     [Fact]
     public void TestCreateBicycleByEntityManager()
     {
-        var dataTable = CsvReader.MapData(ResourcesConstants.BicycleCsv);
-        var manager = new EntityManagerImpl(dataTable);
+        DataTable? dataTable = CsvReader.MapData(ResourcesConstants.BicycleCsv);
+        EntityManagerImpl manager = new EntityManagerImpl(dataTable);
 
-        var bicycle = manager.Create<Bicycle>("type", "city");
+        Bicycle? bicycle = manager.Create<Bicycle>("type", "city");
 
         Assert.NotNull(bicycle);
         Assert.Equal(BicycleType.City, bicycle.Type);
@@ -29,8 +30,8 @@ public class CyclistTest
     [Fact]
     public void TestEntityManagerException()
     {
-        var dataTable = CsvReader.MapData(ResourcesConstants.BicycleCsv);
-        var manager = new EntityManagerImpl(dataTable);
+        DataTable? dataTable = CsvReader.MapData(ResourcesConstants.BicycleCsv);
+        EntityManagerImpl manager = new EntityManagerImpl(dataTable);
 
         Assert.Throws<ArgumentException>(() =>
             manager.Create<Bicycle>("bicycleType", "city"));

@@ -33,13 +33,13 @@ public class BicycleParkingLayer : VectorLayer<BicycleParkingLot>, IBicycleParki
     public Model.Bicycle CreateOwnBicycleNear(Position position, double radius, double useBikeAndRideParkingPercentage,
         string keyAttribute = "type", string type = "city")
     {
-        var bicycle = EntityManager.Create<Model.Bicycle>(keyAttribute, type);
+        Model.Bicycle? bicycle = EntityManager.Create<Model.Bicycle>(keyAttribute, type);
         bicycle.Environment = GraphLayer.Environment;
 
         ISpatialNode node = null;
         if (RandomHelper.Random.NextDouble() < useBikeAndRideParkingPercentage)
         {
-            var bicycleParkingLot = Region(position.PositionArray, radius).FirstOrDefault();
+            BicycleParkingLot? bicycleParkingLot = Region(position.PositionArray, radius).FirstOrDefault();
             if (bicycleParkingLot != null)
             {
                 node = GraphLayer.Environment.NearestNode(bicycleParkingLot.Position);
@@ -63,20 +63,20 @@ public class BicycleParkingLayer : VectorLayer<BicycleParkingLot>, IBicycleParki
         RegisterAgent? registerAgentHandle = null,
         UnregisterAgent? unregisterAgent = null)
     {
-        var initialized = base.InitLayer(layerInitData, registerAgentHandle, unregisterAgent);
+        bool initialized = base.InitLayer(layerInitData, registerAgentHandle, unregisterAgent);
         EntityManager = layerInitData?.Container?.Resolve<IEntityManager>();
         return initialized;
     }
 
     private ISpatialNode FindAnySpatialNode(Position position, double radius)
     {
-        var orderedEnumerable = GraphLayer.Environment.NearestNodes(position, radius).ToList();
+        List<ISpatialNode> orderedEnumerable = GraphLayer.Environment.NearestNodes(position, radius).ToList();
         // TODO Replace with better implementation
-        var count = orderedEnumerable.Count;
+        int count = orderedEnumerable.Count;
 
         if (count <= 1) return orderedEnumerable.FirstOrDefault();
 
-        var anyIndex = RandomHelper.Random.Next(count - 1);
+        int anyIndex = RandomHelper.Random.Next(count - 1);
 
         return orderedEnumerable.ElementAt(anyIndex);
     }

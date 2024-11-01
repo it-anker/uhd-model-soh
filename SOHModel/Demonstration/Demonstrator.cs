@@ -34,15 +34,15 @@ public class Demonstrator : Traveler<DemonstrationLayer>
     /// <returns></returns>
     protected MultimodalRoute GetDemonstrationRoute()
     {
-        var stop1 = new Position(9.954585, 53.569523);
-        var stop2 = new Position(9.960884, 53.562870);
-        var stop3 = new Position(9.956431, 53.560984);
-        var stop4 = new Position(9.969564, 53.550965);
-        var stop5 = new Position(9.971033, 53.547829);
-        var stop6 = new Position(9.969364, 53.546080);
-        var stop7 = new Position(9.950247, 53.544827);
+        Position stop1 = new Position(9.954585, 53.569523);
+        Position stop2 = new Position(9.960884, 53.562870);
+        Position stop3 = new Position(9.956431, 53.560984);
+        Position stop4 = new Position(9.969564, 53.550965);
+        Position stop5 = new Position(9.971033, 53.547829);
+        Position stop6 = new Position(9.969364, 53.546080);
+        Position stop7 = new Position(9.950247, 53.544827);
 
-        var path = MultimodalLayer.Search(this, Source, stop1, ModalChoice.Walking);
+        MultimodalRoute path = MultimodalLayer.Search(this, Source, stop1, ModalChoice.Walking);
 
         path.Add(MultimodalLayer.Search(this, stop1, stop2, ModalChoice.Walking).CurrentRoute, ModalChoice.Walking);
         path.Add(MultimodalLayer.Search(this, stop2, stop3, ModalChoice.Walking).CurrentRoute, ModalChoice.Walking);

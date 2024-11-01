@@ -18,9 +18,9 @@ public static class BusRouteReader
     /// <returns>A dictionary with line id to <see cref="BusRoute" />.</returns>
     public static Dictionary<string, BusRoute> Read(string file, BusStationLayer busStationLayer)
     {
-        var routes = new Dictionary<string, BusRoute>();
+        Dictionary<string, BusRoute> routes = new Dictionary<string, BusRoute>();
 
-        var dataTable = CsvReader.MapData(file);
+        DataTable? dataTable = CsvReader.MapData(file);
 
         if (dataTable.Rows.Count < 2) return routes;
 
@@ -29,19 +29,19 @@ public static class BusRouteReader
         {
             if (row.ItemArray.Length <= 2) continue;
 
-            var line = row[0].Value<string>();
+            string? line = row[0].Value<string>();
             if (!routes.ContainsKey(line))
             {
                 routes.Add(line, new BusRoute());
                 startStation = null;
             }
 
-            var route = routes[line];
-            var stationId = row[1].Value<string>();
-            var station = busStationLayer.Find(stationId);
+            BusRoute route = routes[line];
+            string? stationId = row[1].Value<string>();
+            BusStation? station = busStationLayer.Find(stationId);
             if (station == null) continue;
 
-            var minutes = row[2].Value<int>();
+            int minutes = row[2].Value<int>();
             station.Lines.Add(line.Value<string>());
 
             if (startStation != null) route.Entries.Add(new BusRouteEntry(startStation, station, minutes));

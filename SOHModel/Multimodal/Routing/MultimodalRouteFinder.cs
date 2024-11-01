@@ -60,12 +60,12 @@ public class MultimodalRouteFinder : IMultimodalRouteFinder
     public MultimodalRoute Search(IModalCapabilitiesAgent agent, Position start, Position goal,
         IEnumerable<ModalChoice> capabilities)
     {
-        var travelTime = double.MaxValue;
+        double travelTime = double.MaxValue;
         MultimodalRoute? multimodalRoute = null;
-        foreach (var capability in capabilities)
+        foreach (ModalChoice capability in capabilities)
         {
-            var route = Search(agent, start, goal, capability);
-            var expectedTravelTime = route.ExpectedTravelTime(agent);
+            MultimodalRoute route = Search(agent, start, goal, capability);
+            int expectedTravelTime = route.ExpectedTravelTime(agent);
             if (expectedTravelTime < travelTime)
             {
                 travelTime = expectedTravelTime;

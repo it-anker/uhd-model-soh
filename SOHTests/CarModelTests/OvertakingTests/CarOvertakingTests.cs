@@ -21,15 +21,15 @@ public class CarOvertakingTests
     [Fact]
     public void SwitchLane()
     {
-        var environment = new SpatialGraphEnvironment(ResourcesConstants.DriveGraphVeddelerDamm);
-        var startNode = environment.NearestNode(_startPosition);
-        var goalNode = environment.NearestNode(_goalPosition);
+        SpatialGraphEnvironment environment = new SpatialGraphEnvironment(ResourcesConstants.DriveGraphVeddelerDamm);
+        ISpatialNode startNode = environment.NearestNode(_startPosition);
+        ISpatialNode goalNode = environment.NearestNode(_goalPosition);
 
-        var slowAgent = new OvertakingAgent(environment, startNode, goalNode, 50, 5);
+        OvertakingAgent slowAgent = new OvertakingAgent(environment, startNode, goalNode, 50, 5);
         Assert.InRange(slowAgent.PositionOnCurrentEdge, 50, 50);
         Assert.Equal(0, slowAgent.CurrentLane);
 
-        var fastAgent = new OvertakingAgent(environment, startNode, goalNode, 0, 10);
+        OvertakingAgent fastAgent = new OvertakingAgent(environment, startNode, goalNode, 0, 10);
         Assert.InRange(fastAgent.PositionOnCurrentEdge, 0, 0);
         Assert.Equal(0, fastAgent.CurrentLane);
 
@@ -57,29 +57,29 @@ public class CarOvertakingTests
     [Fact]
     public void ExploreLanesWithDifferentSpatialModalities()
     {
-        var environment = new SpatialGraphEnvironment(new SpatialGraphOptions
+        SpatialGraphEnvironment environment = new SpatialGraphEnvironment(new SpatialGraphOptions
         {
             // NetworkMerge = true
         });
-        var startNode = environment.AddNode();
-        var goalNode = environment.AddNode();
-        var edgeCar = environment.AddEdge(startNode, goalNode, 100,
+        ISpatialNode startNode = environment.AddNode();
+        ISpatialNode goalNode = environment.AddNode();
+        ISpatialEdge edgeCar = environment.AddEdge(startNode, goalNode, 100,
             new Dictionary<string, object> { { "length", 100 }, { "lanes", 2 } }, SpatialModalityType.CarDriving);
-        var edgeCycling = environment.AddEdge(startNode, goalNode, 100,
+        ISpatialEdge edgeCycling = environment.AddEdge(startNode, goalNode, 100,
             new Dictionary<string, object> { { "length", 100 }, { "lanes", 1 } },
             new[] { SpatialModalityType.CarDriving, SpatialModalityType.Cycling });
-        var edge = startNode.OutgoingEdges.First().Value;
+        ISpatialEdge? edge = startNode.OutgoingEdges.First().Value;
         Assert.Equal(edgeCar, edge);
         Assert.Equal(edgeCycling, edge);
         Assert.Single(environment.Edges);
         Assert.Equal(3, edge.LaneCount);
 
-        var car0 = new Car();
+        Car car0 = new Car();
         Assert.True(environment.Insert(car0, edge, 30));
-        var car1 = new Car();
+        Car car1 = new Car();
         Assert.True(environment.Insert(car1, edge, 20, 1));
 
-        var explore1 = edge.Explore(car1).LaneExplores;
+        IDictionary<int, LaneExploreResult>? explore1 = edge.Explore(car1).LaneExplores;
         Assert.Equal(3, explore1.Count);
         Assert.NotEmpty(explore1[0].Forward);
         Assert.Empty(explore1[0].Backward);
@@ -88,10 +88,10 @@ public class CarOvertakingTests
         Assert.Empty(explore1[2].Forward);
         Assert.Empty(explore1[2].Backward);
 
-        var bicycle = new Bicycle();
+        Bicycle bicycle = new Bicycle();
         Assert.True(environment.Insert(bicycle, edge, 15, 2));
 
-        var explore2 = edge.Explore(car1).LaneExplores;
+        IDictionary<int, LaneExploreResult>? explore2 = edge.Explore(car1).LaneExplores;
         Assert.Equal(3, explore2.Count);
         Assert.NotEmpty(explore2[0].Forward);
         Assert.Empty(explore2[0].Backward);
@@ -100,7 +100,7 @@ public class CarOvertakingTests
         Assert.Empty(explore2[2].Forward);
         Assert.NotEmpty(explore2[2].Backward);
 
-        var exploreBicycle = edge.Explore(bicycle).LaneExplores;
+        IDictionary<int, LaneExploreResult>? exploreBicycle = edge.Explore(bicycle).LaneExplores;
         Assert.Equal(2, exploreBicycle.Count);
         Assert.NotEmpty(exploreBicycle[1].Forward);
         Assert.Empty(exploreBicycle[1].Backward);
@@ -111,23 +111,23 @@ public class CarOvertakingTests
     [Fact]
     public void OvertakeOnLanesWithDifferentSpatialModalitiesPossible()
     {
-        var environment = new SpatialGraphEnvironment(new SpatialGraphOptions
+        SpatialGraphEnvironment environment = new SpatialGraphEnvironment(new SpatialGraphOptions
         {
             // NetworkMerge = true
         });
-        var startNode = environment.AddNode();
-        var goalNode = environment.AddNode();
+        ISpatialNode startNode = environment.AddNode();
+        ISpatialNode goalNode = environment.AddNode();
         environment.AddEdge(startNode, goalNode, 100,
             new Dictionary<string, object> { { "length", 100 }, { "lanes", 1 } }, SpatialModalityType.CarDriving);
         environment.AddEdge(startNode, goalNode, 100,
             new Dictionary<string, object> { { "length", 100 }, { "lanes", 1 } },
             new[] { SpatialModalityType.CarDriving, SpatialModalityType.Cycling });
-        var edge = startNode.OutgoingEdges.First().Value;
+        ISpatialEdge? edge = startNode.OutgoingEdges.First().Value;
 
-        var car = new Car();
+        Car car = new Car();
         Assert.True(environment.Insert(car, edge, 60));
 
-        var agent = new OvertakingAgent(environment, startNode, goalNode, 50, 5);
+        OvertakingAgent agent = new OvertakingAgent(environment, startNode, goalNode, 50, 5);
         Assert.InRange(agent.PositionOnCurrentEdge, 50, 50);
         Assert.Equal(0, agent.CurrentLane);
 
@@ -141,22 +141,22 @@ public class CarOvertakingTests
     [Fact]
     public void OvertakeOnLanesWithDifferentSpatialModalitiesNotPossible()
     {
-        var environment = new SpatialGraphEnvironment(new SpatialGraphOptions
+        SpatialGraphEnvironment environment = new SpatialGraphEnvironment(new SpatialGraphOptions
         {
             // NetworkMerge = true
         });
-        var startNode = environment.AddNode();
-        var goalNode = environment.AddNode();
+        ISpatialNode startNode = environment.AddNode();
+        ISpatialNode goalNode = environment.AddNode();
         environment.AddEdge(startNode, goalNode, 100,
             new Dictionary<string, object> { { "length", 100 }, { "lanes", 1 } }, SpatialModalityType.CarDriving);
         environment.AddEdge(startNode, goalNode, 100,
             new Dictionary<string, object> { { "length", 100 }, { "lanes", 1 } }, SpatialModalityType.Cycling);
-        var edge = startNode.OutgoingEdges.First().Value;
+        ISpatialEdge? edge = startNode.OutgoingEdges.First().Value;
 
-        var car = new Car();
+        Car car = new Car();
         Assert.True(environment.Insert(car, edge, 60));
 
-        var agent = new OvertakingAgent(environment, startNode, goalNode, 50, 5);
+        OvertakingAgent agent = new OvertakingAgent(environment, startNode, goalNode, 50, 5);
         Assert.InRange(agent.PositionOnCurrentEdge, 50, 50);
         Assert.Equal(0, agent.CurrentLane);
 
@@ -175,7 +175,7 @@ internal class OvertakingAgent : IAgent, ICarSteeringCapable
     public OvertakingAgent(ISpatialGraphEnvironment environment, ISpatialNode startNode, ISpatialNode goalNode,
         double positionOnEdge, double maxSpeed, int laneOnEdge = 0)
     {
-        var route = environment.FindShortestRoute(startNode, goalNode);
+        Route? route = environment.FindShortestRoute(startNode, goalNode);
 
         Car = Golf.Create(environment);
         Car.IsCollidingEntity = true;

@@ -2,6 +2,7 @@ using System;
 using System.Data;
 using System.Linq;
 using Mars.Common.Core;
+using Mars.Components.Layers;
 using Mars.Interfaces;
 using Mars.Interfaces.Data;
 using Mars.Interfaces.Model;
@@ -9,6 +10,7 @@ using NetTopologySuite.Geometries;
 using NetTopologySuite.IO;
 using SOHModel.Multimodal.Model;
 using Xunit;
+using Position = Mars.Interfaces.Environments.Position;
 
 namespace SOHTests.FerryModelTests;
 
@@ -17,8 +19,8 @@ public class TravelerScheduleTests
     [Fact]
     public void TestImportDockWorkerComplex()
     {
-        var travelLayer = new DockWorkerLayer();
-        var layer = new DockWorkerSchedulerLayer(travelLayer);
+        DockWorkerLayer travelLayer = new DockWorkerLayer();
+        DockWorkerSchedulerLayer layer = new DockWorkerSchedulerLayer(travelLayer);
 
         layer.InitLayer(new LayerInitData
             {
@@ -37,15 +39,15 @@ public class TravelerScheduleTests
         Assert.Equal(270, layer.SchedulingTable.Rows.Count);
         Assert.Equal(270, layer.TimeSeries.Count);
 
-        var elements = layer.TimeSeries.Query("19-09-2020T13:00".Value<DateTime>());
+        IEnumerable<SchedulerEntry>? elements = layer.TimeSeries.Query("19-09-2020T13:00".Value<DateTime>());
 
         Assert.Contains(elements, entry => entry.SchedulingEventAmounts == 5);
 
-        var context = SimulationContext.Start2020InSeconds;
+        SimulationContext? context = SimulationContext.Start2020InSeconds;
         context.CurrentTimePoint = new DateTime(2020, 09, 01);
         layer.Context = context;
         travelLayer.Context = layer.Context;
-        for (var i = 0; i < 50400; i++)
+        for (int i = 0; i < 50400; i++)
         {
             layer.PreTick();
             layer.Context.UpdateStep();
@@ -58,8 +60,8 @@ public class TravelerScheduleTests
     [Fact]
     public void TestInitializeTravelScheduler()
     {
-        var travelLayer = new DockWorkerLayer();
-        var layer = new DockWorkerSchedulerLayer(travelLayer);
+        DockWorkerLayer travelLayer = new DockWorkerLayer();
+        DockWorkerSchedulerLayer layer = new DockWorkerSchedulerLayer(travelLayer);
 
         layer.InitLayer(new LayerInitData
             {
@@ -78,7 +80,7 @@ public class TravelerScheduleTests
         Assert.Equal(5, layer.AllDayTimeSeries.Count);
         Assert.Equal(5, layer.SchedulingTable.Rows.Count);
 
-        var results = layer.AllDayTimeSeries.Query(DateTime.MinValue.AddHours(8)).ToList();
+        List<SchedulerEntry> results = layer.AllDayTimeSeries.Query(DateTime.MinValue.AddHours(8)).ToList();
 
         Assert.Equal(3, results.Count);
         Assert.Equal(53.54836, results[0].Data["sourceY"].Value<double>());
@@ -94,10 +96,10 @@ public class TravelerScheduleTests
         const string dateTimeString2 = "01-10-2020T07:00";
         const string dateTimeString3 = "2020-01-01T00:00:00";
 
-        var dateTime = new DateTime(2020, 09, 01, 7, 0, 0);
-        var dateTime2 = new DateTime(2020, 10, 01, 7, 0, 0);
-        var dateTime3 = new DateTime(2020, 01, 01, 0, 0, 0);
-        var time = DateTime.Today.AddHours(7).AddSeconds(10);
+        DateTime dateTime = new DateTime(2020, 09, 01, 7, 0, 0);
+        DateTime dateTime2 = new DateTime(2020, 10, 01, 7, 0, 0);
+        DateTime dateTime3 = new DateTime(2020, 01, 01, 0, 0, 0);
+        DateTime time = DateTime.Today.AddHours(7).AddSeconds(10);
 
         Assert.Equal(dateTime, dateTimeString.Value<DateTime>());
         Assert.Equal(dateTime2, dateTimeString2.Value<DateTime>());
@@ -108,8 +110,8 @@ public class TravelerScheduleTests
     [Fact]
     public void TestCreateDriverBasedOnInput()
     {
-        var travelLayer = new DockWorkerLayer();
-        var travelScheduler = new DockWorkerSchedulerLayer(travelLayer);
+        DockWorkerLayer travelLayer = new DockWorkerLayer();
+        DockWorkerSchedulerLayer travelScheduler = new DockWorkerSchedulerLayer(travelLayer);
 
 
         travelScheduler.InitLayer(new LayerInitData
@@ -129,13 +131,13 @@ public class TravelerScheduleTests
         Assert.NotEmpty(travelScheduler.AllDayTimeSeries);
 
         Assert.NotNull(SimulationContext.Start2020InSeconds.CurrentTimePoint);
-        var res = travelScheduler.AllDayTimeSeries.Query(
+        List<SchedulerEntry> res = travelScheduler.AllDayTimeSeries.Query(
                 DateTime.MinValue.AddHours(6))
             .ToList();
         Assert.Equal(2, res.Count);
 
 
-        for (var i = 0; i < 50400; i++)
+        for (int i = 0; i < 50400; i++)
         {
             travelScheduler.PreTick();
             travelScheduler.Context.UpdateStep();
@@ -146,19 +148,19 @@ public class TravelerScheduleTests
 
         Assert.Equal(14, travelLayer.Agents.Count(pair =>
         {
-            var position = pair.Value.Position;
+            Position position = pair.Value.Position;
             return Math.Abs(position.X - 9.95253) < 0.0000001 && Math.Abs(position.Y - 53.54907) < 0.00000001;
         }));
 
         Assert.Equal(18, travelLayer.Agents.Count(pair =>
         {
-            var position = pair.Value.Position;
+            Position position = pair.Value.Position;
             return Math.Abs(position.X - 9.91582) < 0.0000001 && Math.Abs(position.Y - 53.54836) < 0.00000001;
         }));
 
         Assert.Empty(travelLayer.Agents.Where(pair =>
         {
-            var position = pair.Value.Position;
+            Position position = pair.Value.Position;
             return Math.Abs(position.X - 9.97033) < 0.0000001 && Math.Abs(position.Y - 9.97033) < 0.00000001;
         }));
     }
@@ -166,9 +168,9 @@ public class TravelerScheduleTests
     [Fact]
     public void TestExceptionWhenMissingAllDayAndConcreteTime()
     {
-        var travelLayer = new DockWorkerLayer();
+        DockWorkerLayer travelLayer = new DockWorkerLayer();
 
-        var table = new DataTable();
+        DataTable table = new DataTable();
 
         table.Columns.Add("startTime");
         table.Columns.Add("endTime");
@@ -181,7 +183,7 @@ public class TravelerScheduleTests
             new object[] { "7:00", "01-09-2020 17:00", 30, 1, "Point(9.95253 53.54907)", "Point(9.92812 53.52143)" },
             LoadOption.Upsert);
 
-        var travelScheduler = new DockWorkerSchedulerLayer(travelLayer, table);
+        DockWorkerSchedulerLayer travelScheduler = new DockWorkerSchedulerLayer(travelLayer, table);
         travelScheduler.InitLayer(new LayerInitData(),
             (_, _) => { },
             (_, _) => { });
@@ -194,9 +196,9 @@ public class TravelerScheduleTests
     [Fact]
     public void TestMixingAllDayTimeSeriesWithConcreteTime()
     {
-        var travelLayer = new DockWorkerLayer();
+        DockWorkerLayer travelLayer = new DockWorkerLayer();
 
-        var table = new DataTable();
+        DataTable table = new DataTable();
 
         table.Columns.Add("startTime");
         table.Columns.Add("endTime");
@@ -216,10 +218,10 @@ public class TravelerScheduleTests
             },
             LoadOption.Upsert);
 
-        var dateTime = "01-09-2020T17:00".Value<DateTime>();
+        DateTime dateTime = "01-09-2020T17:00".Value<DateTime>();
         Assert.Equal(new DateTime(2020, 09, 01, 17, 00, 00), dateTime);
 
-        var travelScheduler = new DockWorkerSchedulerLayer(travelLayer, table);
+        DockWorkerSchedulerLayer travelScheduler = new DockWorkerSchedulerLayer(travelLayer, table);
         travelScheduler.InitLayer(new LayerInitData(),
             (_, _) => { },
             (_, _) => { });
@@ -242,9 +244,9 @@ public class TravelerScheduleTests
     [Fact]
     public void TestCreateDriverBasedOnGeometryInput()
     {
-        var travelLayer = new DockWorkerLayer();
+        DockWorkerLayer travelLayer = new DockWorkerLayer();
 
-        var table = new DataTable();
+        DataTable table = new DataTable();
 
         table.Columns.Add("startTime");
         table.Columns.Add("endTime");
@@ -277,7 +279,7 @@ public class TravelerScheduleTests
             new object[] { "6:00", "9:00", 10, 4, "Point(9.87707 53.53461)", "Point(9.97969 53.54480)" },
             LoadOption.Upsert);
 
-        var travelScheduler = new DockWorkerSchedulerLayer(travelLayer, table);
+        DockWorkerSchedulerLayer travelScheduler = new DockWorkerSchedulerLayer(travelLayer, table);
 
 
         travelScheduler.InitLayer(new LayerInitData(),
@@ -295,13 +297,13 @@ public class TravelerScheduleTests
         Assert.Empty(travelScheduler.TimeSeries);
 
         Assert.NotNull(SimulationContext.Start2020InSeconds.CurrentTimePoint);
-        var res = travelScheduler.AllDayTimeSeries.Query(
+        List<SchedulerEntry> res = travelScheduler.AllDayTimeSeries.Query(
                 DateTime.MinValue.AddHours(6))
             .ToList();
         Assert.Equal(2, res.Count);
 
 
-        for (var i = 0; i < 50400; i++)
+        for (int i = 0; i < 50400; i++)
         {
             travelScheduler.PreTick();
             travelScheduler.Context.UpdateStep();
@@ -312,11 +314,11 @@ public class TravelerScheduleTests
 
         Assert.Equal(14, travelLayer.Agents.Count(pair =>
         {
-            var position = pair.Value.Position;
+            Position position = pair.Value.Position;
 
-            var condition = pair.Value.Gender == GenderType.Female
-                            && Math.Abs(pair.Value.PerceptionInMeter - 1.1) < 0.0000001
-                            && Math.Abs(pair.Value.Mass - 100) < 0.00000001;
+            bool condition = pair.Value.Gender == GenderType.Female
+                             && Math.Abs(pair.Value.PerceptionInMeter - 1.1) < 0.0000001
+                             && Math.Abs(pair.Value.Mass - 100) < 0.00000001;
 
             return condition && Math.Abs(position.X - 9.95253) < 0.0000001 &&
                    Math.Abs(position.Y - 53.54907) < 0.00000001;
@@ -324,13 +326,13 @@ public class TravelerScheduleTests
 
         Assert.Equal(18, travelLayer.Agents.Count(pair =>
         {
-            var position = pair.Value.Position;
+            Position position = pair.Value.Position;
             return Math.Abs(position.X - 9.91582) < 0.0000001 && Math.Abs(position.Y - 53.54836) < 0.00000001;
         }));
 
         Assert.Empty(travelLayer.Agents.Where(pair =>
         {
-            var position = pair.Value.Position;
+            Position position = pair.Value.Position;
             return Math.Abs(position.X - 9.97033) < 0.0000001 && Math.Abs(position.Y - 9.97033) < 0.00000001;
         }));
     }
@@ -338,9 +340,9 @@ public class TravelerScheduleTests
     [Fact]
     public void TestNoAgentForNegativeAgentAmount()
     {
-        var travelLayer = new DockWorkerLayer();
+        DockWorkerLayer travelLayer = new DockWorkerLayer();
 
-        var table = new DataTable();
+        DataTable table = new DataTable();
 
         table.Columns.Add("id");
         table.Columns.Add("startTime");
@@ -354,7 +356,7 @@ public class TravelerScheduleTests
             new object[] { 1, "7:00", "12:00", 5, -1, "Point(9.95253 53.54907)", "Point(9.92812 53.52143)" },
             LoadOption.Upsert);
 
-        var travelScheduler = new DockWorkerSchedulerLayer(travelLayer, table);
+        DockWorkerSchedulerLayer travelScheduler = new DockWorkerSchedulerLayer(travelLayer, table);
         travelScheduler.InitLayer(new LayerInitData(),
             (_, _) => { },
             (_, _) => { });
@@ -368,7 +370,7 @@ public class TravelerScheduleTests
         Assert.NotNull(travelScheduler.AllDayTimeSeries);
         Assert.NotEmpty(travelScheduler.AllDayTimeSeries);
 
-        for (var i = 0; i < 50400; i++)
+        for (int i = 0; i < 50400; i++)
         {
             travelScheduler.PreTick();
             travelScheduler.Context.UpdateStep();
@@ -381,9 +383,9 @@ public class TravelerScheduleTests
     [Fact]
     public void TestCreateOnlyOneAgentForNegativeSpawningInterval()
     {
-        var travelLayer = new DockWorkerLayer();
+        DockWorkerLayer travelLayer = new DockWorkerLayer();
 
-        var table = new DataTable();
+        DataTable table = new DataTable();
 
         table.Columns.Add("id");
         table.Columns.Add("startTime");
@@ -398,7 +400,7 @@ public class TravelerScheduleTests
             new object[] { 1, "7:00", "12:00", -30, 1, "Point(9.95253 53.54907)", "Point(9.92812 53.52143)" },
             LoadOption.Upsert);
 
-        var travelScheduler = new DockWorkerSchedulerLayer(travelLayer, table);
+        DockWorkerSchedulerLayer travelScheduler = new DockWorkerSchedulerLayer(travelLayer, table);
         travelScheduler.InitLayer(new LayerInitData(), (_, _) => { });
 
 
@@ -409,7 +411,7 @@ public class TravelerScheduleTests
         Assert.NotNull(travelScheduler.AllDayTimeSeries);
         Assert.NotEmpty(travelScheduler.AllDayTimeSeries);
 
-        for (var i = 0; i < 50400; i++)
+        for (int i = 0; i < 50400; i++)
         {
             travelScheduler.PreTick();
             travelScheduler.Context.UpdateStep();
@@ -434,9 +436,9 @@ public class TravelerScheduleTests
             "9.90220089347638 53.5195612826928,9.89617845952873 53.5129652836073,9.89331063383937 53.498224659564," +
             "9.9038642323762 53.4969628162607)))";
 
-        var travelLayer = new DockWorkerLayer();
+        DockWorkerLayer travelLayer = new DockWorkerLayer();
 
-        var table = new DataTable();
+        DataTable table = new DataTable();
 
         table.Columns.Add("id");
         table.Columns.Add("startTime");
@@ -456,7 +458,7 @@ public class TravelerScheduleTests
             new object[] { 3, "9:00", "20:00", 0, 1, "Point(9.98911 53.54531)", "Point(9.958469 53.517680)" },
             LoadOption.Upsert);
 
-        var travelScheduler = new DockWorkerSchedulerLayer(travelLayer, table);
+        DockWorkerSchedulerLayer travelScheduler = new DockWorkerSchedulerLayer(travelLayer, table);
         travelScheduler.InitLayer(new LayerInitData(), (_, _) => { }, (_, _) => { });
 
         travelScheduler.Context = SimulationContext.Start2020InSeconds;
@@ -469,14 +471,14 @@ public class TravelerScheduleTests
         Assert.NotEmpty(travelScheduler.AllDayTimeSeries);
 
         Assert.NotNull(SimulationContext.Start2020InSeconds.CurrentTimePoint);
-        var res = travelScheduler.AllDayTimeSeries.Query(
+        List<SchedulerEntry> res = travelScheduler.AllDayTimeSeries.Query(
                 DateTime.MinValue.AddHours(6))
             .ToList();
 
         Assert.Single(res);
 
 
-        for (var i = 0; i < 50400; i++)
+        for (int i = 0; i < 50400; i++)
         {
             travelScheduler.PreTick();
             travelScheduler.Context.UpdateStep();
@@ -500,11 +502,11 @@ public class TravelerScheduleTests
         });
 
         Assert.Single(travelLayer.Agents.Values.Where(t => t.TravelScheduleId == 3));
-        var polygonTraveler = travelLayer.Agents.Values.Where(t => t.TravelScheduleId == 2);
+        IEnumerable<DockWorker> polygonTraveler = travelLayer.Agents.Values.Where(t => t.TravelScheduleId == 2);
 
         // Check that the randomly selected source and target are in their respective polygon description as well. 
-        var source = new WKTReader().Read(sourcePolygon);
-        var target = new WKTReader().Read(targetPolygon);
+        Geometry? source = new WKTReader().Read(sourcePolygon);
+        Geometry? target = new WKTReader().Read(targetPolygon);
 
         Assert.All(polygonTraveler, traveler =>
         {

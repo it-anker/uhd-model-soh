@@ -4,6 +4,7 @@ using Mars.Interfaces.Environments;
 using Mars.Interfaces.Layers;
 using SOHModel.Domain.Steering.Common;
 using SOHModel.Train.Route;
+using SOHModel.Train.Station;
 using SOHModel.Train.Steering;
 
 namespace SOHModel.Train.Model;
@@ -115,10 +116,10 @@ public class TrainDriver : AbstractAgent, ITrainSteeringCapable
                 Environment.Remove(Train);
                 TrainRouteEnumerator.Current?.To.Enter(Train);
 
-                var currentMinutes = TrainRouteEnumerator.Current?.Minutes ?? 0;
+                int currentMinutes = TrainRouteEnumerator.Current?.Minutes ?? 0;
                 _departureTick += currentMinutes * 60;
 
-                var notAtTerminalStation = FindNextRouteSection();
+                bool notAtTerminalStation = FindNextRouteSection();
                 if (notAtTerminalStation)
                 {
                     Train.NotifyPassengers(PassengerMessage.GoalReached);
@@ -134,7 +135,7 @@ public class TrainDriver : AbstractAgent, ITrainSteeringCapable
 
     private void FindTrainRouteAndStartCommuting()
     {
-        if (Layer.TrainRouteLayer.TryGetRoute(Line, out var schedule))
+        if (Layer.TrainRouteLayer.TryGetRoute(Line, out TrainRoute? schedule))
             TrainRoute = schedule;
         else
             throw new ArgumentException($"No train route provided by {nameof(TrainRouteLayer)}");
@@ -147,7 +148,7 @@ public class TrainDriver : AbstractAgent, ITrainSteeringCapable
 
         FindNextRouteSection();
 
-        var trainStation = TrainRouteEnumerator.Current?.From;
+        TrainStation? trainStation = TrainRouteEnumerator.Current?.From;
         if (!trainStation?.Enter(Train) ?? true)
             throw new ArgumentException("Train could not dock the first station");
     }
@@ -156,9 +157,9 @@ public class TrainDriver : AbstractAgent, ITrainSteeringCapable
     {
         if (!TrainRouteEnumerator.MoveNext()) return false;
 
-        var source = Environment.NearestNode(TrainRouteEnumerator.Current?.From.Position,
+        ISpatialNode? source = Environment.NearestNode(TrainRouteEnumerator.Current?.From.Position,
             SpatialModalityType.TrainDriving);
-        var target =
+        ISpatialNode? target =
             Environment.NearestNode(TrainRouteEnumerator.Current?.To.Position, SpatialModalityType.TrainDriving);
 
         Route = Environment.FindShortestRoute(source, target,

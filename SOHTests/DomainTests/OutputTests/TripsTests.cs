@@ -11,12 +11,12 @@ public class TripsTests
     [Fact]
     public void AddFirstElement()
     {
-        var context = SimulationContext.Start2020InSeconds;
-        var collection = new TripsCollection(context);
+        SimulationContext? context = SimulationContext.Start2020InSeconds;
+        TripsCollection collection = new TripsCollection(context);
         collection.Add(1, Position.CreatePosition(0, 0));
 
         Assert.Single(collection.Result);
-        var (key, tripPositions) = collection.Result.First();
+        (object? key, List<TripPosition>? tripPositions) = collection.Result.First();
         Assert.Equal(1, key);
 
         Assert.Single(tripPositions);
@@ -27,12 +27,12 @@ public class TripsTests
     [Fact]
     public void AddFirstElementWithoutKey()
     {
-        var context = SimulationContext.Start2020InSeconds;
-        var collection = new TripsCollection(context);
+        SimulationContext? context = SimulationContext.Start2020InSeconds;
+        TripsCollection collection = new TripsCollection(context);
         collection.Add(Position.CreatePosition(0, 0));
 
         Assert.Single(collection.Result);
-        var (key, tripPositions) = collection.Result.First();
+        (object? key, List<TripPosition>? tripPositions) = collection.Result.First();
         Assert.Equal(0x01, key);
 
         Assert.Single(tripPositions);
@@ -43,13 +43,13 @@ public class TripsTests
     [Fact]
     public void AddElementToLastKey()
     {
-        var context = SimulationContext.Start2020InSeconds;
-        var collection = new TripsCollection(context);
+        SimulationContext? context = SimulationContext.Start2020InSeconds;
+        TripsCollection collection = new TripsCollection(context);
         collection.Add(0d, Position.CreatePosition(0, 0));
         collection.Add(Position.CreatePosition(1, 1));
 
         Assert.Single(collection.Result);
-        var (key, tripPositions) = collection.Result.First();
+        (object? key, List<TripPosition>? tripPositions) = collection.Result.First();
         Assert.Equal(0d, key);
 
         Assert.Equal(0, tripPositions[0].X);
@@ -61,18 +61,18 @@ public class TripsTests
     [Fact]
     public void AddSeveralElementsWithSameIdentifier()
     {
-        var context = SimulationContext.Start2020InSeconds;
-        var collection = new TripsCollection(context);
+        SimulationContext? context = SimulationContext.Start2020InSeconds;
+        TripsCollection collection = new TripsCollection(context);
         collection.Add(1, Position.CreatePosition(0, 0));
         collection.Add(1, Position.CreatePosition(1, 1));
         collection.Add(1, Position.CreatePosition(2, 2));
 
         Assert.Single(collection.Result);
-        var (key, tripPositions) = collection.Result.First();
+        (object? key, List<TripPosition>? tripPositions) = collection.Result.First();
         Assert.Equal(1, key);
 
         Assert.Equal(3, tripPositions.Count);
-        for (var i = 0; i < 3; i++)
+        for (int i = 0; i < 3; i++)
         {
             Assert.Equal(i, tripPositions[i].X);
             Assert.Equal(i, tripPositions[i].Y);
@@ -82,8 +82,8 @@ public class TripsTests
     [Fact]
     public void AddElementsWithDifferentIdentifiers()
     {
-        var context = SimulationContext.Start2020InSeconds;
-        var collection = new TripsCollection(context);
+        SimulationContext? context = SimulationContext.Start2020InSeconds;
+        TripsCollection collection = new TripsCollection(context);
         collection.Add("1", Position.CreatePosition(0, 0));
         collection.Add("a", Position.CreatePosition(1, 1));
         collection.Add(ModalChoice.CyclingRentalBike, Position.CreatePosition(2, 2));
@@ -91,10 +91,10 @@ public class TripsTests
 
         Assert.Equal(4, collection.Result.Count);
 
-        var i = 0;
-        foreach (var tuple in collection.Result)
+        int i = 0;
+        foreach ((object, List<TripPosition>) tuple in collection.Result)
         {
-            var tripPositions = tuple.Item2;
+            List<TripPosition> tripPositions = tuple.Item2;
             Assert.Single(tripPositions);
             Assert.Equal(i, tripPositions[0].X);
             Assert.Equal(i, tripPositions[0].Y);
@@ -105,8 +105,8 @@ public class TripsTests
     [Fact]
     public void AddMultipleElementsWithDifferentIdentifiers()
     {
-        var context = SimulationContext.Start2020InSeconds;
-        var collection = new TripsCollection(context);
+        SimulationContext? context = SimulationContext.Start2020InSeconds;
+        TripsCollection collection = new TripsCollection(context);
         collection.Add(1, Position.CreatePosition(0, 0));
         collection.Add(1, Position.CreatePosition(1, 1));
         collection.Add("a", Position.CreatePosition(2, 2));
@@ -114,20 +114,20 @@ public class TripsTests
 
         Assert.Equal(3, collection.Result.Count);
 
-        var (key0, tripPositions0) = collection.Result[0];
+        (object? key0, List<TripPosition>? tripPositions0) = collection.Result[0];
         Assert.Equal(1, key0);
         Assert.Equal(0, tripPositions0[0].X);
         Assert.Equal(0, tripPositions0[0].Y);
         Assert.Equal(1, tripPositions0[1].X);
         Assert.Equal(1, tripPositions0[1].Y);
 
-        var (key1, tripPositions1) = collection.Result[1];
+        (object? key1, List<TripPosition>? tripPositions1) = collection.Result[1];
         Assert.Equal("a", key1);
         Assert.Single(tripPositions1);
         Assert.Equal(2, tripPositions1[0].X);
         Assert.Equal(2, tripPositions1[0].Y);
 
-        var (key2, tripPositions2) = collection.Result[2];
+        (object? key2, List<TripPosition>? tripPositions2) = collection.Result[2];
         Assert.Equal(1, key2);
         Assert.Single(tripPositions2);
         Assert.Equal(3, tripPositions2[0].X);

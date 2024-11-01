@@ -1,5 +1,6 @@
 using Mars.Common;
 using Mars.Components.Layers;
+using Mars.Interfaces.Environments;
 
 namespace SOHModel.Demonstration;
 
@@ -11,11 +12,11 @@ public class PoliceSchedulerLayer(DemonstrationLayer demonstrationLayer) : Sched
     {
         if (RegisterAgent == null) return;
         
-        var source = dataRow.SourceGeometry.RandomPositionFromGeometry();
-        var target = dataRow.TargetGeometry.RandomPositionFromGeometry();
-        var squadSize = Convert.ToInt32(dataRow.Data["squadSize"]);
+        Position? source = dataRow.SourceGeometry.RandomPositionFromGeometry();
+        Position? target = dataRow.TargetGeometry.RandomPositionFromGeometry();
+        int squadSize = Convert.ToInt32(dataRow.Data["squadSize"]);
 
-        var police = new Police
+        Police police = new Police
         {
             Source = source,
             Target = target,

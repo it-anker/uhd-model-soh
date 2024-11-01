@@ -1,6 +1,7 @@
 using Mars.Common;
 using Mars.Common.Core;
 using Mars.Components.Layers;
+using Mars.Interfaces.Environments;
 
 namespace SOHModel.Multimodal.Model;
 
@@ -20,13 +21,13 @@ public class CycleTravelerSchedulerLayer : SchedulerLayer
 
     protected override void Schedule(SchedulerEntry dataRow)
     {
-        var source = dataRow.SourceGeometry.RandomPositionFromGeometry();
-        var target = dataRow.TargetGeometry.RandomPositionFromGeometry();
+        Position? source = dataRow.SourceGeometry.RandomPositionFromGeometry();
+        Position? target = dataRow.TargetGeometry.RandomPositionFromGeometry();
 
-        var ownBike = dataRow.Data["hasOwnBikeProbability"].Value<double>();
-        var hasBike = _random.NextDouble() < ownBike;
+        double ownBike = dataRow.Data["hasOwnBikeProbability"].Value<double>();
+        bool hasBike = _random.NextDouble() < ownBike;
 
-        var traveler = new CycleTraveler
+        CycleTraveler traveler = new CycleTraveler
         {
             HasBike = hasBike, StartPosition = source, GoalPosition = target
         };

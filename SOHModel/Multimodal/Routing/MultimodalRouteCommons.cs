@@ -17,17 +17,17 @@ public static class MultimodalRouteCommons
     /// <returns>The calculated travel time (rounded).</returns>
     public static int ExpectedTravelTime(this MultimodalRoute multimodalRoute, IModalCapabilitiesAgent agent = null)
     {
-        var travelTime = 0d;
+        double travelTime = 0d;
 
-        var stops = multimodalRoute?.Stops;
+        IList<RouteStop>? stops = multimodalRoute?.Stops;
         if (stops == null || !stops.Any() || !stops.First().Route.Any()) return int.MaxValue;
 
-        foreach (var routeStop in stops)
+        foreach (RouteStop routeStop in stops)
             switch (routeStop.ModalChoice)
             {
                 case ModalChoice.Walking:
-                    var pedestrian = agent as IWalkingCapable;
-                    var walkingSpeed = pedestrian?.PreferredSpeed > 0 ? pedestrian.PreferredSpeed : 5 / 3.6;
+                    IWalkingCapable? pedestrian = agent as IWalkingCapable;
+                    double walkingSpeed = pedestrian?.PreferredSpeed > 0 ? pedestrian.PreferredSpeed : 5 / 3.6;
                     travelTime += routeStop.Route.RouteLength / walkingSpeed;
                     break;
                 case ModalChoice.CarDriving:
@@ -56,16 +56,16 @@ public static class MultimodalRouteCommons
     /// <returns></returns>
     public static List<double> GiveDistanceOfSwitchPoints(MultimodalRoute multimodalRoute)
     {
-        var distances = new List<double>();
+        List<double> distances = new List<double>();
         if (multimodalRoute.Stops.Count() < 2) return distances;
 
         Position endPointOfPrevious = null;
-        foreach (var stop in multimodalRoute.Stops)
+        foreach (RouteStop? stop in multimodalRoute.Stops)
         {
             if (endPointOfPrevious != null)
             {
-                var startPointOfNext = stop.Route.Stops.First().Edge.From.Position;
-                var distance = startPointOfNext.DistanceInMTo(endPointOfPrevious);
+                Position? startPointOfNext = stop.Route.Stops.First().Edge.From.Position;
+                double distance = startPointOfNext.DistanceInMTo(endPointOfPrevious);
                 distances.Add(distance);
             }
 

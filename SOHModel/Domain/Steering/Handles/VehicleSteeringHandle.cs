@@ -24,7 +24,7 @@ public class VehicleSteeringHandle
     protected const double UrbanSafetyDistanceInM = 50d;
     private const double FiftyKmHinMs = 50d / 3.6;
     private const int MinimalExploreDistance = 30;
-    private const double SafetyDistanceForOvertaking = 20; //TODO literature?
+    private const double SafetyDistanceForOvertaking = 20; // TODO literature?
 
     private IIntersectionTrafficCode _intersectionTrafficCode;
     protected IVehicleAccelerator VehicleAccelerator;
@@ -60,15 +60,15 @@ public class VehicleSteeringHandle
     {
         if (GoalReached || (Vehicle.CurrentEdge == null && !MoveFromNodeSuccessfully())) return;
 
-        //TODO stay on lane when going on next edge?? going right left, before turning on intersection?
+        // TODO stay on lane when going on next edge?? going right left, before turning on intersection?
 
-        var exploreResult = ExploreEnvironment();
-        var deceleration = MaximalDeceleration;
+        SpatialGraphExploreResult exploreResult = ExploreEnvironment();
+        double deceleration = MaximalDeceleration;
         deceleration = HandleBraking(deceleration);
         deceleration = HandleIntersectionAhead(exploreResult, deceleration);
         deceleration = HandleVehiclesAhead(exploreResult, deceleration);
 
-        var drivingDistance = CalculateDrivingDistance(deceleration);
+        double drivingDistance = CalculateDrivingDistance(deceleration);
         PerformMoveAction(drivingDistance);
     }
 
@@ -77,7 +77,7 @@ public class VehicleSteeringHandle
         if (!Vehicle.Driver.BrakingActivated)
             return deceleration;
 
-        var distance = Math.Pow(Velocity * 3.6 / 10, 2) * 2;
+        double distance = Math.Pow(Velocity * 3.6 / 10, 2) * 2;
         return CalculateSpeedChange(Velocity, MaxSpeed, distance, 0, 0);
     }
 
@@ -107,41 +107,41 @@ public class VehicleSteeringHandle
         if (Vehicle.RemainingDistanceOnEdge > IntersectionAheadClearanceInM)
             return biggestDeceleration;
 
-        var exploreResults = exploreResult.EdgeExplores;
-        var approachingEndOfRoute =
+        List<EdgeExploreResult>? exploreResults = exploreResult.EdgeExplores;
+        bool approachingEndOfRoute =
             Route.RemainingRouteDistanceToGoal < UrbanSafetyDistanceInM && exploreResults.Count == 1;
         if (approachingEndOfRoute)
         {
-            var speedChange = CalculateSpeedChange(Vehicle.Velocity, MaxSpeed,
+            double speedChange = CalculateSpeedChange(Vehicle.Velocity, MaxSpeed,
                 exploreResults.First().IntersectionDistance, 0, 0);
             return Math.Min(speedChange, biggestDeceleration);
         }
 
-        for (var index = 0; index < exploreResults.Count - 1; index++)
+        for (int index = 0; index < exploreResults.Count - 1; index++)
         {
-            var edgeExploreResult = exploreResults[index];
+            EdgeExploreResult edgeExploreResult = exploreResults[index];
             //-------------------------------//
             //** Turning Speed Adjustment ***//
             //-------------------------------//
-            var nextDirection = DirectionType.Up;
+            DirectionType nextDirection = DirectionType.Up;
 
             if (edgeExploreResult.IntersectionDistance < UrbanSafetyDistanceInM)
             {
                 nextDirection = edgeExploreResult.Edge.To.GetDirection(edgeExploreResult.Edge,
                     exploreResults[index + 1].Edge);
-                var turningSpeed = Vehicle.TurningSpeedFor(nextDirection);
+                double turningSpeed = Vehicle.TurningSpeedFor(nextDirection);
 
                 if (turningSpeed > 0)
                 {
                     if (Vehicle.Velocity > turningSpeed)
                     {
-                        var speedChange = CalculateSpeedChange(Vehicle.Velocity, MaxSpeed,
+                        double speedChange = CalculateSpeedChange(Vehicle.Velocity, MaxSpeed,
                             edgeExploreResult.IntersectionDistance, turningSpeed, 0);
 
-                        //TODO have to check this on semantics
+                        // TODO have to check this on semantics
                         if (Vehicle.Velocity + speedChange < turningSpeed)
                         {
-                            var a = turningSpeed - Vehicle.Velocity;
+                            double a = turningSpeed - Vehicle.Velocity;
                             if (a < biggestDeceleration)
                                 biggestDeceleration = a;
                             continue;
@@ -152,7 +152,7 @@ public class VehicleSteeringHandle
                     }
                     else
                     {
-                        var speedChange = CalculateSpeedChange(Vehicle.Velocity,
+                        double speedChange = CalculateSpeedChange(Vehicle.Velocity,
                             turningSpeed, FreeDrivingClearanceInM, turningSpeed, 0);
 
                         if (speedChange < biggestDeceleration)
@@ -167,17 +167,17 @@ public class VehicleSteeringHandle
             if (edgeExploreResult.LightPhase == TrafficLightPhase.None &&
                 edgeExploreResult.IntersectionDistance < UrbanSafetyDistanceInM)
             {
-                var intersectionWithMultipleEdges = edgeExploreResult.Edge.To.IncomingEdges.Count > 1;
+                bool intersectionWithMultipleEdges = edgeExploreResult.Edge.To.IncomingEdges.Count > 1;
                 if (intersectionWithMultipleEdges)
                 {
-                    var deceleration = _intersectionTrafficCode.Evaluate(edgeExploreResult, nextDirection);
+                    double deceleration = _intersectionTrafficCode.Evaluate(edgeExploreResult, nextDirection);
                     if (deceleration < biggestDeceleration)
                         biggestDeceleration = deceleration;
                 }
             }
             else if (edgeExploreResult.LightPhase == TrafficLightPhase.Yellow)
             {
-                var speedChange = CalculateSpeedChange(Vehicle.Velocity, MaxSpeed,
+                double speedChange = CalculateSpeedChange(Vehicle.Velocity, MaxSpeed,
                     edgeExploreResult.IntersectionDistance, 0, 0);
 
                 if (speedChange <= Vehicle.MaxDeceleration && speedChange < biggestDeceleration)
@@ -185,7 +185,7 @@ public class VehicleSteeringHandle
             }
             else if (edgeExploreResult.LightPhase == TrafficLightPhase.Red)
             {
-                var speedChange = CalculateSpeedChange(Vehicle.Velocity, MaxSpeed,
+                double speedChange = CalculateSpeedChange(Vehicle.Velocity, MaxSpeed,
                     edgeExploreResult.IntersectionDistance, 0, 0);
                 if (speedChange < biggestDeceleration)
                     biggestDeceleration = speedChange;
@@ -207,34 +207,34 @@ public class VehicleSteeringHandle
     {
         if (!Vehicle.IsCollidingEntity) return biggestDeceleration;
 
-        //TODO nicht Spurwechsel, wenn Abbiegevorgang ansteht
-        var (entityAhead, distanceToEntityAhead) = FindEntityAhead(exploreResult, Route);
+        // TODO nicht Spurwechsel, wenn Abbiegevorgang ansteht
+        (ISpatialGraphEntity? entityAhead, double distanceToEntityAhead) = FindEntityAhead(exploreResult, Route);
         if (entityAhead == null) return biggestDeceleration;
 
-        var vehicleAhead = entityAhead is RoadUser vehicle ? vehicle : new RoadBlocker(entityAhead);
+        RoadUser vehicleAhead = entityAhead is RoadUser vehicle ? vehicle : new RoadBlocker(entityAhead);
 
-        var speedChange = CalculateSpeedChange(Vehicle.Velocity, MaxSpeed, distanceToEntityAhead,
+        double speedChange = CalculateSpeedChange(Vehicle.Velocity, MaxSpeed, distanceToEntityAhead,
             vehicleAhead.Velocity, vehicleAhead.Acceleration);
 
         if (!DesireToOvertake(speedChange)) return Math.Min(speedChange, biggestDeceleration);
 
-        var leftIndex = Vehicle.LaneOnCurrentEdge - 1;
-        var rightIndex = Vehicle.LaneOnCurrentEdge + 1;
+        int leftIndex = Vehicle.LaneOnCurrentEdge - 1;
+        int rightIndex = Vehicle.LaneOnCurrentEdge + 1;
 
-        var edgeExploreResult = exploreResult.EdgeExplores.First();
-        var (minLane, maxLane) = edgeExploreResult.Edge.ModalityLaneRanges[Vehicle.ModalityType];
-        var hasLeftLane = edgeExploreResult.LaneExplores.ContainsKey(leftIndex) && leftIndex >= minLane &&
-                          leftIndex <= maxLane; //TODO test?
-        var hasRightLane = edgeExploreResult.LaneExplores.ContainsKey(rightIndex) && rightIndex >= minLane &&
-                           rightIndex <= maxLane;
+        EdgeExploreResult? edgeExploreResult = exploreResult.EdgeExplores.First();
+        (int minLane, int maxLane) = edgeExploreResult.Edge.ModalityLaneRanges[Vehicle.ModalityType];
+        bool hasLeftLane = edgeExploreResult.LaneExplores.ContainsKey(leftIndex) && leftIndex >= minLane &&
+                           leftIndex <= maxLane; // TODO test?
+        bool hasRightLane = edgeExploreResult.LaneExplores.ContainsKey(rightIndex) && rightIndex >= minLane &&
+                            rightIndex <= maxLane;
 
-        var (entityAheadLeft, distanceAheadLeft) = FindEntityOnSameEdge(exploreResult, leftIndex, true);
-        var (entityAheadRight, distanceAheadRight) = FindEntityOnSameEdge(exploreResult, rightIndex, true);
+        (ISpatialGraphEntity? entityAheadLeft, double distanceAheadLeft) = FindEntityOnSameEdge(exploreResult, leftIndex, true);
+        (ISpatialGraphEntity? entityAheadRight, double distanceAheadRight) = FindEntityOnSameEdge(exploreResult, rightIndex, true);
 
-        var (entityBehindLeft, distanceBehindLeft) = FindEntityOnSameEdge(exploreResult, leftIndex, false);
-        var (entityBehindRight, distanceBehindRight) = FindEntityOnSameEdge(exploreResult, rightIndex, false);
+        (ISpatialGraphEntity entityBehindLeft, double distanceBehindLeft) = FindEntityOnSameEdge(exploreResult, leftIndex, false);
+        (ISpatialGraphEntity entityBehindRight, double distanceBehindRight) = FindEntityOnSameEdge(exploreResult, rightIndex, false);
 
-        var nextLaneRelative = 0;
+        int nextLaneRelative = 0;
         if (hasLeftLane && (entityAheadLeft == null || distanceAheadLeft > distanceToEntityAhead) &&
             OvertakingIsSafelyPossible(entityBehindLeft, distanceBehindLeft))
             nextLaneRelative = -1;
@@ -242,7 +242,7 @@ public class VehicleSteeringHandle
         if (hasRightLane && (entityAheadRight == null || distanceAheadRight > distanceToEntityAhead) &&
             OvertakingIsSafelyPossible(entityBehindRight, distanceBehindRight))
         {
-            var switchingLeftNotPossible = nextLaneRelative == 0;
+            bool switchingLeftNotPossible = nextLaneRelative == 0;
             if (switchingLeftNotPossible || distanceAheadRight > distanceAheadLeft)
                 nextLaneRelative = 1;
         }
@@ -254,14 +254,14 @@ public class VehicleSteeringHandle
 
     private bool OvertakingIsSafelyPossible(ISpatialGraphEntity entityBehind, double distanceToEntityBehind)
     {
-        //TODO also check that not a driver from behind is fast joining up
+        // TODO also check that not a driver from behind is fast joining up
         if (entityBehind == null) return true;
-        var velocity = entityBehind is RoadUser vehicle ? vehicle.Velocity : 0;
-        var slower = Velocity > velocity;
+        double velocity = entityBehind is RoadUser vehicle ? vehicle.Velocity : 0;
+        bool slower = Velocity > velocity;
 
         const int safetyTimeInSeconds = 10;
-        var speedDifference = Velocity - velocity;
-        var safetyDistance = speedDifference * safetyTimeInSeconds;
+        double speedDifference = Velocity - velocity;
+        double safetyDistance = speedDifference * safetyTimeInSeconds;
         if (slower) return distanceToEntityBehind > safetyDistance;
 
         return distanceToEntityBehind < safetyDistance + SafetyDistanceForOvertaking;
@@ -269,14 +269,14 @@ public class VehicleSteeringHandle
 
     private bool DesireToOvertake(double speedChange)
     {
-        var (minLane, maxLane) = Vehicle.CurrentEdge.ModalityLaneRanges[Vehicle.ModalityType];
-        var multiLaneRoad = maxLane - minLane >= 1;
+        (int minLane, int maxLane) = Vehicle.CurrentEdge.ModalityLaneRanges[Vehicle.ModalityType];
+        bool multiLaneRoad = maxLane - minLane >= 1;
         return Vehicle.Driver.OvertakingActivated && multiLaneRoad && speedChange < 0;
     }
 
     protected virtual double CalculateDrivingDistance(double biggestDeceleration)
     {
-        //TODO magic number, maybe smaller?
+        // TODO magic number, maybe smaller?
         if (Route.RemainingRouteDistanceToGoal < 3) // Make last step to goal
             return Route.RemainingRouteDistanceToGoal;
 
@@ -284,7 +284,7 @@ public class VehicleSteeringHandle
             return Vehicle.Velocity + biggestDeceleration;
 
         // free way driving
-        var speedChange = CalculateSpeedChange(Vehicle.Velocity, MaxSpeed,
+        double speedChange = CalculateSpeedChange(Vehicle.Velocity, MaxSpeed,
             FreeDrivingClearanceInM, SpeedLimit, 0);
         return Vehicle.Velocity + speedChange;
     }
@@ -297,7 +297,7 @@ public class VehicleSteeringHandle
             {
                 Vehicle.Velocity = Math.Round(distance, 2);
                 Vehicle.Acceleration = distance - Vehicle.Velocity;
-                Vehicle.Position = Vehicle.CalculateNewPositionFor(Route, out var bearing);
+                Vehicle.Position = Vehicle.CalculateNewPositionFor(Route, out double bearing);
                 Vehicle.Bearing = bearing;
             }
 
@@ -305,7 +305,7 @@ public class VehicleSteeringHandle
         }
         else
         {
-            Vehicle.Acceleration = -Vehicle.Velocity; //TODO really?
+            Vehicle.Acceleration = -Vehicle.Velocity; // TODO really?
             Vehicle.Velocity = 0;
         }
 
@@ -323,15 +323,15 @@ public class VehicleSteeringHandle
     /// </returns>
     public (ISpatialGraphEntity, double) FindEntityAhead(SpatialGraphExploreResult exploreResult, Route route)
     {
-        var distance = Vehicle.CurrentEdge != null ? -Vehicle.PositionOnCurrentEdge : 0;
-        for (var i = 0; i < exploreResult.EdgeExplores.Count; i++)
+        double distance = Vehicle.CurrentEdge != null ? -Vehicle.PositionOnCurrentEdge : 0;
+        for (int i = 0; i < exploreResult.EdgeExplores.Count; i++)
         {
-            var edgeExplore = exploreResult.EdgeExplores[i];
-            var desiredLane = Math.Max(0, route[i].DesiredLane);
+            EdgeExploreResult? edgeExplore = exploreResult.EdgeExplores[i];
+            int desiredLane = Math.Max(0, route[i].DesiredLane);
 
-            if (edgeExplore.LaneExplores.TryGetValue(desiredLane, out var laneExploreResult))
+            if (edgeExplore.LaneExplores.TryGetValue(desiredLane, out LaneExploreResult? laneExploreResult))
             {
-                var entity = laneExploreResult.Forward.FirstOrDefault();
+                ISpatialGraphEntity? entity = laneExploreResult.Forward.FirstOrDefault();
                 if (entity != null)
                 {
                     distance += entity.PositionOnCurrentEdge;
@@ -355,17 +355,17 @@ public class VehicleSteeringHandle
     public (ISpatialGraphEntity, double) FindEntityOnSameEdge(SpatialGraphExploreResult exploreResult, int lane,
         bool forward)
     {
-        var edgeExploreResult = exploreResult.EdgeExplores.FirstOrDefault();
+        EdgeExploreResult? edgeExploreResult = exploreResult.EdgeExplores.FirstOrDefault();
         if (edgeExploreResult == null || !edgeExploreResult.LaneExplores.ContainsKey(lane)) return (null, 0);
 
-        var distance = Vehicle.CurrentEdge != null ? -Vehicle.PositionOnCurrentEdge : 0;
-        var laneExplore = edgeExploreResult.LaneExplores[lane];
-        var entity = (forward ? laneExplore.Forward : laneExplore.Backward).FirstOrDefault();
+        double distance = Vehicle.CurrentEdge != null ? -Vehicle.PositionOnCurrentEdge : 0;
+        LaneExploreResult? laneExplore = edgeExploreResult.LaneExplores[lane];
+        ISpatialGraphEntity? entity = (forward ? laneExplore.Forward : laneExplore.Backward).FirstOrDefault();
         if (entity == null) return (null, 0);
 
         distance += entity.PositionOnCurrentEdge;
         return (entity, distance);
-    } //TODO write test cases
+    } // TODO write test cases
 
 
     protected void ChangeLane()
@@ -397,21 +397,21 @@ public class VehicleSteeringHandle
         if (desiredLane >= 0) Route.First().DesiredLane = desiredLane;
 
         const int maxLanesAhead = 5;
-        var firstLaneInitRequired = desiredLane < 0 && Vehicle.LaneOnCurrentEdge == -1;
-        for (var i = firstLaneInitRequired ? 0 : 1;
+        bool firstLaneInitRequired = desiredLane < 0 && Vehicle.LaneOnCurrentEdge == -1;
+        for (int i = firstLaneInitRequired ? 0 : 1;
              i < maxLanesAhead && i < Route.Stops.Count - 1 && ((SpatialEdge)Route.Stops[i].Edge).LaneCount > 1;
              i++)
         {
-            var currentStop = Route.Stops[i];
-            var (leftLane, rightLane) = currentStop.Edge.ModalityLaneRanges[Vehicle.ModalityType];
+            EdgeStop? currentStop = Route.Stops[i];
+            (int leftLane, int rightLane) = currentStop.Edge.ModalityLaneRanges[Vehicle.ModalityType];
             if (currentStop.DesiredLane == -1 || desiredLane != -1)
             {
-                var currentLane = desiredLane < 0 ? leftLane : desiredLane;
-                var nextStop = Route.Stops[i + 1];
-                var incoming = currentStop.Edge.From.Position.GetBearing(currentStop.Edge.To.Position);
-                var outgoing = nextStop.Edge.From.Position.GetBearing(nextStop.Edge.To.Position);
+                int currentLane = desiredLane < 0 ? leftLane : desiredLane;
+                EdgeStop? nextStop = Route.Stops[i + 1];
+                double incoming = currentStop.Edge.From.Position.GetBearing(currentStop.Edge.To.Position);
+                double outgoing = nextStop.Edge.From.Position.GetBearing(nextStop.Edge.To.Position);
 
-                var direction = PositionHelper.GetDirectionType(incoming, outgoing);
+                DirectionType direction = PositionHelper.GetDirectionType(incoming, outgoing);
                 switch (direction)
                 {
                     case DirectionType.Up:

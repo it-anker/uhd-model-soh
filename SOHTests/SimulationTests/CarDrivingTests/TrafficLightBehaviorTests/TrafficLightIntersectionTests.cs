@@ -1,9 +1,11 @@
 using System;
 using System.Collections.Generic;
+using System.Data;
 using System.IO;
 using Mars.Common.Core.Logging;
 using Mars.Common.IO.Csv;
 using Mars.Components.Starter;
+using Mars.Core.Simulation.Entities;
 using Mars.Interfaces.Model;
 using SOHModel.Car.Model;
 using SOHModel.Multimodal.Layers.TrafficLight;
@@ -18,14 +20,14 @@ public class TrafficLightIntersectionTests
     public void ThreeCarsIntersectionWithLightsTest()
     {
         LoggerFactory.SetLogLevel(LogLevel.Info);
-        var modelDescription = new ModelDescription();
+        ModelDescription modelDescription = new ModelDescription();
         modelDescription.AddLayer<CarLayer>();
         modelDescription.AddLayer<TrafficLightLayer>();
         modelDescription.AddAgent<CarDriver, CarLayer>();
         modelDescription.AddEntity<Car>();
 
-        var start = DateTime.Parse("2020-01-01T00:00:00");
-        var config = new SimulationConfig
+        DateTime start = DateTime.Parse("2020-01-01T00:00:00");
+        SimulationConfig config = new SimulationConfig
         {
             Globals =
             {
@@ -71,19 +73,19 @@ public class TrafficLightIntersectionTests
                 }
             }
         };
-        var starter = SimulationStarter.Start(modelDescription, config);
-        var workflowState = starter.Run();
+        SimulationStarter starter = SimulationStarter.Start(modelDescription, config);
+        SimulationWorkflowState workflowState = starter.Run();
         Assert.Equal(120, workflowState.Iterations);
 
-        var table = CsvReader.MapData(Path.Combine(GetType().Name, nameof(CarDriver) + ".csv"));
+        DataTable? table = CsvReader.MapData(Path.Combine(GetType().Name, nameof(CarDriver) + ".csv"));
         Assert.NotNull(table);
 
         //make sure that the cars reach the goal
-        var car1ReachesGoal =
+        DataRow[] car1ReachesGoal =
             table.Select("StableId = '64eae14b-3976-4dd1-b324-e73f1e70a001' AND GoalReached = 'True'");
-        var car2ReachesGoal =
+        DataRow[] car2ReachesGoal =
             table.Select("StableId = '64eae14b-3976-4dd1-b324-e73f1e70a002' AND GoalReached = 'True'");
-        var car3ReachesGoal =
+        DataRow[] car3ReachesGoal =
             table.Select("StableId = '64eae14b-3976-4dd1-b324-e73f1e70a003' AND GoalReached = 'True'");
         Assert.NotEmpty(car1ReachesGoal);
         Assert.NotEmpty(car2ReachesGoal);

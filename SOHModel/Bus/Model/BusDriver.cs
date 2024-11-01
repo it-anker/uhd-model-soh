@@ -3,6 +3,7 @@ using Mars.Interfaces.Annotations;
 using Mars.Interfaces.Environments;
 using Mars.Interfaces.Layers;
 using SOHModel.Bus.Route;
+using SOHModel.Bus.Station;
 using SOHModel.Bus.Steering;
 using SOHModel.Domain.Steering.Common;
 
@@ -115,10 +116,10 @@ public class BusDriver : AbstractAgent, IBusSteeringCapable
                 Environment.Remove(Bus);
                 BusRouteEnumerator.Current?.To.Enter(Bus);
 
-                var currentMinutes = BusRouteEnumerator.Current?.Minutes ?? 0;
+                int currentMinutes = BusRouteEnumerator.Current?.Minutes ?? 0;
                 _departureTick += currentMinutes * 60;
 
-                var notAtTerminalStation = FindNextRouteSection();
+                bool notAtTerminalStation = FindNextRouteSection();
                 if (notAtTerminalStation)
                 {
                     Bus.NotifyPassengers(PassengerMessage.GoalReached);
@@ -134,7 +135,7 @@ public class BusDriver : AbstractAgent, IBusSteeringCapable
 
     private void FindRouteAndStartCommuting()
     {
-        if (Layer.BusRouteLayer.TryGetRoute(Line, out var schedule))
+        if (Layer.BusRouteLayer.TryGetRoute(Line, out BusRoute? schedule))
             BusRoute = schedule;
         else
             throw new ArgumentException($"No bus route provided by {nameof(BusRouteLayer)}");
@@ -147,7 +148,7 @@ public class BusDriver : AbstractAgent, IBusSteeringCapable
 
         FindNextRouteSection();
 
-        var busStation = BusRouteEnumerator.Current?.From;
+        BusStation? busStation = BusRouteEnumerator.Current?.From;
         if (!busStation?.Enter(Bus) ?? true)
             throw new ArgumentException("Bus could not dock the first station");
     }
@@ -156,12 +157,12 @@ public class BusDriver : AbstractAgent, IBusSteeringCapable
     {
         if (BusRouteEnumerator.MoveNext())
         {
-            var source = Environment.NearestNode(BusRouteEnumerator.Current?.From.Position,
+            ISpatialNode? source = Environment.NearestNode(BusRouteEnumerator.Current?.From.Position,
                 SpatialModalityType.CarDriving);
-            var target = Environment.NearestNode(BusRouteEnumerator.Current?.To.Position,
+            ISpatialNode? target = Environment.NearestNode(BusRouteEnumerator.Current?.To.Position,
                 SpatialModalityType.CarDriving);
 
-            var route = Environment.FindShortestRoute(source, target,
+            Mars.Interfaces.Environments.Route? route = Environment.FindShortestRoute(source, target,
                 edge => edge.Modalities.Contains(SpatialModalityType.CarDriving));
 
             if (route is { Count: > 0 })

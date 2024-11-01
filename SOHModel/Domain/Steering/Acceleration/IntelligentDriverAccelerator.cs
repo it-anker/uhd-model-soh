@@ -15,15 +15,15 @@ public class IntelligentDriverAccelerator : IVehicleAccelerator
     {
         if (distanceToVehicleAhead <= 0) return -currentSpeed;
 
-        var speedDiff = Math.Round(Math.Abs(speedVehicleAhead - currentSpeed), 3);
-        var desiredGap = Math.Round(GapInCongestion + GapInConvoy * Math.Sqrt(currentSpeed / maxSpeed) +
-                                    SafeTimeHeadway * currentSpeed +
-                                    currentSpeed * speedDiff /
-                                    (2 * Math.Sqrt(MaxAcceleration * ComfortableDeceleration)), 3);
+        double speedDiff = Math.Round(Math.Abs(speedVehicleAhead - currentSpeed), 3);
+        double desiredGap = Math.Round(GapInCongestion + GapInConvoy * Math.Sqrt(currentSpeed / maxSpeed) +
+                                       SafeTimeHeadway * currentSpeed +
+                                       currentSpeed * speedDiff /
+                                       (2 * Math.Sqrt(MaxAcceleration * ComfortableDeceleration)), 3);
 
-        var speedChange = Math.Round(MaxAcceleration *
-                                     (1 - Math.Pow(currentSpeed / maxSpeed, AccelerationExponent) -
-                                      Math.Pow(desiredGap / distanceToVehicleAhead, 2)), 3);
+        double speedChange = Math.Round(MaxAcceleration *
+                                        (1 - Math.Pow(currentSpeed / maxSpeed, AccelerationExponent) -
+                                         Math.Pow(desiredGap / distanceToVehicleAhead, 2)), 3);
         return speedChange;
     }
 }

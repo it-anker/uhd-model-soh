@@ -6,6 +6,7 @@ using Mars.Interfaces.Agents;
 using Mars.Interfaces.Data;
 using Mars.Interfaces.Environments;
 using Mars.Interfaces.Layers;
+using Mars.Interfaces.Model;
 using SOHModel.Car.Parking;
 using SOHModel.Domain.Graph;
 
@@ -47,7 +48,7 @@ public class CarLayer : AbstractActiveLayer, ICarLayer, ISpatialGraphLayer
         else if (!string.IsNullOrEmpty(Mapping.File))
             Environment = new SpatialGraphEnvironment(layerInitData.LayerInitConfig.File);
 
-        foreach (var config in layerInitData.AgentInitConfigs)
+        foreach (AgentMapping? config in layerInitData.AgentInitConfigs)
         {
             if (registerAgentHandle != null && unregisterAgent != null && Environment != null)
             {

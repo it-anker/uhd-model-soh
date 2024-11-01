@@ -22,7 +22,7 @@ public class CycleTravelerTests
 
     public CycleTravelerTests()
     {
-        var spatialGraphLayer = new SpatialGraphMediatorLayer();
+        SpatialGraphMediatorLayer spatialGraphLayer = new SpatialGraphMediatorLayer();
         spatialGraphLayer.InitLayer(new LayerInitData
         {
             LayerInitConfig =
@@ -46,7 +46,7 @@ public class CycleTravelerTests
             }
         });
 
-        var bicycleRentalLayer = new BicycleRentalLayer
+        BicycleRentalLayer bicycleRentalLayer = new BicycleRentalLayer
         {
             SpatialGraphMediatorLayer = new SpatialGraphMediatorLayer
             {
@@ -84,26 +84,26 @@ public class CycleTravelerTests
     [Fact]
     public void MoveFromOutsideToInsideOverBorder()
     {
-        var start = Position.CreateGeoPosition(9.963353372, 53.554247021);
-        var goal = Position.CreateGeoPosition(9.955426, 53.5550917);
+        Position? start = Position.CreateGeoPosition(9.963353372, 53.554247021);
+        Position? goal = Position.CreateGeoPosition(9.955426, 53.5550917);
 
         Assert.False(_sideWalk.BoundingBox.Contains(start.ToCoordinate()));
         Assert.True(_sideWalk.BoundingBox.Contains(goal.ToCoordinate()));
 
-        var (validatedStart, validatedGoal) = _gatewayLayer.Validate(start, goal);
+        (Position validatedStart, Position validatedGoal) = _gatewayLayer.Validate(start, goal);
         Assert.NotEqual(start, validatedStart);
         Assert.Equal(_sideWalk.NearestNode(start).Position, validatedStart);
         Assert.Equal(goal, validatedGoal);
 
-        var agent = new CycleTraveler
+        CycleTraveler agent = new CycleTraveler
         {
             HasBike = false,
             StartPosition = start,
             GoalPosition = goal
         };
         agent.Init(_layer);
-        var visitedStartNode = false;
-        for (var tick = 0; tick < 5000 && !agent.GoalReached; tick++, _layer.Context.UpdateStep())
+        bool visitedStartNode = false;
+        for (int tick = 0; tick < 5000 && !agent.GoalReached; tick++, _layer.Context.UpdateStep())
         {
             agent.Tick();
             visitedStartNode |= agent.Position.DistanceInMTo(validatedStart) < 2;
@@ -117,26 +117,26 @@ public class CycleTravelerTests
     [Fact]
     public void MoveFromInsideToOutsideOverBorder()
     {
-        var start = Position.CreateGeoPosition(9.955426, 53.5550917);
-        var goal = Position.CreateGeoPosition(9.963353372, 53.554247021);
+        Position? start = Position.CreateGeoPosition(9.955426, 53.5550917);
+        Position? goal = Position.CreateGeoPosition(9.963353372, 53.554247021);
 
         Assert.True(_sideWalk.BoundingBox.Contains(start.ToCoordinate()));
         Assert.False(_sideWalk.BoundingBox.Contains(goal.ToCoordinate()));
 
-        var (validatedStart, validatedGoal) = _gatewayLayer.Validate(start, goal);
+        (Position validatedStart, Position validatedGoal) = _gatewayLayer.Validate(start, goal);
         Assert.Equal(start, validatedStart);
         Assert.Equal(_sideWalk.NearestNode(goal).Position, validatedGoal);
         Assert.NotEqual(goal, validatedGoal);
 
-        var agent = new CycleTraveler
+        CycleTraveler agent = new CycleTraveler
         {
             HasBike = false,
             StartPosition = start,
             GoalPosition = goal
         };
         agent.Init(_layer);
-        var visitedGoalNode = false;
-        for (var tick = 0; tick < 5000 && !agent.GoalReached; tick++, _layer.Context.UpdateStep())
+        bool visitedGoalNode = false;
+        for (int tick = 0; tick < 5000 && !agent.GoalReached; tick++, _layer.Context.UpdateStep())
         {
             agent.Tick();
             visitedGoalNode |= agent.Position.DistanceInMTo(validatedStart) < 2;
@@ -150,26 +150,26 @@ public class CycleTravelerTests
     [Fact]
     public void MoveFromOutsideToInsideOverGateway()
     {
-        var start = Position.CreateGeoPosition(9.98491, 53.54944);
-        var goal = Position.CreateGeoPosition(9.955426, 53.5550917);
+        Position? start = Position.CreateGeoPosition(9.98491, 53.54944);
+        Position? goal = Position.CreateGeoPosition(9.955426, 53.5550917);
 
         Assert.False(_sideWalk.BoundingBox.Contains(start.ToCoordinate()));
         Assert.True(_sideWalk.BoundingBox.Contains(goal.ToCoordinate()));
 
-        var (validatedStart, validatedGoal) = _gatewayLayer.Validate(start, goal);
+        (Position validatedStart, Position validatedGoal) = _gatewayLayer.Validate(start, goal);
         Assert.NotEqual(start, validatedStart);
         Assert.NotEqual(_sideWalk.NearestNode(start).Position, validatedStart);
         Assert.Equal(goal, validatedGoal);
 
-        var agent = new CycleTraveler
+        CycleTraveler agent = new CycleTraveler
         {
             HasBike = false,
             StartPosition = start,
             GoalPosition = goal
         };
         agent.Init(_layer);
-        var visitedStartNode = false;
-        for (var tick = 0; tick < 5000 && !agent.GoalReached; tick++, _layer.Context.UpdateStep())
+        bool visitedStartNode = false;
+        for (int tick = 0; tick < 5000 && !agent.GoalReached; tick++, _layer.Context.UpdateStep())
         {
             agent.Tick();
             visitedStartNode |= agent.Position.DistanceInMTo(validatedStart) < 2;
@@ -183,25 +183,25 @@ public class CycleTravelerTests
     [Fact]
     public void MoveFromInsideToOutsideOverGateway()
     {
-        var start = Position.CreateGeoPosition(9.955426, 53.5550917);
-        var goal = Position.CreateGeoPosition(9.98491, 53.54944);
+        Position? start = Position.CreateGeoPosition(9.955426, 53.5550917);
+        Position? goal = Position.CreateGeoPosition(9.98491, 53.54944);
 
         Assert.True(_sideWalk.BoundingBox.Contains(start.ToCoordinate()));
         Assert.False(_sideWalk.BoundingBox.Contains(goal.ToCoordinate()));
 
-        var (validatedStart, validatedGoal) = _gatewayLayer.Validate(start, goal);
+        (Position validatedStart, Position validatedGoal) = _gatewayLayer.Validate(start, goal);
         Assert.Equal(start, validatedStart);
         Assert.NotEqual(goal, validatedGoal);
 
-        var agent = new CycleTraveler
+        CycleTraveler agent = new CycleTraveler
         {
             HasBike = false,
             StartPosition = start,
             GoalPosition = goal
         };
         agent.Init(_layer);
-        var visitedGoalNode = false;
-        for (var tick = 0; tick < 5000 && !agent.GoalReached; tick++, _layer.Context.UpdateStep())
+        bool visitedGoalNode = false;
+        for (int tick = 0; tick < 5000 && !agent.GoalReached; tick++, _layer.Context.UpdateStep())
         {
             agent.Tick();
             visitedGoalNode |= agent.Position.DistanceInMTo(validatedGoal) < 2;

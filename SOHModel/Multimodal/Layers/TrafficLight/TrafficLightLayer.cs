@@ -61,42 +61,42 @@ public class TrafficLightLayer : AbstractActiveLayer
         Logger.LogInfo("Traffic light layer initializing from file \"" + _layerInitFile + "\"");
 
         //validation happens in the unzip method
-        var inputDirectory = UnzipInputFile(_layerInitFile);
+        string inputDirectory = UnzipInputFile(_layerInitFile);
 
         //look for metadata.csv file
-        var metaDataFile = Directory.EnumerateFiles(inputDirectory, "metadata.csv", SearchOption.AllDirectories)
+        string? metaDataFile = Directory.EnumerateFiles(inputDirectory, "metadata.csv", SearchOption.AllDirectories)
             .FirstOrDefault();
         if (metaDataFile == null)
             throw new ArgumentNullException(nameof(metaDataFile),
                 "No medata.csv file for traffic light layer found");
 
         //validate overall length
-        var lines = File.ReadAllLines(metaDataFile);
+        string[] lines = File.ReadAllLines(metaDataFile);
         if (lines.Length < 2)
             throw new ArgumentOutOfRangeException(nameof(metaDataFile), 
                 "There were no files specified in the metadata.csv for the traffic light layer");
         //check header contents
-        var header = lines[0].Split(',');
+        string[] header = lines[0].Split(',');
         if (!header.Contains("date") || !header.Contains("file"))
             throw new ArgumentOutOfRangeException(nameof(metaDataFile), 
                 "The metadata file must contain 'date' and 'file' columns");
 
         //figure out file and date columns
-        var fileColumn = 0;
-        for (var i = 0; i < header.Length; i++)
+        int fileColumn = 0;
+        for (int i = 0; i < header.Length; i++)
         {
             if (header[i] == "file")
                 fileColumn = i;
         }
 
-        //todo once we have more data, the whole content of this file has to be read
-        var firstLine = lines[1].Split(',');
-        var firstFileName = firstLine[fileColumn];
-        var firstFile = Directory.EnumerateFiles(inputDirectory, firstFileName, SearchOption.AllDirectories)
+        // TODO once we have more data, the whole content of this file has to be read
+        string[] firstLine = lines[1].Split(',');
+        string firstFileName = firstLine[fileColumn];
+        string? firstFile = Directory.EnumerateFiles(inputDirectory, firstFileName, SearchOption.AllDirectories)
             .FirstOrDefault();
 
         //validate overall file length
-        var trafficLightFile = File.ReadAllLines(firstFile ?? throw new Exception());
+        string[] trafficLightFile = File.ReadAllLines(firstFile ?? throw new Exception());
         if (trafficLightFile.Length < 2)
             throw new ArgumentOutOfRangeException(nameof(trafficLightFile), 
                 "Files to initialize traffic lights need to have a header " +
@@ -118,17 +118,17 @@ public class TrafficLightLayer : AbstractActiveLayer
         if (Context.CurrentTick == 1)
         {
             //figure out lat/lon columns
-            var header = _trafficLightPositions[0].Split(',');
+            string[] header = _trafficLightPositions[0].Split(',');
             int latColumn = 0, lonColumn = 0;
-            for (var i = 0; i < header.Length; i++)
+            for (int i = 0; i < header.Length; i++)
             {
                 if (header[i] == "lat") latColumn = i;
                 if (header[i] == "lon") lonColumn = i;
             }
 
-            for (var i = 1; i < _trafficLightPositions.Length; i++)
+            for (int i = 1; i < _trafficLightPositions.Length; i++)
             {
-                var lineParts = _trafficLightPositions[i].Split(',');
+                string[] lineParts = _trafficLightPositions[i].Split(',');
                 _trafficLightControllers.Add(
                     new TrafficLightController(this, _carLayer.Environment,
                         lineParts[latColumn].Value<double>(), lineParts[lonColumn].Value<double>()));
@@ -136,13 +136,13 @@ public class TrafficLightLayer : AbstractActiveLayer
 
             Logger.LogInfo(_trafficLightControllers.Count + " Traffic light controllers created");
 
-            foreach (var trafficLightController in _trafficLightControllers)
+            foreach (TrafficLightController trafficLightController in _trafficLightControllers)
                 trafficLightController.GenerateTrafficSchedules();
 
             return;
         }
 
-        foreach (var controller in _trafficLightControllers) controller.UpdateLightPhase();
+        foreach (TrafficLightController controller in _trafficLightControllers) controller.UpdateLightPhase();
     }
     
     private static string UnzipInputFile(string filename)

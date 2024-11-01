@@ -22,17 +22,17 @@ public class TrainSchedulerLayer : SchedulerLayer
     {
         const string trainTypeKey = "trainType";
 
-        var trainType = dataRow.Data.TryGetValue(trainTypeKey, out var type) ? type.Value<string>() : "HHA-Typ-DT5";
+        string? trainType = dataRow.Data.TryGetValue(trainTypeKey, out object? type) ? type.Value<string>() : "HHA-Typ-DT5";
 
         if (!dataRow.Data.ContainsKey("line"))
             throw new ArgumentException("Missing line number for train of field 'line' in input");
 
-        var boardingTime = dataRow.Data.TryGetValue("minimumBoardingTimeInSeconds", out var wait)
+        int boardingTime = dataRow.Data.TryGetValue("minimumBoardingTimeInSeconds", out object? wait)
             ? wait.Value<int>()
             : 0;
-        var reversedRoute = dataRow.Data.TryGetValue("reversedRoute", out var reversed) &&
-                            reversed.Value<bool>();
-        var driver = new TrainDriver(_trainLayer, UnregisterAgent, trainType)
+        bool reversedRoute = dataRow.Data.TryGetValue("reversedRoute", out object? reversed) &&
+                             reversed.Value<bool>();
+        TrainDriver driver = new TrainDriver(_trainLayer, UnregisterAgent, trainType)
         {
             Line = dataRow.Data["line"].Value<string>(),
             MinimumBoardingTimeInSeconds = boardingTime,

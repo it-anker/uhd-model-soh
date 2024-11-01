@@ -1,9 +1,11 @@
 using System;
 using System.Collections.Generic;
+using System.Data;
 using System.IO;
 using Mars.Common.Core;
 using Mars.Common.IO.Csv;
 using Mars.Components.Starter;
+using Mars.Core.Simulation.Entities;
 using Mars.Interfaces.Model;
 using SOHModel.Car.Model;
 using SOHTests.Commons;
@@ -18,14 +20,14 @@ public class DecreasingSpeedLimitTests
     [Fact]
     public void DecelerateFrom50To30Test()
     {
-        var modelDescription = new ModelDescription();
+        ModelDescription modelDescription = new ModelDescription();
         modelDescription.AddLayer<CarLayer>();
         modelDescription.AddLayer<StaticTrafficLightLayer>();
         modelDescription.AddAgent<CarDriver, CarLayer>();
         modelDescription.AddEntity<Car>();
 
-        var start = DateTime.Parse("2020-01-01T00:00:00");
-        var config = new SimulationConfig
+        DateTime start = DateTime.Parse("2020-01-01T00:00:00");
+        SimulationConfig config = new SimulationConfig
         {
             Globals =
             {
@@ -72,28 +74,28 @@ public class DecreasingSpeedLimitTests
                 }
             }
         };
-        var starter = SimulationStarter.Start(modelDescription, config);
-        var workflowState = starter.Run();
+        SimulationStarter starter = SimulationStarter.Start(modelDescription, config);
+        SimulationWorkflowState workflowState = starter.Run();
 
         Assert.Equal(200, workflowState.Iterations);
 
-        var table = CsvReader.MapData(Path.Combine(GetType().Name, nameof(CarDriver) + ".csv"));
+        DataTable? table = CsvReader.MapData(Path.Combine(GetType().Name, nameof(CarDriver) + ".csv"));
         Assert.NotNull(table);
 
         //first tick where max speed should be 50 km/h
-        var res = table.Select("Tick = '1'");
+        DataRow[] res = table.Select("Tick = '1'");
         Assert.Single(res);
         Assert.Equal(13.89, res[0]["SpeedLimit"].Value<double>(), 2);
 
         //make sure car doesn't drive faster than allowed but also close to max speed of 13.89 m/s
         res = table.Select("Tick = '90' AND CurrentEdgeId = '1'");
         Assert.Single(res);
-        var currentVelocity = res[0]["Velocity"].Value<double>();
+        double currentVelocity = res[0]["Velocity"].Value<double>();
         Assert.True(currentVelocity <= 13.89);
         Assert.True(currentVelocity > 13.85);
 
         //first step after crossing the intersection when max speed has decreased to 30 km/h
-        var rows = table.Select("CurrentEdgeId = '2' AND Velocity = '13.87'");
+        DataRow[] rows = table.Select("CurrentEdgeId = '2' AND Velocity = '13.87'");
         Assert.Single(rows);
         Assert.Equal(8.33, rows[0]["SpeedLimit"].Value<double>(), 2);
 

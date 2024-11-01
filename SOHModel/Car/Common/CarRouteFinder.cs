@@ -27,16 +27,16 @@ public static class CarRouteFinder
                 {
                     currentNode = environment.GetRandomNode();
 
-                    var firstEdge = currentNode.OutgoingEdges.Values.FirstOrDefault();
+                    ISpatialEdge? firstEdge = currentNode.OutgoingEdges.Values.FirstOrDefault();
                     if (firstEdge == null) continue;
 
                     route = new Route { firstEdge };
 
-                    var routeComplete = true;
-                    for (var i = 0; i < 5; i++)
+                    bool routeComplete = true;
+                    for (int i = 0; i < 5; i++)
                     {
-                        var last = route.Last();
-                        var edgeCount = last.Edge.To.OutgoingEdges.Count;
+                        EdgeStop? last = route.Last();
+                        int edgeCount = last.Edge.To.OutgoingEdges.Count;
                         if (edgeCount == 0)
                         {
                             //_logger.LogWarning("Dead end found");
@@ -44,8 +44,8 @@ public static class CarRouteFinder
                             break;
                         }
 
-                        var randomLane = Random.Next(0, edgeCount);
-                        var nextEdge = last.Edge.To.OutgoingEdges.Values.ElementAt(randomLane);
+                        int randomLane = Random.Next(0, edgeCount);
+                        ISpatialEdge? nextEdge = last.Edge.To.OutgoingEdges.Values.ElementAt(randomLane);
                         route.Add(nextEdge);
                     }
 
@@ -62,7 +62,7 @@ public static class CarRouteFinder
                     currentNode = environment.GetRandomNode();
                     if (currentNode == null) continue;
 
-                    var goal = environment.GetRandomNode();
+                    ISpatialNode? goal = environment.GetRandomNode();
                     if (goal == null || goal.Equals(currentNode)) continue;
 
                     route = environment.FindRoute(currentNode, goal);
@@ -73,7 +73,7 @@ public static class CarRouteFinder
             case 3:
             {
                 currentNode = environment.NearestNode(Position.CreateGeoPosition(startLon, startLat));
-                var goal = environment.NearestNode(Position.CreateGeoPosition(destLon, destLat));
+                ISpatialNode? goal = environment.NearestNode(Position.CreateGeoPosition(destLon, destLat));
 
                 route = environment.FindShortestRoute(currentNode, goal,
                     edge => edge.Modalities.Contains(SpatialModalityType.CarDriving)) ?? new Route();
@@ -100,11 +100,11 @@ public static class CarRouteFinder
 
                 while (route.Count == 1)
                 {
-                    var goal = environment.GetRandomNode();
-                    var nextEdges = environment.FindRoute(startingEdge.To, goal, (_, edge, _) => edge.Length);
+                    ISpatialNode? goal = environment.GetRandomNode();
+                    Route? nextEdges = environment.FindRoute(startingEdge.To, goal, (_, edge, _) => edge.Length);
 
                     if (!goal.Equals(currentNode) || nextEdges != null)
-                        foreach (var edge in nextEdges)
+                        foreach (EdgeStop? edge in nextEdges)
                             route.Add(edge.Edge);
                 }
 
@@ -115,12 +115,12 @@ public static class CarRouteFinder
                 currentNode = environment.NearestNode(Position.CreateGeoPosition(startLon, startLat));
                 route = new Route();
 
-                var rawRoute = osmRoute.Replace("[", "").Replace("]", "").Split(';');
+                string[] rawRoute = osmRoute.Replace("[", "").Replace("]", "").Split(';');
 
-                var nodeToScan = currentNode;
-                foreach (var osmId in rawRoute)
+                ISpatialNode? nodeToScan = currentNode;
+                foreach (string osmId in rawRoute)
                 {
-                    var res = nodeToScan.OutgoingEdges.Values.Single(x => x.Attributes["osmid"].Equals(osmId));
+                    ISpatialEdge? res = nodeToScan.OutgoingEdges.Values.Single(x => x.Attributes["osmid"].Equals(osmId));
 
                     route.Add(res);
                     nodeToScan = res.To;

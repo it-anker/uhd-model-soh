@@ -4,6 +4,7 @@ using System.IO;
 using Mars.Common.Core.Logging;
 using Mars.Components.Starter;
 using Mars.Core.Simulation;
+using Mars.Interfaces;
 using Mars.Interfaces.Environments;
 using Mars.Interfaces.Model;
 using SOHModel.Bicycle.Rental;
@@ -24,7 +25,7 @@ public class WalkingDrivingCyclingDailyRoutineTests
     [Trait("Category", "External")]
     public void SimulateOneDay()
     {
-        var description = new ModelDescription();
+        ModelDescription description = new ModelDescription();
         description.AddLayer<SpatialGraphMediatorLayer>(new[] { typeof(ISpatialGraphLayer) });
 
         description.AddLayer<BicycleRentalLayer>(new[] { typeof(IBicycleRentalLayer) });
@@ -43,8 +44,8 @@ public class WalkingDrivingCyclingDailyRoutineTests
         description.AddEntity<Car>();
         description.AddEntity<RentalBicycle>();
 
-        var startPoint = DateTime.Parse("2020-01-01T00:00:00");
-        var config = new SimulationConfig
+        DateTime startPoint = DateTime.Parse("2020-01-01T00:00:00");
+        SimulationConfig config = new SimulationConfig
         {
             Execution =
             {
@@ -160,8 +161,8 @@ public class WalkingDrivingCyclingDailyRoutineTests
         };
 
         LoggerFactory.SetLogLevel(LogLevel.Off);
-        var application = SimulationStarter.BuildApplication(description, config);
-        var simulation = application.Resolve<ISimulation>();
+        ISimulationContainer application = SimulationStarter.BuildApplication(description, config);
+        ISimulation? simulation = application.Resolve<ISimulation>();
         simulation.StartSimulation();
 
         // var modelAllActiveLayers = state.Model.AllActiveLayers;

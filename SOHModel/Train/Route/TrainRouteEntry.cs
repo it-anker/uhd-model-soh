@@ -35,7 +35,7 @@ public class TrainRouteEntry : IEquatable<TrainRouteEntry>
     {
         unchecked
         {
-            var hashCode = From.GetHashCode();
+            int hashCode = From.GetHashCode();
             hashCode = (hashCode * 397) ^ Minutes.GetHashCode();
             hashCode = (hashCode * 397) ^ To.GetHashCode();
             return hashCode;

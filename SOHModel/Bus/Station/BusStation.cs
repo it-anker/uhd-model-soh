@@ -1,11 +1,12 @@
 using System.Collections.Concurrent;
 using Mars.Common.Core;
 using Mars.Interfaces.Data;
-using Mars.Interfaces.Environments;
 using Mars.Interfaces.Layers;
 using Mars.Numerics;
+using NetTopologySuite.Geometries;
 using SOHModel.Bus.Model;
 using SOHModel.Domain.Steering.Capables;
+using Position = Mars.Interfaces.Environments.Position;
 
 namespace SOHModel.Bus.Station;
 
@@ -58,7 +59,7 @@ public class BusStation : IVectorFeature
     public void Update(VectorStructuredData data)
     {
         VectorStructured = data;
-        var centroid = VectorStructured.Geometry.Centroid;
+        Point? centroid = VectorStructured.Geometry.Centroid;
         Position = Position.CreatePosition(centroid.X, centroid.Y);
         Id = VectorStructured.Data["id"].Value<string>();
         Name = VectorStructured.Data["short_name"].Value<string>();
@@ -86,7 +87,7 @@ public class BusStation : IVectorFeature
     /// <returns>True if bus is not on this station any more.</returns>
     public bool Leave(Model.Bus bus)
     {
-        var success = !Buses.ContainsKey(bus) || Buses.TryRemove(bus, out _);
+        bool success = !Buses.ContainsKey(bus) || Buses.TryRemove(bus, out _);
         if (success) bus.BusStation = null;
 
         return success;
@@ -99,7 +100,7 @@ public class BusStation : IVectorFeature
     /// <returns>The next bus that drives to that goal, null if none found</returns>
     public Model.Bus Find(Position goal)
     {
-        foreach (var train in Buses.Keys)
+        foreach (Model.Bus train in Buses.Keys)
             if (train.Driver is BusDriver trainDriver)
                 if (trainDriver.RemainingStations
                     .Any(entry => Distance.Haversine(entry.To.Position.PositionArray, goal.PositionArray) < 30))

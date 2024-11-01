@@ -1,4 +1,5 @@
 using System;
+using SOHModel.Car.Steering;
 using Xunit;
 
 namespace SOHTests.DomainTests.VehicleTests;
@@ -8,15 +9,15 @@ public partial class VehicleTest
     [Fact]
     public void EnterDriverAsPassenger()
     {
-        var vehicle = new TestCarWithoutRangeCheck(_environment, new Random().Next());
+        TestCarWithoutRangeCheck vehicle = new TestCarWithoutRangeCheck(_environment, new Random().Next());
 
-        var driver = new TestSteeringCapable();
-        var result = vehicle.TryEnterDriver(driver, out var driverVehicle);
+        TestSteeringCapable driver = new TestSteeringCapable();
+        bool result = vehicle.TryEnterDriver(driver, out CarSteeringHandle driverVehicle);
         Assert.True(result);
         Assert.NotNull(driverVehicle);
         Assert.Equal(driver, vehicle.Driver);
 
-        var result2 = vehicle.TryEnterPassenger(driver, out var driverVehicle2);
+        bool result2 = vehicle.TryEnterPassenger(driver, out CarPassengerHandle driverVehicle2);
         Assert.False(result2);
         Assert.Null(driverVehicle2);
         Assert.DoesNotContain(driver, vehicle.Passengers);
@@ -25,10 +26,10 @@ public partial class VehicleTest
     [Fact]
     public void EnterDriverInEmptyVehicle()
     {
-        var vehicle = new TestCarWithoutRangeCheck(_environment, new Random().Next());
+        TestCarWithoutRangeCheck vehicle = new TestCarWithoutRangeCheck(_environment, new Random().Next());
 
-        var driver = new TestSteeringCapable();
-        var result = vehicle.TryEnterDriver(driver, out var driverVehicle);
+        TestSteeringCapable driver = new TestSteeringCapable();
+        bool result = vehicle.TryEnterDriver(driver, out CarSteeringHandle driverVehicle);
         Assert.True(result);
         Assert.NotNull(driverVehicle);
         Assert.Equal(driver, vehicle.Driver);
@@ -37,16 +38,16 @@ public partial class VehicleTest
     [Fact]
     public void EnterDriverInOccupiedVehicle()
     {
-        var vehicle = new TestCarWithoutRangeCheck(_environment, new Random().Next());
+        TestCarWithoutRangeCheck vehicle = new TestCarWithoutRangeCheck(_environment, new Random().Next());
 
-        var firstDriver = new TestSteeringCapable();
-        var result = vehicle.TryEnterDriver(firstDriver, out var driverVehicle);
+        TestSteeringCapable firstDriver = new TestSteeringCapable();
+        bool result = vehicle.TryEnterDriver(firstDriver, out CarSteeringHandle driverVehicle);
         Assert.True(result);
         Assert.NotNull(driverVehicle);
         Assert.Equal(firstDriver, vehicle.Driver);
 
-        var secondDriver = new TestSteeringCapable();
-        var result2 = vehicle.TryEnterDriver(secondDriver, out var driverVehicle2);
+        TestSteeringCapable secondDriver = new TestSteeringCapable();
+        bool result2 = vehicle.TryEnterDriver(secondDriver, out CarSteeringHandle driverVehicle2);
         Assert.False(result2);
         Assert.Null(driverVehicle2);
         Assert.NotEqual(secondDriver, vehicle.Driver);
@@ -55,15 +56,15 @@ public partial class VehicleTest
     [Fact]
     public void EnterDriverTwice()
     {
-        var vehicle = new TestCarWithoutRangeCheck(_environment, new Random().Next());
+        TestCarWithoutRangeCheck vehicle = new TestCarWithoutRangeCheck(_environment, new Random().Next());
 
-        var driver = new TestSteeringCapable();
-        var result = vehicle.TryEnterDriver(driver, out var driverVehicle);
+        TestSteeringCapable driver = new TestSteeringCapable();
+        bool result = vehicle.TryEnterDriver(driver, out CarSteeringHandle driverVehicle);
         Assert.True(result);
         Assert.NotNull(driverVehicle);
         Assert.Equal(driver, vehicle.Driver);
 
-        var result2 = vehicle.TryEnterDriver(driver, out var driverVehicle2);
+        bool result2 = vehicle.TryEnterDriver(driver, out CarSteeringHandle driverVehicle2);
         Assert.False(result2);
         Assert.Null(driverVehicle2);
         Assert.Equal(driver, vehicle.Driver);
@@ -72,15 +73,15 @@ public partial class VehicleTest
     [Fact]
     public void EnterPassengerAsDriver()
     {
-        var vehicle = new TestCarWithoutRangeCheck(_environment, 1);
+        TestCarWithoutRangeCheck vehicle = new TestCarWithoutRangeCheck(_environment, 1);
 
-        var passenger = new TestSteeringCapable();
-        var result = vehicle.TryEnterPassenger(passenger, out var passengerVehicle);
+        TestSteeringCapable passenger = new TestSteeringCapable();
+        bool result = vehicle.TryEnterPassenger(passenger, out CarPassengerHandle passengerVehicle);
         Assert.True(result);
         Assert.NotNull(passengerVehicle);
         Assert.Contains(passenger, vehicle.Passengers);
 
-        var result2 = vehicle.TryEnterDriver(passenger, out var driverVehicle);
+        bool result2 = vehicle.TryEnterDriver(passenger, out CarSteeringHandle driverVehicle);
         Assert.False(result2);
         Assert.Null(driverVehicle);
         Assert.NotEqual(passenger, vehicle.Driver);
@@ -89,16 +90,16 @@ public partial class VehicleTest
     [Fact]
     public void EnterPassengerInVehicleWithFreeSeats()
     {
-        var vehicle = new TestCarWithoutRangeCheck(_environment, 2);
+        TestCarWithoutRangeCheck vehicle = new TestCarWithoutRangeCheck(_environment, 2);
 
-        var passenger = new TestSteeringCapable();
-        var result = vehicle.TryEnterPassenger(passenger, out var passengerVehicle);
+        TestSteeringCapable passenger = new TestSteeringCapable();
+        bool result = vehicle.TryEnterPassenger(passenger, out CarPassengerHandle passengerVehicle);
         Assert.True(result);
         Assert.NotNull(passengerVehicle);
         Assert.Contains(passenger, vehicle.Passengers);
 
-        var passenger2 = new TestSteeringCapable();
-        var result2 = vehicle.TryEnterPassenger(passenger2, out var passengerVehicle2);
+        TestSteeringCapable passenger2 = new TestSteeringCapable();
+        bool result2 = vehicle.TryEnterPassenger(passenger2, out CarPassengerHandle passengerVehicle2);
         Assert.True(result2);
         Assert.NotNull(passengerVehicle2);
         Assert.Contains(passenger2, vehicle.Passengers);
@@ -107,10 +108,10 @@ public partial class VehicleTest
     [Fact]
     public void EnterPassengerInVehicleWithoutCapacity()
     {
-        var vehicle = new TestCarWithoutRangeCheck(_environment, 0);
+        TestCarWithoutRangeCheck vehicle = new TestCarWithoutRangeCheck(_environment, 0);
 
-        var passenger = new TestSteeringCapable();
-        var result = vehicle.TryEnterPassenger(passenger, out var passengerVehicle);
+        TestSteeringCapable passenger = new TestSteeringCapable();
+        bool result = vehicle.TryEnterPassenger(passenger, out CarPassengerHandle passengerVehicle);
         Assert.False(result);
         Assert.Null(passengerVehicle);
         Assert.DoesNotContain(passenger, vehicle.Passengers);
@@ -119,16 +120,16 @@ public partial class VehicleTest
     [Fact]
     public void EnterPassengerInVehicleWithoutFreeSeats()
     {
-        var vehicle = new TestCarWithoutRangeCheck(_environment, 1);
+        TestCarWithoutRangeCheck vehicle = new TestCarWithoutRangeCheck(_environment, 1);
 
-        var passenger = new TestSteeringCapable();
-        var result = vehicle.TryEnterPassenger(passenger, out var passengerVehicle);
+        TestSteeringCapable passenger = new TestSteeringCapable();
+        bool result = vehicle.TryEnterPassenger(passenger, out CarPassengerHandle passengerVehicle);
         Assert.True(result);
         Assert.NotNull(passengerVehicle);
         Assert.Contains(passenger, vehicle.Passengers);
 
-        var passenger2 = new TestSteeringCapable();
-        var result2 = vehicle.TryEnterPassenger(passenger2, out var passengerVehicle2);
+        TestSteeringCapable passenger2 = new TestSteeringCapable();
+        bool result2 = vehicle.TryEnterPassenger(passenger2, out CarPassengerHandle passengerVehicle2);
         Assert.False(result2);
         Assert.Null(passengerVehicle2);
         Assert.DoesNotContain(passenger2, vehicle.Passengers);
@@ -137,15 +138,15 @@ public partial class VehicleTest
     [Fact]
     public void EnterPassengerTwice()
     {
-        var vehicle = new TestCarWithoutRangeCheck(_environment, 1);
+        TestCarWithoutRangeCheck vehicle = new TestCarWithoutRangeCheck(_environment, 1);
 
-        var passenger = new TestSteeringCapable();
-        var result = vehicle.TryEnterPassenger(passenger, out var passengerVehicle);
+        TestSteeringCapable passenger = new TestSteeringCapable();
+        bool result = vehicle.TryEnterPassenger(passenger, out CarPassengerHandle passengerVehicle);
         Assert.True(result);
         Assert.NotNull(passengerVehicle);
         Assert.Contains(passenger, vehicle.Passengers);
 
-        var result2 = vehicle.TryEnterPassenger(passenger, out var passengerVehicle2);
+        bool result2 = vehicle.TryEnterPassenger(passenger, out CarPassengerHandle passengerVehicle2);
         Assert.False(result2);
         Assert.Null(passengerVehicle2);
         Assert.Contains(passenger, vehicle.Passengers);

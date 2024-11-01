@@ -18,16 +18,16 @@ public class PedestrianTest
     [Fact]
     public void ChangeWalkToRun()
     {
-        var environment = new FourNodeGraphEnv();
-        var multimodalLayer = new TestMultimodalLayer(environment.GraphEnvironment);
-        var pedestrian = new TestPedestrian
+        FourNodeGraphEnv environment = new FourNodeGraphEnv();
+        TestMultimodalLayer multimodalLayer = new TestMultimodalLayer(environment.GraphEnvironment);
+        TestPedestrian pedestrian = new TestPedestrian
         {
             StartPosition = FourNodeGraphEnv.Node1Pos
         };
         pedestrian.Init(multimodalLayer);
         Assert.Equal(GenderType.Male, pedestrian.Gender);
 
-        var route = environment.GraphEnvironment.FindRoute(environment.Node1, environment.Node2);
+        Route? route = environment.GraphEnvironment.FindRoute(environment.Node1, environment.Node2);
         pedestrian.MultimodalRoute = new MultimodalRoute(route, ModalChoice.Walking);
 
         pedestrian.SetRunning();
@@ -52,12 +52,12 @@ public class PedestrianTest
     [Fact]
     public void InvalidateActiveSteeringOnLeavingSidewalk()
     {
-        var environment = new FourNodeGraphEnv();
-        var multimodalLayer = new TestMultimodalLayer(environment.GraphEnvironment);
-        var startNode = environment.Node1;
-        var goalNode = environment.Node2;
+        FourNodeGraphEnv environment = new FourNodeGraphEnv();
+        TestMultimodalLayer multimodalLayer = new TestMultimodalLayer(environment.GraphEnvironment);
+        ISpatialNode startNode = environment.Node1;
+        ISpatialNode goalNode = environment.Node2;
 
-        var pedestrian = new TestPedestrian
+        TestPedestrian pedestrian = new TestPedestrian
         {
             StartPosition = FourNodeGraphEnv.Node1Pos
         };
@@ -65,7 +65,7 @@ public class PedestrianTest
         Assert.Null(pedestrian.ActiveSteeringHandle);
         Assert.False(pedestrian.OnSidewalk);
 
-        var route = environment.GraphEnvironment.FindRoute(startNode, goalNode);
+        Route? route = environment.GraphEnvironment.FindRoute(startNode, goalNode);
         pedestrian.MultimodalRoute = new MultimodalRoute(route, ModalChoice.Walking);
         pedestrian.Tick();
         Assert.NotNull(pedestrian.ActiveSteeringHandle.Route);
@@ -82,18 +82,18 @@ public class PedestrianTest
     [Fact]
     public void MoveFromInitialNodeSuccessfully()
     {
-        var environment = new FourNodeGraphEnv();
-        var multimodalLayer = new TestMultimodalLayer(environment.GraphEnvironment);
-        var startNode = environment.Node1;
-        var goalNode = environment.Node2;
+        FourNodeGraphEnv environment = new FourNodeGraphEnv();
+        TestMultimodalLayer multimodalLayer = new TestMultimodalLayer(environment.GraphEnvironment);
+        ISpatialNode startNode = environment.Node1;
+        ISpatialNode goalNode = environment.Node2;
 
-        var pedestrian = new TestPedestrian
+        TestPedestrian pedestrian = new TestPedestrian
         {
             StartPosition = startNode.Position
         };
         pedestrian.Init(multimodalLayer);
 
-        var route = environment.GraphEnvironment.FindRoute(startNode, goalNode, (_, edge, _) => edge.Length);
+        Route? route = environment.GraphEnvironment.FindRoute(startNode, goalNode, (_, edge, _) => edge.Length);
         pedestrian.MultimodalRoute = new MultimodalRoute(route, ModalChoice.Walking);
 
         Assert.Equal(0, pedestrian.Velocity);
@@ -108,24 +108,24 @@ public class PedestrianTest
     [Fact]
     public void MoveFromNode1ToNode2()
     {
-        var environment = new FourNodeGraphEnv();
-        var multimodalLayer = new TestMultimodalLayer(environment.GraphEnvironment);
-        var startNode = environment.Node1;
-        var goalNode = environment.Node2;
+        FourNodeGraphEnv environment = new FourNodeGraphEnv();
+        TestMultimodalLayer multimodalLayer = new TestMultimodalLayer(environment.GraphEnvironment);
+        ISpatialNode startNode = environment.Node1;
+        ISpatialNode goalNode = environment.Node2;
 
-        var pedestrian = new TestPedestrian
+        TestPedestrian pedestrian = new TestPedestrian
         {
             StartPosition = startNode.Position
         };
         pedestrian.Init(multimodalLayer);
 
-        var route = environment.GraphEnvironment.FindRoute(startNode, goalNode);
+        Route? route = environment.GraphEnvironment.FindRoute(startNode, goalNode);
         pedestrian.MultimodalRoute = new MultimodalRoute(route, ModalChoice.Walking);
 
         pedestrian.Move();
         Assert.NotEqual(startNode.Position, pedestrian.Position);
 
-        for (var tick = 0; tick < 200 && !pedestrian.GoalReached; tick++) pedestrian.Move();
+        for (int tick = 0; tick < 200 && !pedestrian.GoalReached; tick++) pedestrian.Move();
 
         Assert.Equal(goalNode.Position.X, pedestrian.Position.X, 3);
         Assert.Equal(goalNode.Position.Y, pedestrian.Position.Y, 3);
@@ -134,11 +134,11 @@ public class PedestrianTest
     [Fact]
     public void PositionCorrectAfterEnteringAndLeavingSidewalk()
     {
-        var environment = new FourNodeGraphEnv();
-        var multimodalLayer = new TestMultimodalLayer(environment.GraphEnvironment);
-        var startPosition = FourNodeGraphEnv.Node1Pos;
+        FourNodeGraphEnv environment = new FourNodeGraphEnv();
+        TestMultimodalLayer multimodalLayer = new TestMultimodalLayer(environment.GraphEnvironment);
+        Position startPosition = FourNodeGraphEnv.Node1Pos;
 
-        var pedestrian = new TestPedestrian
+        TestPedestrian pedestrian = new TestPedestrian
         {
             StartPosition = startPosition
         };
@@ -147,7 +147,7 @@ public class PedestrianTest
         Assert.Equal(startPosition, pedestrian.Position);
         Assert.Equal(Whereabouts.Offside, pedestrian.Whereabouts);
 
-        var route = environment.GraphEnvironment.FindShortestRoute(environment.Node1, environment.Node2);
+        Route? route = environment.GraphEnvironment.FindShortestRoute(environment.Node1, environment.Node2);
         pedestrian.MultimodalRoute = new MultimodalRoute(route, ModalChoice.Walking);
         Assert.Null(pedestrian.ActiveSteeringHandle);
         Assert.Equal(startPosition, pedestrian.Position);
@@ -168,18 +168,18 @@ public class PedestrianTest
     [Fact]
     public void PositionParameterIsUpdated()
     {
-        var environment = new FourNodeGraphEnv();
-        var multimodalLayer = new TestMultimodalLayer(environment.GraphEnvironment);
-        var node1 = environment.Node1;
-        var node2 = environment.Node2;
-        var pedestrian = new TestPedestrian
+        FourNodeGraphEnv environment = new FourNodeGraphEnv();
+        TestMultimodalLayer multimodalLayer = new TestMultimodalLayer(environment.GraphEnvironment);
+        ISpatialNode node1 = environment.Node1;
+        ISpatialNode node2 = environment.Node2;
+        TestPedestrian pedestrian = new TestPedestrian
         {
             StartPosition = node1.Position
         };
         pedestrian.Init(multimodalLayer);
         Assert.Equal(node1.Position, pedestrian.Position);
 
-        var route = environment.GraphEnvironment.FindRoute(node1, node2, (_, edge, _) => edge.Length);
+        Route? route = environment.GraphEnvironment.FindRoute(node1, node2, (_, edge, _) => edge.Length);
         pedestrian.MultimodalRoute = new MultimodalRoute(route, ModalChoice.Walking);
 
         Assert.Null(pedestrian.ActiveSteeringHandle);
@@ -194,24 +194,24 @@ public class PedestrianTest
     [Fact]
     public void PositionPreservedAfterMoveAndLeavingSidewalk()
     {
-        var environment = new FourNodeGraphEnv();
-        var multimodalLayer = new TestMultimodalLayer(environment.GraphEnvironment);
-        var startNode = environment.Node1;
-        var goalNode = environment.Node2;
+        FourNodeGraphEnv environment = new FourNodeGraphEnv();
+        TestMultimodalLayer multimodalLayer = new TestMultimodalLayer(environment.GraphEnvironment);
+        ISpatialNode startNode = environment.Node1;
+        ISpatialNode goalNode = environment.Node2;
 
-        var pedestrian = new TestPedestrian
+        TestPedestrian pedestrian = new TestPedestrian
         {
             StartPosition = startNode.Position
         };
         pedestrian.Init(multimodalLayer);
         Assert.Equal(startNode.Position, pedestrian.Position);
 
-        var route = environment.GraphEnvironment.FindRoute(startNode, goalNode);
+        Route? route = environment.GraphEnvironment.FindRoute(startNode, goalNode);
         pedestrian.MultimodalRoute = new MultimodalRoute(route, ModalChoice.Walking);
         Assert.Equal(startNode.Position, pedestrian.Position);
 
         pedestrian.Move();
-        var currentPosition = pedestrian.Position;
+        Position currentPosition = pedestrian.Position;
 
         // pedestrian.LeaveSidewalk();
         Assert.Equal(currentPosition, pedestrian.Position);
@@ -220,10 +220,10 @@ public class PedestrianTest
     [Fact]
     public void ResetRoadUserParameters()
     {
-        var environment = new FourNodeGraphEnv();
-        var multimodalLayer = new TestMultimodalLayer(environment.GraphEnvironment);
-        var startNode = environment.Node1;
-        var pedestrian = new TestPedestrian
+        FourNodeGraphEnv environment = new FourNodeGraphEnv();
+        TestMultimodalLayer multimodalLayer = new TestMultimodalLayer(environment.GraphEnvironment);
+        ISpatialNode startNode = environment.Node1;
+        TestPedestrian pedestrian = new TestPedestrian
         {
             StartPosition = startNode.Position
         };
@@ -231,7 +231,7 @@ public class PedestrianTest
         Assert.Null(pedestrian.CurrentEdge);
         Assert.Equal(0, pedestrian.PositionOnCurrentEdge);
 
-        var route = environment.GraphEnvironment.FindRoute(startNode, environment.Node2);
+        Route? route = environment.GraphEnvironment.FindRoute(startNode, environment.Node2);
         pedestrian.MultimodalRoute = new MultimodalRoute(route, ModalChoice.Walking);
         pedestrian.Move();
         Assert.NotNull(pedestrian.CurrentEdge);
@@ -245,23 +245,23 @@ public class PedestrianTest
     [Fact]
     public void RunningAgentOvertakesWalkingAgent()
     {
-        var environment = new FourNodeGraphEnv();
-        var multimodalLayer = new TestMultimodalLayer(environment.GraphEnvironment);
+        FourNodeGraphEnv environment = new FourNodeGraphEnv();
+        TestMultimodalLayer multimodalLayer = new TestMultimodalLayer(environment.GraphEnvironment);
         Assert.True(HumanVelocityConstants.MeanValueRunMale - HumanVelocityConstants.DeviationRunMale >
                     HumanVelocityConstants.MeanValueWalkMale + HumanVelocityConstants.DeviationWalkMale);
 
-        var walkingAgent = new TestPedestrian
+        TestPedestrian walkingAgent = new TestPedestrian
         {
             StartPosition = FourNodeGraphEnv.Node1Pos
         };
         walkingAgent.Init(multimodalLayer);
-        var runningAgent = new TestPedestrian
+        TestPedestrian runningAgent = new TestPedestrian
         {
             StartPosition = FourNodeGraphEnv.Node1Pos
         };
         runningAgent.Init(multimodalLayer);
 
-        var graphEnvironment = environment.GraphEnvironment;
+        ISpatialGraphEnvironment graphEnvironment = environment.GraphEnvironment;
         walkingAgent.MultimodalRoute =
             new MultimodalRoute(graphEnvironment.FindRoute(environment.Node1, environment.Node2),
                 ModalChoice.Walking);
@@ -279,7 +279,7 @@ public class PedestrianTest
         walkingAgent.Tick(); // move first
         Assert.NotEqual(FourNodeGraphEnv.Node1Pos, walkingAgent.Position);
 
-        for (var tick = 0; tick < 5; tick++)
+        for (int tick = 0; tick < 5; tick++)
         {
             walkingAgent.Move();
             runningAgent.Move();
@@ -292,33 +292,33 @@ public class PedestrianTest
     [Fact]
     public void SwitchRouteOnTheWay()
     {
-        var fourNodeEnv = new FourNodeGraphEnv();
-        var env = fourNodeEnv.GraphEnvironment;
-        var multimodalLayer = new TestMultimodalLayer(fourNodeEnv.GraphEnvironment);
-        var pedestrian = new TestPedestrian
+        FourNodeGraphEnv fourNodeEnv = new FourNodeGraphEnv();
+        ISpatialGraphEnvironment env = fourNodeEnv.GraphEnvironment;
+        TestMultimodalLayer multimodalLayer = new TestMultimodalLayer(fourNodeEnv.GraphEnvironment);
+        TestPedestrian pedestrian = new TestPedestrian
         {
             StartPosition = fourNodeEnv.Node1.Position
         };
         pedestrian.Init(multimodalLayer);
 
-        var route = env.FindRoute(fourNodeEnv.Node1, fourNodeEnv.Node4, (_, edge, _) => edge.Length);
+        Route? route = env.FindRoute(fourNodeEnv.Node1, fourNodeEnv.Node4, (_, edge, _) => edge.Length);
         pedestrian.MultimodalRoute = new MultimodalRoute(route, ModalChoice.Walking);
 
-        var onWayToNode4 = true;
-        for (var tick = 0; tick < 10000 && !pedestrian.GoalReached; tick++)
+        bool onWayToNode4 = true;
+        for (int tick = 0; tick < 10000 && !pedestrian.GoalReached; tick++)
         {
             pedestrian.Move();
 
             if (onWayToNode4 && route.First().Edge.To.Equals(fourNodeEnv.Node4))
             {
-                var routeToNode3 = env.FindRoute(fourNodeEnv.Node1, fourNodeEnv.Node3,
+                Route? routeToNode3 = env.FindRoute(fourNodeEnv.Node1, fourNodeEnv.Node3,
                     (_, edge, _) => edge.Length);
                 Assert.InRange(route.RouteLength - route.RemainingRouteDistanceToGoal, routeToNode3.RouteLength,
                     route.RouteLength);
 
                 // go back
                 onWayToNode4 = false;
-                var currentNode = route.First().Edge.From;
+                ISpatialNode? currentNode = route.First().Edge.From;
                 route = env.FindRoute(currentNode, fourNodeEnv.Node1, (_, edge, _) => edge.Length);
                 pedestrian.MultimodalRoute = new MultimodalRoute(route, ModalChoice.Walking);
             }
@@ -333,13 +333,13 @@ public class PedestrianTest
     [Fact]
     public void SwitchRouteWithinMoveProceedOnSameEdge()
     {
-        var fourNodeGraphEnv = new FourNodeGraphEnv();
-        var environment = fourNodeGraphEnv.GraphEnvironment;
+        FourNodeGraphEnv fourNodeGraphEnv = new FourNodeGraphEnv();
+        ISpatialGraphEnvironment environment = fourNodeGraphEnv.GraphEnvironment;
 
-        var multimodalLayer = new TestMultimodalLayer(environment);
-        var startNode = fourNodeGraphEnv.Node1;
+        TestMultimodalLayer multimodalLayer = new TestMultimodalLayer(environment);
+        ISpatialNode startNode = fourNodeGraphEnv.Node1;
 
-        var pedestrian = new TestPedestrian
+        TestPedestrian pedestrian = new TestPedestrian
         {
             StartPosition = startNode.Position
         };
@@ -348,17 +348,17 @@ public class PedestrianTest
         Assert.Null(pedestrian.CurrentEdge);
         Assert.False(pedestrian.OnSidewalk);
 
-        var firstRoute = environment.FindRoute(startNode, fourNodeGraphEnv.Node2, (_, edge, _) => edge.Length);
+        Route? firstRoute = environment.FindRoute(startNode, fourNodeGraphEnv.Node2, (_, edge, _) => edge.Length);
         pedestrian.MultimodalRoute = new MultimodalRoute(firstRoute, ModalChoice.Walking);
         pedestrian.Move();
         Assert.NotNull(pedestrian.CurrentEdge);
         Assert.NotEqual(0, pedestrian.PositionOnCurrentEdge);
 
-        var secondRoute = environment.FindRoute(startNode, fourNodeGraphEnv.Node3, (_, edge, _) => edge.Length);
+        Route? secondRoute = environment.FindRoute(startNode, fourNodeGraphEnv.Node3, (_, edge, _) => edge.Length);
         Assert.Equal(secondRoute.First().Edge, pedestrian.CurrentEdge);
 
         pedestrian.MultimodalRoute = new MultimodalRoute(secondRoute, ModalChoice.Walking);
-        var oldPositionOnCurrentEdge = pedestrian.PositionOnCurrentEdge;
+        double oldPositionOnCurrentEdge = pedestrian.PositionOnCurrentEdge;
         pedestrian.Move();
 
         Assert.Equal(firstRoute.First().Edge, pedestrian.CurrentEdge);
@@ -369,10 +369,10 @@ public class PedestrianTest
     [Fact]
     public void SwitchRouteWithinMoveRequiresJump()
     {
-        var environment = new FourNodeGraphEnv();
-        var multimodalLayer = new TestMultimodalLayer(environment.GraphEnvironment);
-        var startNode = environment.Node1;
-        var pedestrian = new TestPedestrian
+        FourNodeGraphEnv environment = new FourNodeGraphEnv();
+        TestMultimodalLayer multimodalLayer = new TestMultimodalLayer(environment.GraphEnvironment);
+        ISpatialNode startNode = environment.Node1;
+        TestPedestrian pedestrian = new TestPedestrian
         {
             StartPosition = startNode.Position
         };
@@ -380,14 +380,14 @@ public class PedestrianTest
         Assert.Null(pedestrian.ActiveSteeringHandle);
         Assert.False(pedestrian.OnSidewalk);
 
-        var firstRoute = environment.GraphEnvironment.FindRoute(startNode, environment.Node2);
+        Route? firstRoute = environment.GraphEnvironment.FindRoute(startNode, environment.Node2);
         pedestrian.MultimodalRoute = new MultimodalRoute(firstRoute, ModalChoice.Walking);
         pedestrian.Move();
         Assert.NotNull(pedestrian.ActiveSteeringHandle);
         Assert.NotNull(pedestrian.CurrentEdge);
         Assert.NotEqual(0, pedestrian.PositionOnCurrentEdge);
 
-        var secondRoute = environment.GraphEnvironment.FindRoute(environment.Node2, environment.Node3);
+        Route? secondRoute = environment.GraphEnvironment.FindRoute(environment.Node2, environment.Node3);
         Assert.NotEqual(secondRoute.First().Edge, pedestrian.CurrentEdge);
 
         pedestrian.MultimodalRoute = new MultimodalRoute(secondRoute, ModalChoice.Walking);
@@ -402,11 +402,11 @@ public class PedestrianTest
     [Fact]
     public void WalkFullFourNodeEnvironment()
     {
-        var environment = new FourNodeGraphEnv();
-        var layer = new TestMultimodalLayer(environment.GraphEnvironment);
-        var start = FourNodeGraphEnv.Node1Pos;
-        var goal = environment.Node4.Position;
-        var pedestrian = new TestPedestrian
+        FourNodeGraphEnv environment = new FourNodeGraphEnv();
+        TestMultimodalLayer layer = new TestMultimodalLayer(environment.GraphEnvironment);
+        Position start = FourNodeGraphEnv.Node1Pos;
+        Position? goal = environment.Node4.Position;
+        TestPedestrian pedestrian = new TestPedestrian
         {
             StartPosition = start
         };
@@ -417,7 +417,7 @@ public class PedestrianTest
 
         pedestrian.MultimodalRoute = new WalkingMultimodalRoute(layer.SpatialGraphMediatorLayer, start, goal);
 
-        for (var tick = 0; tick < 5000 && !pedestrian.GoalReached; tick++, layer.Context.UpdateStep())
+        for (int tick = 0; tick < 5000 && !pedestrian.GoalReached; tick++, layer.Context.UpdateStep())
             pedestrian.Tick();
         Assert.True(pedestrian.GoalReached);
 
@@ -428,13 +428,13 @@ public class PedestrianTest
     [Fact]
     public void WalkToReachNodeOnAltonaGraph()
     {
-        var environment = new SpatialGraphEnvironment(ResourcesConstants.DriveGraphAltonaAltstadt);
-        var multimodalLayer = new TestMultimodalLayer(environment);
+        SpatialGraphEnvironment environment = new SpatialGraphEnvironment(ResourcesConstants.DriveGraphAltonaAltstadt);
+        TestMultimodalLayer multimodalLayer = new TestMultimodalLayer(environment);
 
-        var start = environment.NearestNode(Position.CreateGeoPosition(9.845780, 53.570825));
-        var goal = environment.NearestNode(Position.CreateGeoPosition(9.847038, 53.571780));
+        ISpatialNode start = environment.NearestNode(Position.CreateGeoPosition(9.845780, 53.570825));
+        ISpatialNode goal = environment.NearestNode(Position.CreateGeoPosition(9.847038, 53.571780));
 
-        var pedestrian = new TestPedestrian
+        TestPedestrian pedestrian = new TestPedestrian
         {
             StartPosition = start.Position
         };
@@ -444,10 +444,10 @@ public class PedestrianTest
         Assert.Equal(0, pedestrian.PositionOnCurrentEdge);
         Assert.Null(pedestrian.CurrentEdge);
 
-        var route = environment.FindRoute(start, goal);
+        Route route = environment.FindRoute(start, goal);
         pedestrian.MultimodalRoute = new MultimodalRoute(route, ModalChoice.Walking);
 
-        for (var tick = 0; tick < 100; tick++)
+        for (int tick = 0; tick < 100; tick++)
         {
             pedestrian.Move();
             if (pedestrian.GoalReached) break;
@@ -462,10 +462,10 @@ public class PedestrianTest
     [Fact]
     public void WalkToReachNodeOnSimpleEnvironment()
     {
-        var environment = new FourNodeGraphEnv();
-        var multimodalLayer = new TestMultimodalLayer(environment.GraphEnvironment);
+        FourNodeGraphEnv environment = new FourNodeGraphEnv();
+        TestMultimodalLayer multimodalLayer = new TestMultimodalLayer(environment.GraphEnvironment);
 
-        var pedestrian = new TestPedestrian
+        TestPedestrian pedestrian = new TestPedestrian
         {
             StartPosition = FourNodeGraphEnv.Node1Pos
         };
@@ -482,7 +482,7 @@ public class PedestrianTest
         Assert.Equal(0, pedestrian.PositionOnCurrentEdge);
         Assert.Null(pedestrian.CurrentEdge);
 
-        var route = environment.GraphEnvironment.FindRoute(environment.Node1, environment.Node2);
+        Route? route = environment.GraphEnvironment.FindRoute(environment.Node1, environment.Node2);
         pedestrian.MultimodalRoute = new MultimodalRoute(route, ModalChoice.Walking);
 
         //no change without movement
@@ -490,7 +490,7 @@ public class PedestrianTest
         Assert.Equal(0, pedestrian.PositionOnCurrentEdge);
         Assert.Null(pedestrian.CurrentEdge);
 
-        for (var tick = 0; tick < 10000; tick++)
+        for (int tick = 0; tick < 10000; tick++)
         {
             pedestrian.Move();
             if (pedestrian.GoalReached) break;

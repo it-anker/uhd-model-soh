@@ -30,20 +30,20 @@ public class FifoIntersectionHandle<TSteeringCapable, TPassengerCapable, TSteeri
     public override double Evaluate(EdgeExploreResult edgeExploreResult, DirectionType vehicleDirection)
     {
         double biggestDeceleration = 1000;
-        var orderOfArrival = new List<ISpatialGraphEntity>();
+        List<ISpatialGraphEntity> orderOfArrival = new List<ISpatialGraphEntity>();
 
         // Establish arrival order
         if (edgeExploreResult.IntersectionDistance < 20 && orderOfArrival.Count == 0)
         {
-            var incomingCars = CollectIncomingEntities(edgeExploreResult.Edge.To);
-            var arrivalOrder = incomingCars.OrderBy(kvp => kvp.CurrentEdge.Length - kvp.PositionOnCurrentEdge);
+            IEnumerable<ISpatialGraphEntity> incomingCars = CollectIncomingEntities(edgeExploreResult.Edge.To);
+            IOrderedEnumerable<ISpatialGraphEntity> arrivalOrder = incomingCars.OrderBy(kvp => kvp.CurrentEdge.Length - kvp.PositionOnCurrentEdge);
             orderOfArrival.AddRange(arrivalOrder);
         }
 
         // Come to a full stop
         if (Vehicle.Velocity > 0 && Vehicle.RemainingDistanceOnEdge > 2)
         {
-            var acc = VehicleAccelerator.CalculateSpeedChange(Vehicle.Velocity, edgeExploreResult.Edge.MaxSpeed,
+            double acc = VehicleAccelerator.CalculateSpeedChange(Vehicle.Velocity, edgeExploreResult.Edge.MaxSpeed,
                 edgeExploreResult.IntersectionDistance, 0);
 
             if (acc < biggestDeceleration) biggestDeceleration = acc;
@@ -53,7 +53,7 @@ public class FifoIntersectionHandle<TSteeringCapable, TPassengerCapable, TSteeri
         else
         {
             // Filter incoming cars from all edges which are less than 1m before intersection
-            var incomingCars = CollectIncomingEntities(edgeExploreResult.Edge.To).Where(entity =>
+            IEnumerable<ISpatialGraphEntity> incomingCars = CollectIncomingEntities(edgeExploreResult.Edge.To).Where(entity =>
                 Math.Abs(entity.PositionOnCurrentEdge - entity.CurrentEdge.Length) < 10);
 
 
@@ -65,10 +65,10 @@ public class FifoIntersectionHandle<TSteeringCapable, TPassengerCapable, TSteeri
             // entferne alle atuso die weiter weg sind als 1m entfernen wir
             // wir bleiben erhalten
 
-            var remove = orderOfArrival.Where(entity => !incomingCars.Contains(entity) && entity != Vehicle)
+            List<ISpatialGraphEntity> remove = orderOfArrival.Where(entity => !incomingCars.Contains(entity) && entity != Vehicle)
                 .ToList();
 
-            foreach (var guid in remove) orderOfArrival.Remove(guid);
+            foreach (ISpatialGraphEntity guid in remove) orderOfArrival.Remove(guid);
 
             // if no car is in the list, add ourself
             // if list is empty the following FirstOrDefault() would always trigger 

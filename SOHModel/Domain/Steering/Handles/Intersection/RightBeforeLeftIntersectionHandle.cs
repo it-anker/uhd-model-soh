@@ -1,4 +1,5 @@
 using Mars.Common;
+using Mars.Interfaces.Agents;
 using Mars.Interfaces.Environments;
 using SOHModel.Domain.Common;
 using SOHModel.Domain.Model;
@@ -50,13 +51,13 @@ public class RightBeforeLeftIntersectionHandle<TSteeringCapable, TPassengerCapab
         //reduce speed for intersection
         if (_vehicle.Velocity >= VehicleConstants.IntersectionSpeed)
         {
-            var speedChange = _vehicleAccelerator.CalculateSpeedChange(_vehicle.Velocity,
+            double speedChange = _vehicleAccelerator.CalculateSpeedChange(_vehicle.Velocity,
                 edgeExplore.Edge.MaxSpeed, edgeExplore.IntersectionDistance,
                 VehicleConstants.IntersectionSpeed);
 
             if (_vehicle.Velocity + speedChange < VehicleConstants.IntersectionSpeed)
             {
-                var a = VehicleConstants.IntersectionSpeed - _vehicle.Velocity;
+                double a = VehicleConstants.IntersectionSpeed - _vehicle.Velocity;
                 if (a < biggestDeceleration)
                     biggestDeceleration = a;
             }
@@ -68,7 +69,7 @@ public class RightBeforeLeftIntersectionHandle<TSteeringCapable, TPassengerCapab
         }
         else
         {
-            var speedChange = _vehicleAccelerator.CalculateSpeedChange(_vehicle.Velocity,
+            double speedChange = _vehicleAccelerator.CalculateSpeedChange(_vehicle.Velocity,
                 VehicleConstants.IntersectionSpeed, 1000, VehicleConstants.IntersectionSpeed);
 
             if (speedChange + _vehicle.Velocity > VehicleConstants.IntersectionSpeed)
@@ -83,19 +84,19 @@ public class RightBeforeLeftIntersectionHandle<TSteeringCapable, TPassengerCapab
         //resolve eventual deadlock
         if (_waitedSeconds > 10)
         {
-            var incomingCars = CollectIncomingEntities(edgeExplore.Edge.To);
+            IEnumerable<ISpatialGraphEntity> incomingCars = CollectIncomingEntities(edgeExplore.Edge.To);
             if (_orderOfArrival.Count == 0)
             {
-                var arrivalOrder = incomingCars.OrderBy(kvp => kvp.CurrentEdge.Length - kvp.PositionOnCurrentEdge);
+                IOrderedEnumerable<ISpatialGraphEntity> arrivalOrder = incomingCars.OrderBy(kvp => kvp.CurrentEdge.Length - kvp.PositionOnCurrentEdge);
                 _orderOfArrival.AddRange(arrivalOrder.Select(keyValuePair => keyValuePair.ID));
             }
             else
             {
-                var isSubset = _orderOfArrival.All(guid => incomingCars.Select(entity => entity.ID).Contains(guid));
+                bool isSubset = _orderOfArrival.All(guid => incomingCars.Select(entity => entity.ID).Contains(guid));
 
                 if (isSubset && incomingCars.First() == _vehicle)
                 {
-                    var speedChange =
+                    double speedChange =
                         _vehicleAccelerator.CalculateSpeedChange(_vehicle.Velocity,
                             edgeExplore.Edge.MaxSpeed, 1000, 14);
                     _vehicle.Velocity = 1.5;
@@ -107,24 +108,24 @@ public class RightBeforeLeftIntersectionHandle<TSteeringCapable, TPassengerCapab
         }
 
         //regular behavior
-        foreach (var incomingEdge in edgeExplore.Edge.To.IncomingEdges.Values)
+        foreach (ISpatialEdge? incomingEdge in edgeExplore.Edge.To.IncomingEdges.Values)
         {
             if (incomingEdge == _vehicle.CurrentEdge) continue;
 
-            var currentEdgeBearing =
+            double currentEdgeBearing =
                 _vehicle.CurrentEdge.From.Position.GetBearing(_vehicle.CurrentEdge.To.Position);
-            var incomingBearing =
-                incomingEdge.From.Position.GetBearing(incomingEdge.To.Position); //TODO use geometry
-            var otherEdgeDirection = PositionHelper.GetDirectionType(incomingBearing, currentEdgeBearing);
+            double incomingBearing =
+                incomingEdge.From.Position.GetBearing(incomingEdge.To.Position); // TODO use geometry
+            DirectionType otherEdgeDirection = PositionHelper.GetDirectionType(incomingBearing, currentEdgeBearing);
 
             if (GiveRightOfWayConstellation(otherEdgeDirection, vehicleDirection))
-                foreach (var roadUser in ExploreIncomingEdge(incomingEdge))
+                foreach (ISpatialGraphEntity roadUser in ExploreIncomingEdge(incomingEdge))
                 {
-                    var remainingDistanceOnEdge = Math.Max(0,
+                    double remainingDistanceOnEdge = Math.Max(0,
                         roadUser.CurrentEdge.Length - roadUser.PositionOnCurrentEdge);
                     if (remainingDistanceOnEdge < GiveRightOfWayDistanceInM && remainingDistanceOnEdge > 0)
                     {
-                        var speedChange = _vehicleAccelerator.CalculateSpeedChange(_vehicle.Velocity,
+                        double speedChange = _vehicleAccelerator.CalculateSpeedChange(_vehicle.Velocity,
                             edgeExplore.Edge.MaxSpeed, edgeExplore.IntersectionDistance, 0);
                         if (speedChange < biggestDeceleration)
                             biggestDeceleration = speedChange;

@@ -12,7 +12,7 @@ public class TestVectorBuildingsLayer : VectorBuildingsLayer
     /// <returns>An initialized vector layer.</returns>
     public static VectorBuildingsLayer Create(string filePath)
     {
-        var layer = new TestVectorBuildingsLayer();
+        TestVectorBuildingsLayer layer = new TestVectorBuildingsLayer();
         layer.InitLayer(new LayerInitData { LayerInitConfig = { File = filePath } });
         return layer;
     }

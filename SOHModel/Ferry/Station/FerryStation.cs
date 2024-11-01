@@ -1,11 +1,12 @@
 using System.Collections.Concurrent;
 using Mars.Common.Core;
 using Mars.Interfaces.Data;
-using Mars.Interfaces.Environments;
 using Mars.Interfaces.Layers;
 using Mars.Numerics;
+using NetTopologySuite.Geometries;
 using SOHModel.Domain.Steering.Capables;
 using SOHModel.Ferry.Model;
+using Position = Mars.Interfaces.Environments.Position;
 
 namespace SOHModel.Ferry.Station;
 
@@ -59,7 +60,7 @@ public class FerryStation : IVectorFeature
     public void Update(VectorStructuredData data)
     {
         VectorStructured = data;
-        var centroid = VectorStructured.Geometry.Centroid;
+        Point? centroid = VectorStructured.Geometry.Centroid;
         Position = Position.CreatePosition(centroid.X, centroid.Y);
         Id = VectorStructured.Data["id"].Value<string>();
         Name = VectorStructured.Data["short_name"].Value<string>();
@@ -87,7 +88,7 @@ public class FerryStation : IVectorFeature
     /// <returns>True if ferry is not on this station any more.</returns>
     public bool Leave(Model.Ferry ferry)
     {
-        var success = !Ferries.ContainsKey(ferry) || Ferries.TryRemove(ferry, out _);
+        bool success = !Ferries.ContainsKey(ferry) || Ferries.TryRemove(ferry, out _);
         if (success) ferry.FerryStation = null;
 
         return success;
@@ -100,7 +101,7 @@ public class FerryStation : IVectorFeature
     /// <returns>The next ferry that drives to that goal, null if none found</returns>
     public Model.Ferry Find(Position goal)
     {
-        foreach (var ferry in Ferries.Keys)
+        foreach (Model.Ferry ferry in Ferries.Keys)
             if (ferry.Driver is FerryDriver ferryDriver)
                 if (ferryDriver.RemainingStations
                     .Any(entry => Distance.Haversine(entry.To.Position.PositionArray, goal.PositionArray) < 30))

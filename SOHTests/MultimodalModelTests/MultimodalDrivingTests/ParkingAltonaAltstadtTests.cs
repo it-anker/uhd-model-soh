@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using Mars.Components.Environments;
+using Mars.Interfaces;
 using Mars.Interfaces.Environments;
 using Mars.Interfaces.Model;
 using Mars.Interfaces.Model.Options;
@@ -20,7 +21,7 @@ public class ParkingAltonaAltstadtTests
 
     public ParkingAltonaAltstadtTests()
     {
-        var environment = new SpatialGraphEnvironment(new SpatialGraphOptions
+        SpatialGraphEnvironment environment = new SpatialGraphEnvironment(new SpatialGraphOptions
         {
             GraphImports = new List<Input>
             {
@@ -50,8 +51,8 @@ public class ParkingAltonaAltstadtTests
 
     private void CheckCarParkingSpacesHaveCarCountOf(int count)
     {
-        var carParkingSpaces = _carParkingLayer.Features.OfType<CarParkingSpace>();
-        var parkingSpacesWithCars = carParkingSpaces
+        IEnumerable<CarParkingSpace> carParkingSpaces = _carParkingLayer.Features.OfType<CarParkingSpace>();
+        List<CarParkingSpace> parkingSpacesWithCars = carParkingSpaces
             .Where(s => s.ParkingVehicles.Any()).ToList();
 
         Assert.Equal(count, parkingSpacesWithCars
@@ -64,14 +65,14 @@ public class ParkingAltonaAltstadtTests
         Assert.InRange(_carParkingLayer.Features.Count, 3750, 3800);
         CheckCarParkingSpacesHaveCarCountOf(0);
 
-        //TODO has problems with higher agent count < > do not find parking spots?
+        // TODO has problems with higher agent count < > do not find parking spots?
         const int agentCount = 30;
-        var agents = new List<MultimodalAgent<TestMultimodalLayer>>();
-        for (var i = 0; i < agentCount; i++)
+        List<MultimodalAgent<TestMultimodalLayer>> agents = new List<MultimodalAgent<TestMultimodalLayer>>();
+        for (int i = 0; i < agentCount; i++)
         {
-            var start = Position.CreatePosition(9.9497996, 53.5606333); //_sidewalk.GetRandomNode().Position;
-            var goal = Position.CreatePosition(9.9467003, 53.5621657); //FindGoal(start);
-            var agent = new TestMultiCapableAgent
+            Position? start = Position.CreatePosition(9.9497996, 53.5606333); //_sidewalk.GetRandomNode().Position;
+            Position? goal = Position.CreatePosition(9.9467003, 53.5621657); //FindGoal(start);
+            TestMultiCapableAgent agent = new TestMultiCapableAgent
             {
                 StartPosition = start,
                 GoalPosition = goal,
@@ -86,9 +87,9 @@ public class ParkingAltonaAltstadtTests
 
         CheckCarParkingSpacesHaveCarCountOf(agentCount);
 
-        var context = _multimodalLayer.Context;
-        for (var tick = 0; tick < 2000 && !agents.TrueForAll(a => a.GoalReached); tick++, context.UpdateStep())
-            foreach (var agent in agents)
+        ISimulationContext context = _multimodalLayer.Context;
+        for (int tick = 0; tick < 2000 && !agents.TrueForAll(a => a.GoalReached); tick++, context.UpdateStep())
+            foreach (MultimodalAgent<TestMultimodalLayer> agent in agents)
                 agent.Tick();
 
 

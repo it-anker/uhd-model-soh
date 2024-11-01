@@ -45,11 +45,11 @@ namespace SOHModel.Demonstration
             base.InitLayer(layerInitData, registerAgentHandle, unregisterAgentHandle);
 
             // Load left and right police route nodes from geojson
-            var routeEnvLeft = new SpatialGraphEnvironment(new SpatialGraphOptions()
+            SpatialGraphEnvironment routeEnvLeft = new SpatialGraphEnvironment(new SpatialGraphOptions()
             {
                 GraphImports = [layerInitData.LayerInitConfig.Inputs[0]]
             });
-            var routeEnvRight = new SpatialGraphEnvironment(new SpatialGraphOptions()
+            SpatialGraphEnvironment routeEnvRight = new SpatialGraphEnvironment(new SpatialGraphOptions()
             {
                 GraphImports = [layerInitData.LayerInitConfig.Inputs[1]]
             });
@@ -58,7 +58,7 @@ namespace SOHModel.Demonstration
             RightPoliceRouteNodes = routeEnvRight.Nodes;
 
             // spawn agents on layer and store them in PoliceMap collection
-            var agentManager = layerInitData.Container.Resolve<IAgentManager>();
+            IAgentManager? agentManager = layerInitData.Container.Resolve<IAgentManager>();
             
             PoliceMap = agentManager.Spawn<Police, DemonstrationLayer>().ToDictionary(police => police.ID);
             ChiefMap = agentManager.Spawn<PoliceChief, DemonstrationLayer>().ToDictionary(chief => chief.ID);

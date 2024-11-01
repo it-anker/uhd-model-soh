@@ -13,7 +13,7 @@ public class RentalBicycle : Model.Bicycle, IRentalBicycle
 
     protected override BicycleSteeringHandle CreateSteeringHandle(IBicycleSteeringCapable driver)
     {
-        var handle = new BicycleSteeringHandle(Environment, this, driver);
+        BicycleSteeringHandle handle = new BicycleSteeringHandle(Environment, this, driver);
         return handle;
     }
 }

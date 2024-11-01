@@ -29,7 +29,7 @@ public class PedestrianUsesFerryTests
 
     public PedestrianUsesFerryTests()
     {
-        var routeLayerFixture = new FerryRouteLayerFixture();
+        FerryRouteLayerFixture routeLayerFixture = new FerryRouteLayerFixture();
         _ferryStationLayer = routeLayerFixture.FerryStationLayer;
 
         _environment = new SpatialGraphEnvironment(new SpatialGraphOptions
@@ -66,7 +66,7 @@ public class PedestrianUsesFerryTests
         _start = Position.CreateGeoPosition(9.9700038, 53.5464827); //near Landungsbrücken
         _goal = Position.CreateGeoPosition(9.9498396, 53.5451737); //near Fischmarkt
 
-        var ferryLayer = new FerryLayer(routeLayerFixture.FerryRouteLayer)
+        FerryLayer ferryLayer = new FerryLayer(routeLayerFixture.FerryRouteLayer)
         {
             Context = SimulationContext.Start2020InSeconds,
             EntityManager = new EntityManagerImpl(CsvReader.MapData(ResourcesConstants.FerryCsv)),
@@ -85,7 +85,7 @@ public class PedestrianUsesFerryTests
     public void EnterWaitingFerryAtStation()
     {
         Assert.Null(_ferry.FerryStation);
-        var ferryStation = _ferryStationLayer.Nearest(_start);
+        FerryStation ferryStation = _ferryStationLayer.Nearest(_start);
         Assert.False(ferryStation.Ferries.Any());
 
         _ferryDriver.Tick();
@@ -93,7 +93,7 @@ public class PedestrianUsesFerryTests
         Assert.NotNull(_ferry.FerryStation);
         Assert.Equal("Landungsbrücken Brücke 1", _ferry.FerryStation.Name);
 
-        var agent = new TestPassengerPedestrian
+        TestPassengerPedestrian agent = new TestPassengerPedestrian
         {
             StartPosition = _start
         };
@@ -102,7 +102,7 @@ public class PedestrianUsesFerryTests
 
         // enter ferry station
         Assert.Equal(_start, agent.Position);
-        for (var tick = 0; tick < 10000 && !agent.HasUsedFerry; tick++, _layer.Context.UpdateStep())
+        for (int tick = 0; tick < 10000 && !agent.HasUsedFerry; tick++, _layer.Context.UpdateStep())
             agent.Tick();
 
         Assert.True(agent.HasUsedFerry);
@@ -112,7 +112,7 @@ public class PedestrianUsesFerryTests
     [Fact]
     public void EnterLaterArrivingFerryAtStation()
     {
-        var agent = new TestPassengerPedestrian
+        TestPassengerPedestrian agent = new TestPassengerPedestrian
         {
             StartPosition = _start
         };
@@ -121,7 +121,7 @@ public class PedestrianUsesFerryTests
 
         Assert.Equal(_start, agent.Position);
 
-        for (var tick = 0; tick < 500; tick++, _layer.Context.UpdateStep()) agent.Tick();
+        for (int tick = 0; tick < 500; tick++, _layer.Context.UpdateStep()) agent.Tick();
 
         Assert.False(agent.HasUsedFerry);
 
@@ -130,7 +130,7 @@ public class PedestrianUsesFerryTests
 
         Assert.InRange(_ferry.Position.DistanceInMTo(agent.Position), 0, 7);
 
-        for (var tick = 0; tick < 200; tick++, _layer.Context.UpdateStep()) agent.Tick();
+        for (int tick = 0; tick < 200; tick++, _layer.Context.UpdateStep()) agent.Tick();
 
         Assert.True(agent.HasUsedFerry);
     }
@@ -138,20 +138,20 @@ public class PedestrianUsesFerryTests
     [Fact]
     public void EnterCommutingFerryAndLeaveItAtGoal()
     {
-        var agent = new TestPassengerPedestrian { StartPosition = _start };
+        TestPassengerPedestrian agent = new TestPassengerPedestrian { StartPosition = _start };
         agent.Init(_layer);
         agent.MultimodalRoute = _layer.Search(agent, _start, _goal, ModalChoice.Ferry);
         Assert.Equal(3, agent.MultimodalRoute.Count);
         Assert.Equal(Whereabouts.Offside, agent.Whereabouts);
 
-        var station = _ferryStationLayer.Nearest(_start);
+        FerryStation station = _ferryStationLayer.Nearest(_start);
         Assert.Empty(station.Ferries);
-        var ferryStationNodePosition = _environment.NearestNode(station.Position).Position;
+        Position? ferryStationNodePosition = _environment.NearestNode(station.Position).Position;
 
         // walk to station
         Assert.Equal(_start, agent.Position);
         Assert.NotEqual(_start, ferryStationNodePosition);
-        for (var tick = 0; tick < 300; tick++, _layer.Context.UpdateStep())
+        for (int tick = 0; tick < 300; tick++, _layer.Context.UpdateStep())
             agent.Tick();
         Assert.Equal(ferryStationNodePosition, agent.Position);
         Assert.Equal(1, agent.MultimodalRoute.PassedStops);
@@ -159,7 +159,7 @@ public class PedestrianUsesFerryTests
 
         // agent enters ferry
         _ferryDriver.Tick(); //ferry docks in station
-        for (var tick = 0; tick < 200; tick++, _layer.Context.UpdateStep())
+        for (int tick = 0; tick < 200; tick++, _layer.Context.UpdateStep())
             agent.Tick();
         Assert.Equal(Whereabouts.Vehicle, agent.Whereabouts);
         Assert.Equal(1, agent.MultimodalRoute.PassedStops);
@@ -168,13 +168,13 @@ public class PedestrianUsesFerryTests
 
         // ferry leaves start station and moves to goal station
         Assert.True(station.Leave(_ferry));
-        var goalStation = _ferryStationLayer.Nearest(agent.MultimodalRoute.CurrentRoute.Goal);
+        FerryStation goalStation = _ferryStationLayer.Nearest(agent.MultimodalRoute.CurrentRoute.Goal);
         _ferry.Position = _environment.NearestNode(goalStation.Position).Position;
         Assert.True(goalStation.Enter(_ferry));
         _ferry.NotifyPassengers(PassengerMessage.GoalReached);
 
         // walk to goal
-        for (var tick = 0; tick < 1; tick++, _layer.Context.UpdateStep()) agent.Tick();
+        for (int tick = 0; tick < 1; tick++, _layer.Context.UpdateStep()) agent.Tick();
         Assert.Equal(2, agent.MultimodalRoute.PassedStops);
 
         Assert.Equal(Whereabouts.Sidewalk, agent.Whereabouts);
@@ -183,24 +183,24 @@ public class PedestrianUsesFerryTests
     [Fact]
     public void WalkFerryWalkToGoal()
     {
-        var agent = new TestPassengerPedestrian { StartPosition = _start };
+        TestPassengerPedestrian agent = new TestPassengerPedestrian { StartPosition = _start };
         agent.Init(_layer);
         agent.MultimodalRoute = _layer.Search(agent, _start, _goal, ModalChoice.Ferry);
 
-        var station = _ferryStationLayer.Nearest(_start);
+        FerryStation station = _ferryStationLayer.Nearest(_start);
         Assert.Empty(station.Ferries);
 
         Assert.Equal(_start, agent.Position);
-        for (var tick = 0; tick < 250; tick++, _layer.Context.UpdateStep())
+        for (int tick = 0; tick < 250; tick++, _layer.Context.UpdateStep())
             agent.Tick();
 
         _ferryDriver.Tick();
 
-        var ferryStationNode = _environment.NearestNode(_ferry.Position);
+        ISpatialNode? ferryStationNode = _environment.NearestNode(_ferry.Position);
         Assert.Equal(ferryStationNode.Position, agent.Position);
         Assert.Equal(1, agent.MultimodalRoute.PassedStops);
 
-        for (var tick = 0; tick < 200; tick++, _layer.Context.UpdateStep())
+        for (int tick = 0; tick < 200; tick++, _layer.Context.UpdateStep())
             agent.Tick();
         Assert.Equal(Whereabouts.Vehicle, agent.Whereabouts);
         Assert.True(agent.HasUsedFerry);
@@ -208,13 +208,13 @@ public class PedestrianUsesFerryTests
         Assert.True(station.Leave(_ferry));
 
         Assert.Equal(ModalChoice.Ferry, agent.MultimodalRoute.CurrentModalChoice);
-        var goalStation = _ferryStationLayer.Nearest(agent.MultimodalRoute.CurrentRoute.Goal);
+        FerryStation goalStation = _ferryStationLayer.Nearest(agent.MultimodalRoute.CurrentRoute.Goal);
         _ferry.Position = _environment.NearestNode(goalStation.Position).Position;
 
         Assert.True(goalStation.Enter(_ferry));
         _ferry.NotifyPassengers(PassengerMessage.GoalReached);
 
-        for (var tick = 0; tick < 300; tick++, _layer.Context.UpdateStep())
+        for (int tick = 0; tick < 300; tick++, _layer.Context.UpdateStep())
             agent.Tick();
         Assert.Equal(Whereabouts.Offside, agent.Whereabouts);
         Assert.True(agent.GoalReached);

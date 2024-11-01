@@ -68,7 +68,7 @@ public abstract class MultimodalAgent<TLayer> : IAgent<TLayer>, IModalCapabiliti
 
         if (SwitchRequired) // leave old modality, continue with next one
         {
-            var previousModalType = MultimodalRoute.CurrentModalChoice;
+            ModalChoice previousModalType = MultimodalRoute.CurrentModalChoice;
             MultimodalRoute.Next();
 
             if (LeaveModalType(previousModalType))
@@ -103,7 +103,7 @@ public abstract class MultimodalAgent<TLayer> : IAgent<TLayer>, IModalCapabiliti
         if (ActiveSteering == null)
             throw new ApplicationException("Reroute failed because no active steering!?");
 
-        var multimodalRoute = MultimodalLayer.Search(this, Position, MultimodalRoute.Goal,
+        MultimodalRoute multimodalRoute = MultimodalLayer.Search(this, Position, MultimodalRoute.Goal,
             MultimodalRoute.MainModalChoice);
         MultimodalRoute.AppendAndDeleteTail(multimodalRoute);
         ActiveSteering.Route = MultimodalRoute.CurrentRoute;
@@ -139,7 +139,7 @@ public abstract class MultimodalAgent<TLayer> : IAgent<TLayer>, IModalCapabiliti
         where TSteeringHandle : ISteeringHandle
         where TPassengerHandle : IPassengerHandle
     {
-        if (!vehicle.TryEnterDriver(driver, out var steeringHandle)) return false;
+        if (!vehicle.TryEnterDriver(driver, out TSteeringHandle? steeringHandle)) return false;
 
         ActiveSteering = steeringHandle;
         return true;
@@ -159,7 +159,7 @@ public abstract class MultimodalAgent<TLayer> : IAgent<TLayer>, IModalCapabiliti
         where TSteeringHandle : ISteeringHandle
         where TPassengerHandle : IPassengerHandle
     {
-        if (vehicle == null || !vehicle.TryEnterPassenger(passenger, out var passengerHandle)) return false;
+        if (vehicle == null || !vehicle.TryEnterPassenger(passenger, out TPassengerHandle? passengerHandle)) return false;
 
         // LeaveSidewalk();
         ActiveSteering = new IdlePassengerSteeringHandle(passengerHandle);
@@ -267,7 +267,7 @@ public abstract class MultimodalAgent<TLayer> : IAgent<TLayer>, IModalCapabiliti
     ///     Provides the steering handle that is used whenever another active steering is invalidated.
     ///     In urban cases that could be a walking steering.
     /// </summary>
-    // protected abstract ISteeringHandle PrimarySteeringHandle { get; } //TODO delete
+    // protected abstract ISteeringHandle PrimarySteeringHandle { get; } // TODO delete
 
     #endregion
 

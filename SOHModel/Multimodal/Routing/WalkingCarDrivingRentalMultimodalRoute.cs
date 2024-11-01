@@ -1,4 +1,5 @@
 using Mars.Interfaces.Environments;
+using SOHModel.Car.Model;
 using SOHModel.Car.Rental;
 using SOHModel.Domain.Graph;
 
@@ -18,32 +19,32 @@ public class WalkingCarDrivingRentalMultimodalRoute : MultimodalRoute
         ICarRentalLayer carRentalLayer, 
         Position start, Position goal)
     {
-        var env = envLayer.Environment;
-        var rentalCar = carRentalLayer.Nearest(start);
+        ISpatialGraphEnvironment env = envLayer.Environment;
+        RentalCar? rentalCar = carRentalLayer.Nearest(start);
         if (rentalCar == null)
             throw new ArgumentException("No rental car found.");
 
-        var currentSidewalkNode = env.NearestNode(start, SpatialModalityType.Walking);
-        var rentalCarSidewalkNode = env.NearestNode(rentalCar.Position, SpatialModalityType.Walking);
+        ISpatialNode? currentSidewalkNode = env.NearestNode(start, SpatialModalityType.Walking);
+        ISpatialNode? rentalCarSidewalkNode = env.NearestNode(rentalCar.Position, SpatialModalityType.Walking);
         if (!currentSidewalkNode.Equals(rentalCarSidewalkNode))
         {
-            var route = env.FindShortestRoute(currentSidewalkNode, rentalCarSidewalkNode, WalkingFilter);
+            Route? route = env.FindShortestRoute(currentSidewalkNode, rentalCarSidewalkNode, WalkingFilter);
             if (route != null) Add(route, ModalChoice.Walking);
         }
 
-        var rentalCarStreetNode = env.NearestNode(rentalCar.Position, SpatialModalityType.CarDriving);
-        var goalStreetNode = env.NearestNode(goal, SpatialModalityType.CarDriving);
+        ISpatialNode? rentalCarStreetNode = env.NearestNode(rentalCar.Position, SpatialModalityType.CarDriving);
+        ISpatialNode? goalStreetNode = env.NearestNode(goal, SpatialModalityType.CarDriving);
         if (!rentalCarStreetNode.Equals(goalStreetNode))
         {
-            var routeWithCar = FindDrivingRoute(env, rentalCarStreetNode, goalStreetNode);
+            Route routeWithCar = FindDrivingRoute(env, rentalCarStreetNode, goalStreetNode);
             Add(routeWithCar, ModalChoice.CarRentalDriving);
         }
 
-        var parkingGoalSidewalkNode = env.NearestNode(goalStreetNode.Position, SpatialModalityType.Walking);
-        var nodeSidewalkGoal = env.NearestNode(goal, SpatialModalityType.Walking);
+        ISpatialNode? parkingGoalSidewalkNode = env.NearestNode(goalStreetNode.Position, SpatialModalityType.Walking);
+        ISpatialNode? nodeSidewalkGoal = env.NearestNode(goal, SpatialModalityType.Walking);
         if (!nodeSidewalkGoal.Equals(parkingGoalSidewalkNode))
         {
-            var routeToGoal = env.FindShortestRoute(parkingGoalSidewalkNode, nodeSidewalkGoal, WalkingFilter);
+            Route? routeToGoal = env.FindShortestRoute(parkingGoalSidewalkNode, nodeSidewalkGoal, WalkingFilter);
             Add(routeToGoal, ModalChoice.Walking);
         }
     }
@@ -51,13 +52,13 @@ public class WalkingCarDrivingRentalMultimodalRoute : MultimodalRoute
     private static Route FindDrivingRoute(ISpatialGraphEnvironment environment, ISpatialNode startNode,
         ISpatialNode goalNode)
     {
-        var route = environment.FindFastestRoute(startNode, goalNode,
+        Route? route = environment.FindFastestRoute(startNode, goalNode,
             edge => edge.Modalities.Contains(SpatialModalityType.CarDriving));
         if (route != null) return route;
 
         const int hops = 3;
-        foreach (var tempStartNode in environment.NearestNodes(startNode.Position, double.MaxValue, hops))
-        foreach (var tempGoalNode in environment.NearestNodes(goalNode.Position, double.MaxValue, hops))
+        foreach (ISpatialNode? tempStartNode in environment.NearestNodes(startNode.Position, double.MaxValue, hops))
+        foreach (ISpatialNode? tempGoalNode in environment.NearestNodes(goalNode.Position, double.MaxValue, hops))
         {
             route = environment.FindFastestRoute(tempStartNode, tempGoalNode,
                 edge => edge.Modalities.Contains(SpatialModalityType.CarDriving));

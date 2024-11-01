@@ -3,6 +3,7 @@ using Mars.Common;
 using Mars.Common.Core;
 using Mars.Components.Layers;
 using Mars.Interfaces.Annotations;
+using Mars.Interfaces.Environments;
 using SOHModel.Domain.Graph;
 using SOHModel.Ferry.Station;
 
@@ -29,24 +30,24 @@ public class DockWorkerSchedulerLayer : SchedulerLayer
 
     protected override void Schedule(SchedulerEntry dataRow)
     {
-        var start = dataRow.SourceGeometry.RandomPositionFromGeometry();
-        var goal = dataRow.TargetGeometry.RandomPositionFromGeometry();
+        Position? start = dataRow.SourceGeometry.RandomPositionFromGeometry();
+        Position? goal = dataRow.TargetGeometry.RandomPositionFromGeometry();
 
-        var dockWorker = new DockWorker
+        DockWorker dockWorker = new DockWorker
         {
             FerryStationLayer = StationLayer,
             EnvironmentLayer = Environment,
             StartPosition = start,
             GoalPosition = goal,
-            TravelScheduleId = dataRow.Data.TryGetValue("id", out var id) ? id.Value<int>() : 0
+            TravelScheduleId = dataRow.Data.TryGetValue("id", out object? id) ? id.Value<int>() : 0
         };
         dockWorker.Init(WorkerLayer);
 
-        if (dataRow.Data.TryGetValue("gender", out var gender) && gender != null)
+        if (dataRow.Data.TryGetValue("gender", out object? gender) && gender != null)
             dockWorker.Gender = gender.Value<GenderType>();
-        if (dataRow.Data.TryGetValue("mass", out var mass) && mass != null)
+        if (dataRow.Data.TryGetValue("mass", out object? mass) && mass != null)
             dockWorker.Mass = mass.Value<double>();
-        if (dataRow.Data.TryGetValue("perceptionInMeter", out var perception) && perception != null)
+        if (dataRow.Data.TryGetValue("perceptionInMeter", out object? perception) && perception != null)
             dockWorker.PerceptionInMeter = perception.Value<double>();
 
         WorkerLayer.Agents.Add(dockWorker.ID, dockWorker);

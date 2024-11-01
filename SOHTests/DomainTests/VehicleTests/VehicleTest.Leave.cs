@@ -1,4 +1,6 @@
 using System;
+using SOHModel.Bicycle.Steering;
+using SOHModel.Car.Steering;
 using Xunit;
 
 namespace SOHTests.DomainTests.VehicleTests;
@@ -8,82 +10,82 @@ public partial class VehicleTest
     [Fact]
     public void LeaveBicycleAsDriver()
     {
-        var vehicle = new TestBicycleWithoutRangeCheck();
+        TestBicycleWithoutRangeCheck vehicle = new TestBicycleWithoutRangeCheck();
 
-        var driver = new TestSteeringCapable();
-        var result = vehicle.TryEnterDriver(driver, out var driverVehicle);
+        TestSteeringCapable driver = new TestSteeringCapable();
+        bool result = vehicle.TryEnterDriver(driver, out BicycleSteeringHandle driverVehicle);
         Assert.True(result);
         Assert.NotNull(driverVehicle);
         Assert.Equal(driver, vehicle.Driver);
 
-        var result2 = driverVehicle.LeaveVehicle(driver);
+        bool result2 = driverVehicle.LeaveVehicle(driver);
         Assert.True(result2);
     }
 
     [Fact]
     public void LeaveCarAsDriver()
     {
-        var vehicle = new TestCarWithoutRangeCheck(_environment, new Random().Next());
+        TestCarWithoutRangeCheck vehicle = new TestCarWithoutRangeCheck(_environment, new Random().Next());
 
-        var driver = new TestSteeringCapable();
-        var result = vehicle.TryEnterDriver(driver, out var driverVehicle);
+        TestSteeringCapable driver = new TestSteeringCapable();
+        bool result = vehicle.TryEnterDriver(driver, out CarSteeringHandle driverVehicle);
         Assert.True(result);
         Assert.NotNull(driverVehicle);
         Assert.Equal(driver, vehicle.Driver);
 
-        var result2 = driverVehicle.LeaveVehicle(driver);
+        bool result2 = driverVehicle.LeaveVehicle(driver);
         Assert.True(result2);
     }
 
     [Fact]
     public void LeaveVehicleAsDriverPassengersAreInformed()
     {
-        var vehicle = new TestCarWithoutRangeCheck(_environment, 1);
+        TestCarWithoutRangeCheck vehicle = new TestCarWithoutRangeCheck(_environment, 1);
 
-        var driver = new TestSteeringCapable();
-        var result = vehicle.TryEnterDriver(driver, out var driverVehicle);
+        TestSteeringCapable driver = new TestSteeringCapable();
+        bool result = vehicle.TryEnterDriver(driver, out CarSteeringHandle driverVehicle);
         Assert.True(result);
         Assert.NotNull(driverVehicle);
         Assert.Equal(driver, vehicle.Driver);
 
-        var passenger = new TestSteeringCapable();
+        TestSteeringCapable passenger = new TestSteeringCapable();
         passenger.CarWithoutRangeCheck = vehicle;
-        var result2 = vehicle.TryEnterPassenger(passenger, out var passengerVehicle);
+        bool result2 = vehicle.TryEnterPassenger(passenger, out CarPassengerHandle passengerVehicle);
         Assert.True(result2);
         Assert.NotNull(passengerVehicle);
         Assert.Contains(passenger, vehicle.Passengers);
 
-        var result3 = driverVehicle.LeaveVehicle(driver);
+        bool result3 = driverVehicle.LeaveVehicle(driver);
         Assert.True(result3);
     }
 
     [Fact]
     public void LeaveVehicleAsDriverWhichIsNotTheDriver()
     {
-        var vehicle = new TestCarWithoutRangeCheck(_environment, new Random().Next());
+        TestCarWithoutRangeCheck vehicle = new TestCarWithoutRangeCheck(_environment, new Random().Next());
 
-        var driver = new TestSteeringCapable();
-        var result = vehicle.TryEnterDriver(driver, out var driverVehicle);
+        TestSteeringCapable driver = new TestSteeringCapable();
+        bool result = vehicle.TryEnterDriver(driver, out CarSteeringHandle driverVehicle);
         Assert.True(result);
         Assert.NotNull(driverVehicle);
         Assert.Equal(driver, vehicle.Driver);
 
-        var result2 = driverVehicle.LeaveVehicle(new TestSteeringCapable());
+        bool result2 = driverVehicle.LeaveVehicle(new TestSteeringCapable());
         Assert.False(result2);
     }
 
     [Fact]
     public void LeaveVehicleAsPassenger()
     {
-        var vehicle = new TestCarWithoutRangeCheck(_environment, 1);
+        TestCarWithoutRangeCheck vehicle = new TestCarWithoutRangeCheck(_environment, 1);
 
-        var passenger = new TestSteeringCapable();
-        var result = vehicle.TryEnterPassenger(passenger, out var passengerVehicle);
+        TestSteeringCapable passenger = new TestSteeringCapable();
+        bool result = vehicle.TryEnterPassenger(passenger, out CarPassengerHandle passengerVehicle);
         Assert.True(result);
         Assert.NotNull(passengerVehicle);
         Assert.Contains(passenger, vehicle.Passengers);
 
-        var result2 = passengerVehicle.LeaveVehicle(passenger);
+        bool result2 = passengerVehicle.LeaveVehicle(passenger);
         Assert.True(result2);
     }
 
@@ -91,15 +93,15 @@ public partial class VehicleTest
     [Fact]
     public void LeaveVehicleAsPassengerThatIsNoPassenger()
     {
-        var vehicle = new TestCarWithoutRangeCheck(_environment, 10);
+        TestCarWithoutRangeCheck vehicle = new TestCarWithoutRangeCheck(_environment, 10);
 
-        var passenger = new TestSteeringCapable();
-        var result = vehicle.TryEnterPassenger(passenger, out var passengerVehicle);
+        TestSteeringCapable passenger = new TestSteeringCapable();
+        bool result = vehicle.TryEnterPassenger(passenger, out CarPassengerHandle passengerVehicle);
         Assert.True(result);
         Assert.NotNull(passengerVehicle);
         Assert.Contains(passenger, vehicle.Passengers);
 
-        var result2 = passengerVehicle.LeaveVehicle(new TestSteeringCapable());
+        bool result2 = passengerVehicle.LeaveVehicle(new TestSteeringCapable());
         Assert.False(result2);
     }
 }

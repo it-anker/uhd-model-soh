@@ -77,7 +77,7 @@ public class TripPositionCoordinateConverter : GeometryConverter
         JsonSerializer serializer)
     {
         writer.WriteStartArray();
-        foreach (var coordinate in coordinates)
+        foreach (Coordinate coordinate in coordinates)
             WriteJsonCoordinate(writer, coordinate, serializer);
         writer.WriteEndArray();
     }
@@ -86,7 +86,7 @@ public class TripPositionCoordinateConverter : GeometryConverter
         JsonSerializer serializer)
     {
         writer.WriteStartArray();
-        foreach (var coordinate in coordinates)
+        foreach (Coordinate[] coordinate in coordinates)
             WriteJsonCoordinates(writer, coordinate, serializer);
         writer.WriteEndArray();
     }
@@ -95,7 +95,7 @@ public class TripPositionCoordinateConverter : GeometryConverter
         JsonSerializer serializer)
     {
         writer.WriteStartArray();
-        foreach (var coordinate in coordinates)
+        foreach (List<Coordinate[]> coordinate in coordinates)
             WriteJsonCoordinatesEnumerable(writer, coordinate, serializer);
         writer.WriteEndArray();
     }

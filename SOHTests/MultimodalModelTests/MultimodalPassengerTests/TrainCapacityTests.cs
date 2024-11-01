@@ -23,7 +23,7 @@ public class TrainCapacityTests
 
     public TrainCapacityTests()
     {
-        var environment = new SpatialGraphEnvironment(new SpatialGraphOptions
+        SpatialGraphEnvironment environment = new SpatialGraphEnvironment(new SpatialGraphOptions
         {
             GraphImports = new List<Input>
             {
@@ -50,7 +50,7 @@ public class TrainCapacityTests
             }
         });
 
-        var routeLayerFixture = new TrainRouteLayerFixture();
+        TrainRouteLayerFixture routeLayerFixture = new TrainRouteLayerFixture();
         _trainStationLayer = routeLayerFixture.TrainRouteLayer.TrainStationLayer;
 
         _multimodalLayer = new TestMultimodalLayer(environment)
@@ -69,13 +69,13 @@ public class TrainCapacityTests
     [Fact]
     public void PassengerCapacityOfTrainExceeded()
     {
-        var start = Position.CreateGeoPosition(10.0010703, 53.6769356); //Ochsenzoll
-        var goal = Position.CreateGeoPosition(10.033216, 53.628261); //Klein Borstel
+        Position? start = Position.CreateGeoPosition(10.0010703, 53.6769356); //Ochsenzoll
+        Position? goal = Position.CreateGeoPosition(10.033216, 53.628261); //Klein Borstel
 
-        var station = _trainStationLayer.Nearest(start);
+        TrainStation? station = _trainStationLayer.Nearest(start);
         Assert.Equal("Ochsenzoll", station.Name);
 
-        var driver = new TrainDriver(_trainLayer, (_, _) => { })
+        TrainDriver driver = new TrainDriver(_trainLayer, (_, _) => { })
         {
             Line = "U1",
             MinimumBoardingTimeInSeconds = 10
@@ -84,14 +84,14 @@ public class TrainCapacityTests
         driver.Tick();
         Assert.Single(station.Trains);
 
-        var capacity = driver.Train.PassengerCapacity;
+        int capacity = driver.Train.PassengerCapacity;
         Assert.Equal(336, capacity);
 
 
         Assert.True(driver.Train.HasFreeCapacity());
-        for (var i = 0; i < capacity; i++)
+        for (int i = 0; i < capacity; i++)
         {
-            var agent = new TestPassengerPedestrian
+            TestPassengerPedestrian agent = new TestPassengerPedestrian
             {
                 StartPosition = start
             };
@@ -103,9 +103,9 @@ public class TrainCapacityTests
         }
 
         Assert.False(driver.Train.HasFreeCapacity());
-        for (var i = 0; i < capacity; i++)
+        for (int i = 0; i < capacity; i++)
         {
-            var agent = new TestPassengerPedestrian
+            TestPassengerPedestrian agent = new TestPassengerPedestrian
             {
                 StartPosition = start
             };
@@ -119,18 +119,18 @@ public class TrainCapacityTests
     [Fact]
     public void PassengerUseDifferentTrainsDueToCapacityLimitation()
     {
-        var agents = new List<TestPassengerPedestrian>();
-        var trainDrivers = new List<TrainDriver>();
+        List<TestPassengerPedestrian> agents = new List<TestPassengerPedestrian>();
+        List<TrainDriver> trainDrivers = new List<TrainDriver>();
 
-        var start = Position.CreateGeoPosition(10.0010703, 53.6769356); //Ochsenzoll
-        var goal = Position.CreateGeoPosition(10.033216, 53.628261); //Klein Borstel
+        Position? start = Position.CreateGeoPosition(10.0010703, 53.6769356); //Ochsenzoll
+        Position? goal = Position.CreateGeoPosition(10.033216, 53.628261); //Klein Borstel
 
-        var usedTrains = new HashSet<Train>();
+        HashSet<Train> usedTrains = new HashSet<Train>();
 
         const int agentCount = 400;
-        for (var i = 0; i < agentCount; i++)
+        for (int i = 0; i < agentCount; i++)
         {
-            var agent = new TestPassengerPedestrian
+            TestPassengerPedestrian agent = new TestPassengerPedestrian
             {
                 StartPosition = start
             };
@@ -142,12 +142,12 @@ public class TrainCapacityTests
         long firstGoalReachedTick = -1;
         const int spawningInterval = 300;
         const int ticks = 4000;
-        for (var tick = 0;
+        for (int tick = 0;
              tick < ticks && !agents.All(agent => agent.GoalReached);
              tick++, _multimodalLayer.Context.UpdateStep())
         {
-            foreach (var driver in trainDrivers) driver.Tick();
-            foreach (var agent in agents)
+            foreach (TrainDriver driver in trainDrivers) driver.Tick();
+            foreach (TestPassengerPedestrian agent in agents)
             {
                 agent.Tick();
                 if (agent.UsedTrain != null) usedTrains.Add(agent.UsedTrain);
@@ -157,7 +157,7 @@ public class TrainCapacityTests
 
             if (tick % spawningInterval == 0)
             {
-                var driver = new TrainDriver(_trainLayer, (_, _) => { })
+                TrainDriver driver = new TrainDriver(_trainLayer, (_, _) => { })
                 {
                     Line = "U1",
                     MinimumBoardingTimeInSeconds = 20

@@ -4,7 +4,7 @@ namespace SOHModel.Bicycle.Common;
 
 public class HandleBicycleType
 {
-    //TODO in entity init csv verschieben und im bicylce speichern
+    // TODO in entity init csv verschieben und im bicylce speichern
     public static double GetBicycleWeight(BicycleType type)
     {
         //    Citybike	17	20	18,5

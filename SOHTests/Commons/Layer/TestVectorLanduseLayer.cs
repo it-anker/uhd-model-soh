@@ -12,7 +12,7 @@ public class TestVectorLanduseLayer : VectorLanduseLayer
     /// <returns>An initialized vector layer.</returns>
     public static VectorLanduseLayer Create(string filePath)
     {
-        var layer = new TestVectorLanduseLayer();
+        TestVectorLanduseLayer layer = new TestVectorLanduseLayer();
         layer.InitLayer(new LayerInitData { LayerInitConfig = { File = filePath } });
         return layer;
     }

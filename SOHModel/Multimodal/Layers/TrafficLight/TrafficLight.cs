@@ -3,6 +3,8 @@ using Mars.Components.Layers.Temporal;
 using Mars.Interfaces.Data;
 using Mars.Interfaces.Environments;
 using Mars.Interfaces.Layers;
+using NetTopologySuite.Geometries;
+using Position = Mars.Interfaces.Environments.Position;
 
 namespace SOHModel.Multimodal.Layers.TrafficLight;
 
@@ -79,7 +81,7 @@ public class TrafficLight : IVectorFeature, IQueryFieldProvider
     
     private void Init(VectorStructuredData data)
     {
-        var centroid = data.Geometry.Centroid;
+        Point? centroid = data.Geometry.Centroid;
 
         Position = Position.CreatePosition(centroid.X, centroid.Y);
         

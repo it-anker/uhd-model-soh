@@ -13,7 +13,7 @@ public class DayPlanTest
 
     public DayPlanTest()
     {
-        var context = SimulationContext.Start2020InSeconds;
+        SimulationContext? context = SimulationContext.Start2020InSeconds;
 
         Assert.NotNull(context.StartTimePoint);
         _date = context.StartTimePoint.Value;
@@ -22,7 +22,7 @@ public class DayPlanTest
     [Fact]
     public void Check24Hours()
     {
-        for (var i = 0; i < 10000; i++)
+        for (int i = 0; i < 10000; i++)
         {
             AssertLastActionBeforeFirstActionPlus24H(
                 DayPlanGenerator.CreateDayPlanForAgent(_date, true, false).ToList());
@@ -34,8 +34,8 @@ public class DayPlanTest
 
         static void AssertLastActionBeforeFirstActionPlus24H(IReadOnlyCollection<Trip> dayPlanFullWorker)
         {
-            var firstAction = dayPlanFullWorker.FirstOrDefault();
-            var lastAction = dayPlanFullWorker.LastOrDefault();
+            Trip? firstAction = dayPlanFullWorker.FirstOrDefault();
+            Trip? lastAction = dayPlanFullWorker.LastOrDefault();
 
             Assert.NotNull(firstAction);
             Assert.NotNull(lastAction);
@@ -47,9 +47,9 @@ public class DayPlanTest
     [Fact]
     public void TestDayPlanWithFixAppointment()
     {
-        var start = DateTime.Today.AddHours(8);
+        DateTime start = DateTime.Today.AddHours(8);
 
-        var dayplan = DayPlanGenerator.CreateDayPlanForAgent(DateTime.Today,
+        IEnumerable<Trip> dayplan = DayPlanGenerator.CreateDayPlanForAgent(DateTime.Today,
             true,
             false,
             new Dictionary<TripReason, DateTime>
@@ -66,32 +66,32 @@ public class DayPlanTest
     public void CreateDayPlan()
     {
         //Generate 1000 day plans for every type of worker and check if star time is lower then next action start time         
-        for (var i = 0; i < 10000; i++)
+        for (int i = 0; i < 10000; i++)
         {
-            var dayPlanFullWorker = DayPlanGenerator.CreateDayPlanForAgent(_date, true,
+            List<Trip> dayPlanFullWorker = DayPlanGenerator.CreateDayPlanForAgent(_date, true,
                 false).ToList();
-            var fullWorkerAction = dayPlanFullWorker.FirstOrDefault();
-            foreach (var action in dayPlanFullWorker)
+            Trip? fullWorkerAction = dayPlanFullWorker.FirstOrDefault();
+            foreach (Trip action in dayPlanFullWorker)
             {
                 Assert.NotNull(fullWorkerAction);
                 Assert.True(fullWorkerAction.StartTime <= action.StartTime);
                 fullWorkerAction = action;
             }
 
-            var dayPlanHalfWorker = DayPlanGenerator.CreateDayPlanForAgent(_date, true,
+            List<Trip> dayPlanHalfWorker = DayPlanGenerator.CreateDayPlanForAgent(_date, true,
                 true).ToList();
-            var halfWorkerAction = dayPlanHalfWorker.FirstOrDefault();
-            foreach (var action in dayPlanHalfWorker)
+            Trip? halfWorkerAction = dayPlanHalfWorker.FirstOrDefault();
+            foreach (Trip action in dayPlanHalfWorker)
             {
                 Assert.NotNull(halfWorkerAction);
                 Assert.True(halfWorkerAction.StartTime <= action.StartTime);
                 halfWorkerAction = action;
             }
 
-            var dayPlanNoWorker = DayPlanGenerator.CreateDayPlanForAgent(_date, false,
+            List<Trip> dayPlanNoWorker = DayPlanGenerator.CreateDayPlanForAgent(_date, false,
                 false).ToList();
-            var noWorkerAction = dayPlanNoWorker.FirstOrDefault();
-            foreach (var action in dayPlanNoWorker)
+            Trip? noWorkerAction = dayPlanNoWorker.FirstOrDefault();
+            foreach (Trip action in dayPlanNoWorker)
             {
                 Assert.NotNull(noWorkerAction);
                 Assert.True(noWorkerAction.StartTime <= action.StartTime);
@@ -102,11 +102,11 @@ public class DayPlanTest
             Assert.NotNull(dayPlanHalfWorker);
             Assert.NotNull(dayPlanNoWorker);
 
-            var fullWorkerHasTwoWorkBlocks =
+            int fullWorkerHasTwoWorkBlocks =
                 dayPlanFullWorker.FindAll(action => action.TripReason == TripReason.Work).Count;
-            var halfWorkerHasOneWorkBlock =
+            int halfWorkerHasOneWorkBlock =
                 dayPlanHalfWorker.FindAll(action => action.TripReason == TripReason.Work).Count;
-            var noWorkerHasNoWorkBlock =
+            int noWorkerHasNoWorkBlock =
                 dayPlanNoWorker.FindAll(action => action.TripReason == TripReason.Work).Count;
 
             Assert.Equal(2, fullWorkerHasTwoWorkBlocks);
@@ -118,9 +118,9 @@ public class DayPlanTest
     [Fact]
     public void TestDayPlanRestrictionForWorker()
     {
-        var plan1 = DayPlanGenerator.CreateDayPlanForAgent(DateTime.Today, true, false);
-        var plan2 = DayPlanGenerator.CreateDayPlanForAgent(DateTime.Today, true, true);
-        var plan3 = DayPlanGenerator.CreateDayPlanForAgent(DateTime.Today, false, false);
+        IEnumerable<Trip> plan1 = DayPlanGenerator.CreateDayPlanForAgent(DateTime.Today, true, false);
+        IEnumerable<Trip> plan2 = DayPlanGenerator.CreateDayPlanForAgent(DateTime.Today, true, true);
+        IEnumerable<Trip> plan3 = DayPlanGenerator.CreateDayPlanForAgent(DateTime.Today, false, false);
 
 
         Assert.Equal(2, plan1.Count(action => action.TripReason == TripReason.Work));
@@ -131,37 +131,37 @@ public class DayPlanTest
     [Fact]
     public void NoRepeatingActionsCreated()
     {
-        for (var i = 0; i < 100000; i++)
+        for (int i = 0; i < 100000; i++)
         {
-            var dayPlanFullWorker = DayPlanGenerator.CreateDayPlanForAgent(_date, true,
+            List<Trip> dayPlanFullWorker = DayPlanGenerator.CreateDayPlanForAgent(_date, true,
                 false).ToList();
-            var previous = dayPlanFullWorker.FirstOrDefault();
-            for (var j = 1; j < dayPlanFullWorker.Count; j++)
+            Trip? previous = dayPlanFullWorker.FirstOrDefault();
+            for (int j = 1; j < dayPlanFullWorker.Count; j++)
             {
                 Assert.NotNull(previous);
-                var current = dayPlanFullWorker.ElementAt(j);
+                Trip current = dayPlanFullWorker.ElementAt(j);
                 Assert.NotEqual(previous.TripReason, current.TripReason);
                 previous = current;
             }
 
-            var dayPlanHalfWorker = DayPlanGenerator.CreateDayPlanForAgent(_date, true,
+            List<Trip> dayPlanHalfWorker = DayPlanGenerator.CreateDayPlanForAgent(_date, true,
                 true).ToList();
             previous = dayPlanHalfWorker.FirstOrDefault();
-            for (var j = 1; j < dayPlanHalfWorker.Count; j++)
+            for (int j = 1; j < dayPlanHalfWorker.Count; j++)
             {
                 Assert.NotNull(previous);
-                var current = dayPlanHalfWorker.ElementAt(j);
+                Trip current = dayPlanHalfWorker.ElementAt(j);
                 Assert.NotEqual(previous.TripReason, current.TripReason);
                 previous = current;
             }
 
-            var dayPlanNoWorker = DayPlanGenerator.CreateDayPlanForAgent(_date, false,
+            List<Trip> dayPlanNoWorker = DayPlanGenerator.CreateDayPlanForAgent(_date, false,
                 false).ToList();
             previous = dayPlanNoWorker.FirstOrDefault();
-            for (var j = 1; j < dayPlanNoWorker.Count; j++)
+            for (int j = 1; j < dayPlanNoWorker.Count; j++)
             {
                 Assert.NotNull(previous);
-                var current = dayPlanNoWorker.ElementAt(j);
+                Trip current = dayPlanNoWorker.ElementAt(j);
                 Assert.NotEqual(previous.TripReason, current.TripReason);
                 previous = current;
             }

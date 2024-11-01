@@ -26,7 +26,7 @@ public class Citizen : MultiCapableAgent<IMultimodalLayer>
 
         if (Worker)
         {
-            var workPosition = MediatorLayer.VectorLandUseLayer.RandomPosition();
+            Position workPosition = MediatorLayer.VectorLandUseLayer.RandomPosition();
             Work = new PointOfInterest(TripReason.Work, workPosition);
         }
 
@@ -94,7 +94,7 @@ public class Citizen : MultiCapableAgent<IMultimodalLayer>
     {
         if (Tour.MoveNext())
         {
-            var goalPosition = FindPositionForTrip(Tour.Current);
+            Position goalPosition = FindPositionForTrip(Tour.Current);
             MultimodalRoute = MultimodalLayer.Search(this, Position, goalPosition, Capabilities);
         }
 

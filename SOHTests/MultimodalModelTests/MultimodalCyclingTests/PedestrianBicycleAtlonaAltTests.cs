@@ -17,7 +17,7 @@ public class PedestrianBicycleAltonaAltstadtTests
 
     public PedestrianBicycleAltonaAltstadtTests()
     {
-        var graph =
+        SpatialGraphEnvironment graph =
             new SpatialGraphEnvironment(new SpatialGraphOptions
             {
                 GraphImports = new List<Input>
@@ -38,9 +38,9 @@ public class PedestrianBicycleAltonaAltstadtTests
 
     private (Position start, Position goal) FindReasonableStartAndGoal()
     {
-        var start = _layer.StreetEnvironment.GetRandomNode().Position;
-        var goal = _layer.StreetEnvironment.GetRandomNode().Position;
-        var counter = 0;
+        Position? start = _layer.StreetEnvironment.GetRandomNode().Position;
+        Position? goal = _layer.StreetEnvironment.GetRandomNode().Position;
+        int counter = 0;
         while (start.DistanceInMTo(goal) < 2000)
         {
             goal = _layer.StreetEnvironment.GetRandomNode().Position;
@@ -55,12 +55,12 @@ public class PedestrianBicycleAltonaAltstadtTests
     [Fact]
     public void CycleWalkManyAgents()
     {
-        var agents = new List<TestMultiCapableAgent>();
+        List<TestMultiCapableAgent> agents = new List<TestMultiCapableAgent>();
         const int agentCount = 30;
-        for (var i = 0; i < agentCount; i++)
+        for (int i = 0; i < agentCount; i++)
         {
-            var (start, goal) = FindReasonableStartAndGoal();
-            var agent = new TestMultiCapableAgent
+            (Position start, Position goal) = FindReasonableStartAndGoal();
+            TestMultiCapableAgent agent = new TestMultiCapableAgent
             {
                 StartPosition = start,
                 GoalPosition = goal,
@@ -74,8 +74,8 @@ public class PedestrianBicycleAltonaAltstadtTests
         Assert.All(agents, a => Assert.Equal(ModalChoice.CyclingRentalBike, a.RouteMainModalChoice));
 
         const int ticks = 3000;
-        for (var tick = 0; tick <= ticks; tick++, _layer.Context.UpdateStep())
-            foreach (var agent in agents)
+        for (int tick = 0; tick <= ticks; tick++, _layer.Context.UpdateStep())
+            foreach (TestMultiCapableAgent agent in agents)
                 agent.Tick();
 
         Assert.All(agents, a => Assert.True(a.GoalReached));
@@ -83,7 +83,7 @@ public class PedestrianBicycleAltonaAltstadtTests
         Assert.All(agents,
             a =>
             {
-                var distanceToGoal =
+                double distanceToGoal =
                     a.Position.DistanceInMTo(a.MultimodalRoute.Stops.Last().Route.Stops.Last().Edge.To.Position);
                 Assert.InRange(distanceToGoal, 0, 15);
             });
@@ -95,12 +95,12 @@ public class PedestrianBicycleAltonaAltstadtTests
     [Fact]
     public void WalkCycleWalkSpecificRoute()
     {
-        var start = Position.CreateGeoPosition(9.9423436, 53.5488809);
-        var goal = Position.CreateGeoPosition(9.9277651, 53.5446598);
+        Position? start = Position.CreateGeoPosition(9.9423436, 53.5488809);
+        Position? goal = Position.CreateGeoPosition(9.9277651, 53.5446598);
         // var start = Position.CreateGeoPosition(9.93520213357434, 53.549863306078855);
         // var goal = Position.CreateGeoPosition(9.9474231, 53.5461301);
 
-        var agent = new TestMultiCapableAgent
+        TestMultiCapableAgent agent = new TestMultiCapableAgent
         {
             StartPosition = start,
             GoalPosition = goal,
@@ -109,7 +109,7 @@ public class PedestrianBicycleAltonaAltstadtTests
         agent.Init(_layer);
         Assert.Equal(ModalChoice.CyclingRentalBike, agent.RouteMainModalChoice);
 
-        for (var tick = 0; tick <= 5000 && !agent.GoalReached; tick++, _layer.Context.UpdateStep()) agent.Tick();
+        for (int tick = 0; tick <= 5000 && !agent.GoalReached; tick++, _layer.Context.UpdateStep()) agent.Tick();
 
         Assert.True(agent.GoalReached);
     }

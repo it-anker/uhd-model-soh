@@ -18,10 +18,10 @@ public class TrainRouteTests : IClassFixture<TrainStationLayerFixture>
     [Fact]
     public void ReadTrainRouteTest()
     {
-        var routes = TrainRouteReader.Read(ResourcesConstants.TrainU1LineCsv, _trainStationLayer);
+        Dictionary<string, TrainRoute> routes = TrainRouteReader.Read(ResourcesConstants.TrainU1LineCsv, _trainStationLayer);
         Assert.Single(routes);
 
-        var (line, route) = routes.First();
+        (string line, TrainRoute route) = routes.First();
         Assert.Equal("U1", line);
         Assert.Equal(37, route.Count());
 
@@ -35,10 +35,10 @@ public class TrainRouteTests : IClassFixture<TrainStationLayerFixture>
     [Fact]
     public void ReverseTrainRouteTest()
     {
-        var route = new TrainRoute();
-        var station1 = new TrainStation();
-        var station2 = new TrainStation();
-        var station3 = new TrainStation();
+        TrainRoute route = new TrainRoute();
+        TrainStation station1 = new TrainStation();
+        TrainStation station2 = new TrainStation();
+        TrainStation station3 = new TrainStation();
         route.Entries.Add(new TrainRouteEntry(station1, station2, 5));
         route.Entries.Add(new TrainRouteEntry(station2, station3, 5));
 
@@ -47,7 +47,7 @@ public class TrainRouteTests : IClassFixture<TrainStationLayerFixture>
         Assert.Equal(station2, route.Entries.Last().From);
         Assert.Equal(station3, route.Entries.Last().To);
 
-        var reversed = route.Reversed();
+        TrainRoute reversed = route.Reversed();
         Assert.Equal(station3, reversed.Entries.First().From);
         Assert.Equal(station2, reversed.Entries.First().To);
         Assert.Equal(station2, reversed.Entries.Last().From);
@@ -57,11 +57,11 @@ public class TrainRouteTests : IClassFixture<TrainStationLayerFixture>
     [Fact]
     public void ReverseReadTrainRouteTest()
     {
-        var routes = TrainRouteReader.Read(ResourcesConstants.TrainU1LineCsv, _trainStationLayer);
+        Dictionary<string, TrainRoute> routes = TrainRouteReader.Read(ResourcesConstants.TrainU1LineCsv, _trainStationLayer);
         Assert.Single(routes);
 
-        var (line, route) = routes.First();
-        var reversed = route.Reversed();
+        (string line, TrainRoute route) = routes.First();
+        TrainRoute reversed = route.Reversed();
         Assert.Equal("U1", line);
         Assert.Equal(37, reversed.Count());
 

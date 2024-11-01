@@ -43,11 +43,11 @@ public class WiedemannAccelerator : IVehicleAccelerator
     {
         _driver = driver;
 
-        var driverType = driver.DriverType;
-        var driverSpecificFollowingVariation = HandleDriverType.DetermineFollowingVariation(driverType);
-        var driverSpecificHeadwayTime = HandleDriverType.DetermineHeadwayTime(driverType);
-        var driverSpecificEnterFollowingThreshold = HandleDriverType.DetermineEnterFolowingThreshold(driverType);
-        var driverSpecificOscillationAcceleration =
+        DriverType driverType = driver.DriverType;
+        double driverSpecificFollowingVariation = HandleDriverType.DetermineFollowingVariation(driverType);
+        double driverSpecificHeadwayTime = HandleDriverType.DetermineHeadwayTime(driverType);
+        double driverSpecificEnterFollowingThreshold = HandleDriverType.DetermineEnterFolowingThreshold(driverType);
+        double driverSpecificOscillationAcceleration =
             HandleDriverType.DetermineOscillationAcceleration(driverType);
         SetDriverSpecificParams(driverSpecificFollowingVariation, driverSpecificHeadwayTime,
             driverSpecificEnterFollowingThreshold, driverSpecificOscillationAcceleration, _driverRand);
@@ -75,15 +75,15 @@ public class WiedemannAccelerator : IVehicleAccelerator
             throw new ArgumentException(
                 $"{nameof(IBicycleSteeringCapable.Mass)} of {nameof(IBicycleSteeringCapable)} cannot be 0");
 
-        var speed = Math.Abs(velocity);
-        var currentMaxAccelerationFactor =
+        double speed = Math.Abs(velocity);
+        double currentMaxAccelerationFactor =
             new FastGaussianDistribution(MaxAccelerationFactor, 0.3D).Next(RandomHelper.Random);
-        var adjustedPower = power * Efficiency;
-        var epsilon = adjustedPower / (_driver.Mass * currentMaxAccelerationFactor);
-        var t1 = adjustedPower / _driver.Mass;
-        var t2 = 1 / (speed + epsilon);
-        var t3 = Math.Pow(speed, 2) / Math.Pow(maxSpeed, 3);
-        var t4 = 0.0;
+        double adjustedPower = power * Efficiency;
+        double epsilon = adjustedPower / (_driver.Mass * currentMaxAccelerationFactor);
+        double t1 = adjustedPower / _driver.Mass;
+        double t2 = 1 / (speed + epsilon);
+        double t3 = Math.Pow(speed, 2) / Math.Pow(maxSpeed, 3);
+        double t4 = 0.0;
         if (_driver.Gradient > 0.0)
             t4 = BicycleConstants.G * (_driver.Gradient / 100);
 
@@ -93,8 +93,8 @@ public class WiedemannAccelerator : IVehicleAccelerator
     public double CalculateSpeedChange(double currentSpeed, double speedAhead, double distanceAhead,
         double accelerationAhead, double currentAcceleration, double maxSpeed)
     {
-        var dx = distanceAhead + StandstillDistance;
-        var dv = speedAhead - currentSpeed;
+        double dx = distanceAhead + StandstillDistance;
+        double dv = speedAhead - currentSpeed;
         double sdxc;
         if (speedAhead <= 0)
             sdxc = StandstillDistance;
@@ -102,14 +102,14 @@ public class WiedemannAccelerator : IVehicleAccelerator
             // TODO Sumo: sdxc = StandstillDistance
             sdxc = StandstillDistance + _headwayTime * currentSpeed;
 
-        var sdxo = _followingVariation + sdxc;
+        double sdxo = _followingVariation + sdxc;
         // TODO Sumo: / 1000
-        var sdv = OscillationSpeedDependency * dx * dx;
+        double sdv = OscillationSpeedDependency * dx * dx;
 
-        var sdvo = sdv;
+        double sdvo = sdv;
         // TODO Sumo: speed > 0
 
-        var sdvc = speedAhead > 0 ? NegativeFollowingThreshold - sdv : 0;
+        double sdvc = speedAhead > 0 ? NegativeFollowingThreshold - sdv : 0;
 
         // TODO Sumo: predspeed > PositiveFollowingThreshold
         if (currentSpeed > PositiveFollowingThreshold) sdvo += PositiveFollowingThreshold;
@@ -157,7 +157,7 @@ public class WiedemannAccelerator : IVehicleAccelerator
         }
         else if (dx > sdxc)
         {
-            var maxAcceleration = CalcMaxAcceleration(_driver.CyclingPower, currentSpeed, maxSpeed);
+            double maxAcceleration = CalcMaxAcceleration(_driver.CyclingPower, currentSpeed, maxSpeed);
             acceleration = dx < sdxo ? Math.Min(dv * dv / (sdxo - dx), maxAcceleration) : maxAcceleration;
         }
 

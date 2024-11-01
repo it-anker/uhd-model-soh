@@ -11,7 +11,7 @@ public class TrainRouteLayerFixture : IDisposable
     public TrainRouteLayerFixture()
     {
         TrainStationLayer = new TrainStationLayerFixture().TrainStationLayer;
-        var trainRouteLayer = new TrainRouteLayer(TrainStationLayer);
+        TrainRouteLayer trainRouteLayer = new TrainRouteLayer(TrainStationLayer);
         trainRouteLayer.InitLayer(
             new LayerInitData
             {

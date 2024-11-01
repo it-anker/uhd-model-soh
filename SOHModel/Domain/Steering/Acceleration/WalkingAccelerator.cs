@@ -26,8 +26,8 @@ public class WalkingAccelerator
         if (_walkingCapable.PreferredSpeed <= 0)
             throw new ApplicationException("Gender is not set for agent and therefore no preferred speed.");
 
-        var density = CalculateDensity(edge, _walkingCapable.PerceptionInMeter);
-        var velocity = PossibleSpeedForDensity(_walkingCapable.PreferredSpeed, density);
+        double density = CalculateDensity(edge, _walkingCapable.PerceptionInMeter);
+        double velocity = PossibleSpeedForDensity(_walkingCapable.PreferredSpeed, density);
         return velocity > 0 ? velocity : _walkingCapable.WalkingShoes.Velocity;
     }
 
@@ -39,10 +39,10 @@ public class WalkingAccelerator
     /// <returns>Density. Agents per square meter.</returns>
     private double CalculateDensity(ISpatialEdge edge, double perceptionInMeter)
     {
-        var density = 0.0;
+        double density = 0.0;
         if (edge == null || !edge.Entities.Contains(_walkingCapable.WalkingShoes)) return density;
 
-        var counts = edge.ExploreInLaneOnEdge(_walkingCapable.WalkingShoes, perceptionInMeter);
+        int counts = edge.ExploreInLaneOnEdge(_walkingCapable.WalkingShoes, perceptionInMeter);
         if (counts <= 0) return density;
 
         density = counts / (2.1 * perceptionInMeter);
@@ -57,7 +57,7 @@ public class WalkingAccelerator
     /// <returns>possible speed of the agent</returns>
     private static double PossibleSpeedForDensity(double velocity, double density)
     {
-        var speedForDensity = velocity;
+        double speedForDensity = velocity;
         if (density < 0.38)
         {
             //no significant obstructions: do nothing

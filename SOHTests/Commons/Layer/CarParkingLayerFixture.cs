@@ -1,4 +1,5 @@
 using System;
+using System.Data;
 using Mars.Common.IO.Csv;
 using Mars.Core.Data;
 using Mars.Interfaces;
@@ -16,12 +17,12 @@ public class CarParkingLayerFixture : IDisposable
 {
     public CarParkingLayerFixture(ISpatialGraphLayer streetLayer)
     {
-        var dataTable = CsvReader.MapData(ResourcesConstants.CarCsv);
-        var manager = new EntityManagerImpl(dataTable);
+        DataTable? dataTable = CsvReader.MapData(ResourcesConstants.CarCsv);
+        EntityManagerImpl manager = new EntityManagerImpl(dataTable);
 
-        var mock = new Mock<ISimulationContainer>();
+        Mock<ISimulationContainer> mock = new Mock<ISimulationContainer>();
         mock.Setup(container => container.Resolve<IEntityManager>()).Returns(manager);
-        var layerInitData = new LayerInitData
+        LayerInitData layerInitData = new LayerInitData
         {
             LayerInitConfig = { File = ResourcesConstants.ParkingAltonaAltstadt },
             Container = mock.Object

@@ -45,7 +45,7 @@ public static class DayPlanGenerator
     {
         IEnumerable<TripReason> dayActions;
 
-        var isWorkingDay = date.DayOfWeek != DayOfWeek.Saturday || date.DayOfWeek != DayOfWeek.Sunday;
+        bool isWorkingDay = date.DayOfWeek != DayOfWeek.Saturday || date.DayOfWeek != DayOfWeek.Sunday;
 
         if (isWorker)
         {
@@ -64,7 +64,7 @@ public static class DayPlanGenerator
             dayActions = CreateDayPlanActionsForNoWorkerWorkingDay();
         }
 
-        var actionsWithStartTimes =
+        IEnumerable<Trip> actionsWithStartTimes =
             CalculateStartTimesForAction(dayActions, date, isWorker, isPartTimeWorker, appointments);
 
         return actionsWithStartTimes.Do(action =>
@@ -82,7 +82,7 @@ public static class DayPlanGenerator
         yield return TripReason.Eat;
         yield return TripReason.Work;
 
-        var action = OneThirdEatFreeTimeErrands();
+        TripReason action = OneThirdEatFreeTimeErrands();
         yield return action;
         yield return DecideNextToDoDependingOnThePrevious(action);
         yield return TripReason.HomeTime;
@@ -91,9 +91,9 @@ public static class DayPlanGenerator
     // Half-worker
     private static IEnumerable<TripReason> CreateDayPlanActionsForHalfWorkerWorkingDay()
     {
-        var morningShift = Random.Next(100) < 50;
+        bool morningShift = Random.Next(100) < 50;
 
-        var action = OneThirdEatFreeTimeErrands();
+        TripReason action = OneThirdEatFreeTimeErrands();
         yield return action;
 
         action = morningShift ? TripReason.Work : DecideNextToDoDependingOnThePrevious(action);
@@ -113,10 +113,10 @@ public static class DayPlanGenerator
 
     private static IEnumerable<TripReason> CreateDayPlanActionsForFullWorkerWeekendDay(DayOfWeek day)
     {
-        var random = Random.Next(100);
-        var worksOnWeekend = day == DayOfWeek.Saturday ? random <= 50 : random <= 20;
+        int random = Random.Next(100);
+        bool worksOnWeekend = day == DayOfWeek.Saturday ? random <= 50 : random <= 20;
 
-        var action = OneThirdEatFreeTimeErrands();
+        TripReason action = OneThirdEatFreeTimeErrands();
         yield return action;
 
         action = worksOnWeekend ? TripReason.Work : DecideNextToDoDependingOnThePrevious(action);
@@ -136,8 +136,8 @@ public static class DayPlanGenerator
 
     private static IEnumerable<TripReason> CreateDayPlanActionsForHalfWorkerWeekendDay(DayOfWeek day)
     {
-        var rand = Random.Next(100);
-        var morningShift = Random.Next(100) < 50;
+        int rand = Random.Next(100);
+        bool morningShift = Random.Next(100) < 50;
         bool workOnWeekend;
 
         if (day == DayOfWeek.Saturday)
@@ -145,7 +145,7 @@ public static class DayPlanGenerator
         else
             workOnWeekend = rand <= 20;
 
-        var action = OneThirdEatFreeTimeErrands();
+        TripReason action = OneThirdEatFreeTimeErrands();
         yield return action;
 
         action = workOnWeekend && morningShift
@@ -172,7 +172,7 @@ public static class DayPlanGenerator
     //No-Worker
     private static IEnumerable<TripReason> CreateDayPlanActionsForNoWorkerWorkingDay()
     {
-        var action = OneThirdEatFreeTimeErrands();
+        TripReason action = OneThirdEatFreeTimeErrands();
         yield return action;
         action = DecideNextToDoDependingOnThePrevious(action);
         yield return action;
@@ -209,7 +209,7 @@ public static class DayPlanGenerator
 
     private static TripReason OneThirdEatFreeTimeErrands()
     {
-        var random = Random.Next(100);
+        int random = Random.Next(100);
 
         if (random <= 33) return TripReason.Eat;
         if (random <= 66) return TripReason.FreeTime;
@@ -222,49 +222,49 @@ public static class DayPlanGenerator
         bool isWorker, bool isPartTimeWorker,
         IDictionary<TripReason, DateTime> appointments = null)
     {
-        var actionWithStartTimes = new List<Trip>();
+        List<Trip> actionWithStartTimes = new List<Trip>();
 
         if (isWorker)
         {
             if (isPartTimeWorker)
             {
                 // Half-Time worker
-                var actionList = dayPlanActions.ToList();
-                var index = actionList.IndexOf(TripReason.Work);
+                List<TripReason> actionList = dayPlanActions.ToList();
+                int index = actionList.IndexOf(TripReason.Work);
 
-                var errandTime = AvgErrandTimeHalfWorkerInMinutes;
-                var freeTime = AvgFreeTimeHalfWorkerInMinutes;
+                double errandTime = AvgErrandTimeHalfWorkerInMinutes;
+                double freeTime = AvgFreeTimeHalfWorkerInMinutes;
                 DateTime startTimeForWorkAction;
 
                 if (index <= actionList.Count / 2) // Morning shift
                 {
-                    var randomIntForTime = Random.Next(100);
+                    int randomIntForTime = Random.Next(100);
 
                     // Check for fix working appointment
-                    if (appointments != null && appointments.TryGetValue(TripReason.Work, out var time))
+                    if (appointments != null && appointments.TryGetValue(TripReason.Work, out DateTime time))
                     {
                         startTimeForWorkAction = CreateDateTime(date, time.Hour, time.Minute);
                     }
                     else if (randomIntForTime is >= 0 and < 4
                             ) // Generate the morning shift by probability.
                     {
-                        var randFullHour = Random.Next(0, 5);
-                        var randMinutes = (int)(Random.NextDouble() * 60);
+                        int randFullHour = Random.Next(0, 5);
+                        int randMinutes = (int)(Random.NextDouble() * 60);
                         startTimeForWorkAction = CreateDateTime(date, randFullHour, randMinutes);
                     }
                     else if (randomIntForTime is >= 4 and < 71)
                     {
                         //5 - 8 Uhr
-                        var randFullHour = Random.Next(5, 8);
-                        var randMinutes = (int)(Random.NextDouble() * 60);
+                        int randFullHour = Random.Next(5, 8);
+                        int randMinutes = (int)(Random.NextDouble() * 60);
                         startTimeForWorkAction = new DateTime(date.Year, date.Month, date.Day,
                             randFullHour, randMinutes, 0);
                     }
                     else if (randomIntForTime is >= 71 and < 92)
                     {
                         //8 bis 10 Uhr
-                        var randFullHour = Random.Next(8, 10);
-                        var randMinutes = Random.NextDouble() * 60;
+                        int randFullHour = Random.Next(8, 10);
+                        double randMinutes = Random.NextDouble() * 60;
                         startTimeForWorkAction = new DateTime(date.Year, date.Month, date.Day,
                             randFullHour,
                             (int)randMinutes, 0);
@@ -272,8 +272,8 @@ public static class DayPlanGenerator
                     else if (randomIntForTime is >= 92 and < 100)
                     {
                         //10 - 13 Uhr
-                        var randFullHour = Random.Next(10, 13);
-                        var randMinutes = Random.NextDouble() * 60;
+                        int randFullHour = Random.Next(10, 13);
+                        double randMinutes = Random.NextDouble() * 60;
                         startTimeForWorkAction = new DateTime(date.Year, date.Month, date.Day,
                             randFullHour,
                             (int)randMinutes, 0);
@@ -285,14 +285,14 @@ public static class DayPlanGenerator
                 }
                 else // Evening shift
                 {
-                    var randomIntForTime = Random.Next(100);
+                    int randomIntForTime = Random.Next(100);
 
                     // Generate the evening shift 
                     if (randomIntForTime is >= 0 and < 54)
                     {
                         //13 bis 16
-                        var randFullHour = Random.Next(13, 16);
-                        var randMinutes = Random.NextDouble() * 60;
+                        int randFullHour = Random.Next(13, 16);
+                        double randMinutes = Random.NextDouble() * 60;
                         startTimeForWorkAction = new DateTime(date.Year, date.Month, date.Day,
                             randFullHour,
                             (int)randMinutes, 0);
@@ -300,8 +300,8 @@ public static class DayPlanGenerator
                     else if (randomIntForTime is >= 54 and < 69)
                     {
                         //16 bis 19
-                        var randFullHour = Random.Next(16, 19);
-                        var randMinutes = Random.NextDouble() * 60;
+                        int randFullHour = Random.Next(16, 19);
+                        double randMinutes = Random.NextDouble() * 60;
                         startTimeForWorkAction = new DateTime(date.Year, date.Month, date.Day,
                             randFullHour,
                             (int)randMinutes, 0);
@@ -309,8 +309,8 @@ public static class DayPlanGenerator
                     else if (randomIntForTime is >= 69 and < 77)
                     {
                         //19 bis 22
-                        var randFullHour = Random.Next(19, 22);
-                        var randMinutes = Random.NextDouble() * 60;
+                        int randFullHour = Random.Next(19, 22);
+                        double randMinutes = Random.NextDouble() * 60;
                         startTimeForWorkAction = new DateTime(date.Year, date.Month, date.Day,
                             randFullHour,
                             (int)randMinutes, 0);
@@ -318,8 +318,8 @@ public static class DayPlanGenerator
                     else if (randomIntForTime is >= 77 and < 100)
                     {
                         //22 bis 00
-                        var randFullHour = Random.Next(22, 24);
-                        var randMinutes = Random.NextDouble() * 60;
+                        int randFullHour = Random.Next(22, 24);
+                        double randMinutes = Random.NextDouble() * 60;
                         startTimeForWorkAction = new DateTime(date.Year, date.Month, date.Day,
                             randFullHour,
                             (int)randMinutes, 0);
@@ -330,11 +330,11 @@ public static class DayPlanGenerator
                     }
                 }
 
-                var tempList = new List<Trip>();
+                List<Trip> tempList = new List<Trip>();
 
-                var startTimeForAction = startTimeForWorkAction;
+                DateTime startTimeForAction = startTimeForWorkAction;
 
-                for (var i = 0; i < index; i++)
+                for (int i = 0; i < index; i++)
                 {
                     double randMinutes;
                     switch (actionList.ElementAt(i))
@@ -361,16 +361,16 @@ public static class DayPlanGenerator
                     }
                 }
 
-                for (var i = tempList.Count - 1; i >= 0; i--) actionWithStartTimes.Add(tempList.ElementAt(i));
+                for (int i = tempList.Count - 1; i >= 0; i--) actionWithStartTimes.Add(tempList.ElementAt(i));
 
                 actionWithStartTimes.Add(new Trip(actionList.ElementAt(index), startTimeForWorkAction));
 
 
                 //work for 4 to 6 hours
-                var afterWork = startTimeForWorkAction.AddMinutes(Random.Next(4 * 60, 6 * 60));
+                DateTime afterWork = startTimeForWorkAction.AddMinutes(Random.Next(4 * 60, 6 * 60));
                 actionWithStartTimes.Add(new Trip(actionList.ElementAt(++index), afterWork));
 
-                for (var i = index; i < actionList.Count; i++)
+                for (int i = index; i < actionList.Count; i++)
                     switch (actionList.ElementAt(i))
                     {
                         case TripReason.HomeTime:
@@ -396,15 +396,15 @@ public static class DayPlanGenerator
             else
             {
                 //FullWorker
-                var errandTime = AvgErrandTimeFullWorkerInMinutes;
-                var freeTime = AvgFreeTimeFullWorkerInMinutes;
+                double errandTime = AvgErrandTimeFullWorkerInMinutes;
+                double freeTime = AvgFreeTimeFullWorkerInMinutes;
 
-                var actionList = dayPlanActions.ToList();
-                var firstWorkBlock = actionList.Find(type => type == TripReason.Work);
-                var randomIntForTime = Random.Next(102);
-                var startTimeForWorkAction = DateTime.MinValue;
+                List<TripReason> actionList = dayPlanActions.ToList();
+                TripReason firstWorkBlock = actionList.Find(type => type == TripReason.Work);
+                int randomIntForTime = Random.Next(102);
+                DateTime startTimeForWorkAction = DateTime.MinValue;
 
-                if (appointments != null && appointments.TryGetValue(TripReason.Work, out var time))
+                if (appointments != null && appointments.TryGetValue(TripReason.Work, out DateTime time))
                 {
                     //Fix time point for work
                     startTimeForWorkAction = new DateTime(date.Year, date.Month, date.Day, time.Hour, time.Minute,
@@ -413,74 +413,74 @@ public static class DayPlanGenerator
                 else if (randomIntForTime is >= 0 and < 3)
                 {
                     //00 bis 05 Uhr
-                    var randFullHour = Random.Next(0, 5);
-                    var randMinutes = Random.NextDouble() * 60;
+                    int randFullHour = Random.Next(0, 5);
+                    double randMinutes = Random.NextDouble() * 60;
                     startTimeForWorkAction = new DateTime(date.Year, date.Month, date.Day, randFullHour,
                         (int)randMinutes, 0);
                 }
                 else if (randomIntForTime is >= 3 and < 63)
                 {
                     //5 bis 8 Uhr
-                    var randFullHour = Random.Next(5, 8);
-                    var randMinutes = Random.NextDouble() * 60;
+                    int randFullHour = Random.Next(5, 8);
+                    double randMinutes = Random.NextDouble() * 60;
                     startTimeForWorkAction = new DateTime(date.Year, date.Month, date.Day, randFullHour,
                         (int)randMinutes, 0);
                 }
                 else if (randomIntForTime is >= 63 and < 82)
                 {
                     //8 bis 10 Uhr
-                    var randFullHour = Random.Next(8, 10);
-                    var randMinutes = Random.NextDouble() * 60;
+                    int randFullHour = Random.Next(8, 10);
+                    double randMinutes = Random.NextDouble() * 60;
                     startTimeForWorkAction = new DateTime(date.Year, date.Month, date.Day, randFullHour,
                         (int)randMinutes, 0);
                 }
                 else if (randomIntForTime is >= 82 and < 89)
                 {
                     //10 bis 13 Uhr
-                    var randFullHour = Random.Next(10, 13);
-                    var randMinutes = Random.NextDouble() * 60;
+                    int randFullHour = Random.Next(10, 13);
+                    double randMinutes = Random.NextDouble() * 60;
                     startTimeForWorkAction = new DateTime(date.Year, date.Month, date.Day, randFullHour,
                         (int)randMinutes, 0);
                 }
                 else if (randomIntForTime is >= 89 and < 96)
                 {
                     //13 bis 16 Uhr
-                    var randFullHour = Random.Next(13, 16);
-                    var randMinutes = Random.NextDouble() * 60;
+                    int randFullHour = Random.Next(13, 16);
+                    double randMinutes = Random.NextDouble() * 60;
                     startTimeForWorkAction = new DateTime(date.Year, date.Month, date.Day, randFullHour,
                         (int)randMinutes, 0);
                 }
                 else if (randomIntForTime is >= 96 and < 98)
                 {
                     //16 bis 19 Uhr
-                    var randFullHour = Random.Next(16, 19);
-                    var randMinutes = Random.NextDouble() * 60;
+                    int randFullHour = Random.Next(16, 19);
+                    double randMinutes = Random.NextDouble() * 60;
                     startTimeForWorkAction = new DateTime(date.Year, date.Month, date.Day, randFullHour,
                         (int)randMinutes, 0);
                 }
                 else if (randomIntForTime is >= 98 and < 99)
                 {
                     //19 bis 22 Uhr
-                    var randFullHour = Random.Next(19, 22);
-                    var randMinutes = Random.NextDouble() * 60;
+                    int randFullHour = Random.Next(19, 22);
+                    double randMinutes = Random.NextDouble() * 60;
                     startTimeForWorkAction = new DateTime(date.Year, date.Month, date.Day, randFullHour,
                         (int)randMinutes, 0);
                 }
                 else if (randomIntForTime is >= 99 and < 102)
                 {
                     //22 bis 24 Uhr
-                    var randFullHour = Random.Next(22, 24);
-                    var randMinutes = Random.NextDouble() * 60;
+                    int randFullHour = Random.Next(22, 24);
+                    double randMinutes = Random.NextDouble() * 60;
                     startTimeForWorkAction = new DateTime(date.Year, date.Month, date.Day, randFullHour,
                         (int)randMinutes, 0);
                 }
 
-                var index = actionList.IndexOf(firstWorkBlock);
+                int index = actionList.IndexOf(firstWorkBlock);
 
-                var startTimeForAction = startTimeForWorkAction;
+                DateTime startTimeForAction = startTimeForWorkAction;
 
-                var tempList = new List<Trip>();
-                for (var i = 0; i < index; i++)
+                List<Trip> tempList = new List<Trip>();
+                for (int i = 0; i < index; i++)
                 {
                     double randMinutes;
                     switch (actionList.ElementAt(i))
@@ -510,30 +510,30 @@ public static class DayPlanGenerator
                     }
                 }
 
-                for (var i = tempList.Count - 1; i >= 0; i--) actionWithStartTimes.Add(tempList.ElementAt(i));
+                for (int i = tempList.Count - 1; i >= 0; i--) actionWithStartTimes.Add(tempList.ElementAt(i));
 
                 actionWithStartTimes.Add(new Trip(actionList.ElementAt(index), startTimeForWorkAction));
 
                 //lunch is randomized in the middle of avgWorkTimeFullWorker
-                var beginLunchAfterMinutes = Random.Next((int)(AvgWorkTimeFullWorkerInMinutes / 2) - 30,
+                int beginLunchAfterMinutes = Random.Next((int)(AvgWorkTimeFullWorkerInMinutes / 2) - 30,
                     (int)(AvgWorkTimeFullWorkerInMinutes / 2) + 30);
 
-                var lunchStart = startTimeForWorkAction.AddMinutes(beginLunchAfterMinutes);
+                DateTime lunchStart = startTimeForWorkAction.AddMinutes(beginLunchAfterMinutes);
                 actionWithStartTimes.Add(new Trip(actionList.ElementAt(++index), lunchStart));
 
 
                 //lunch takes 30 to 60 minutes (gesetzliche Mittagspause)
-                var lunchTimeInMinutes = Random.Next(30, 60);
-                var secondWorkBlockStart = lunchStart.AddMinutes(lunchTimeInMinutes);
+                int lunchTimeInMinutes = Random.Next(30, 60);
+                DateTime secondWorkBlockStart = lunchStart.AddMinutes(lunchTimeInMinutes);
                 actionWithStartTimes.Add(new Trip(actionList.ElementAt(++index), secondWorkBlockStart));
 
                 //afterWorkAction
-                var currentDateTime =
+                DateTime currentDateTime =
                     secondWorkBlockStart.AddMinutes(AvgWorkTimeFullWorkerInMinutes - beginLunchAfterMinutes);
                 actionWithStartTimes.Add(new Trip(actionList.ElementAt(++index), currentDateTime));
 
 
-                for (var i = index; i < actionList.Count; i++)
+                for (int i = index; i < actionList.Count; i++)
                     switch (actionList.ElementAt(i))
                     {
                         case TripReason.HomeTime:
@@ -561,26 +561,26 @@ public static class DayPlanGenerator
         }
 
         {
-            var actionList = dayPlanActions.ToList();
+            List<TripReason> actionList = dayPlanActions.ToList();
             //dayplan No-Worker 15% Errands 55% Freetime 30% HomeTime (Sleep)
-            var percentErrandTime =
+            int percentErrandTime =
                 actionList.Count(type => type == TripReason.Errands) > 0 ? Random.Next(10, 20) : 0;
-            var percentFreeTime = 70 - percentErrandTime;
+            int percentFreeTime = 70 - percentErrandTime;
 
-            var errandTimeInMinutes = 24D * percentErrandTime / 100 * 60;
-            var freeTimeInMinutes = 24D * percentFreeTime / 100 * 60;
+            double errandTimeInMinutes = 24D * percentErrandTime / 100 * 60;
+            double freeTimeInMinutes = 24D * percentFreeTime / 100 * 60;
 
-            var homeTimeBlock = actionList.Find(type => type == TripReason.HomeTime);
+            TripReason homeTimeBlock = actionList.Find(type => type == TripReason.HomeTime);
 
-            var startTimeHomeBlock = DateTime.MinValue;
+            DateTime startTimeHomeBlock = DateTime.MinValue;
 
-            var randomIntForTime = Random.Next(104);
+            int randomIntForTime = Random.Next(104);
 
             if (randomIntForTime is >= 0 and < 5)
             {
                 //00 bis 05 Uhr
-                var randFullHour = Random.Next(0, 5);
-                var randMinutes = Random.NextDouble() * 60;
+                int randFullHour = Random.Next(0, 5);
+                double randMinutes = Random.NextDouble() * 60;
                 startTimeHomeBlock = new DateTime(date.Year, date.Month, date.Day, randFullHour,
                     (int)randMinutes, 0);
             }
@@ -588,8 +588,8 @@ public static class DayPlanGenerator
             if (randomIntForTime is >= 5 and < 7)
             {
                 //5 bis 8 Uhr
-                var randFullHour = Random.Next(5, 8);
-                var randMinutes = Random.NextDouble() * 60;
+                int randFullHour = Random.Next(5, 8);
+                double randMinutes = Random.NextDouble() * 60;
                 startTimeHomeBlock = new DateTime(date.Year, date.Month, date.Day, randFullHour,
                     (int)randMinutes, 0);
             }
@@ -597,8 +597,8 @@ public static class DayPlanGenerator
             if (randomIntForTime is >= 7 and < 12)
             {
                 //8 bis 10 Uhr
-                var randFullHour = Random.Next(8, 10);
-                var randMinutes = Random.NextDouble() * 60;
+                int randFullHour = Random.Next(8, 10);
+                double randMinutes = Random.NextDouble() * 60;
                 startTimeHomeBlock = new DateTime(date.Year, date.Month, date.Day, randFullHour,
                     (int)randMinutes, 0);
             }
@@ -607,8 +607,8 @@ public static class DayPlanGenerator
             if (randomIntForTime is >= 12 and < 31)
             {
                 //10 bis 13 Uhr
-                var randFullHour = Random.Next(10, 13);
-                var randMinutes = Random.NextDouble() * 60;
+                int randFullHour = Random.Next(10, 13);
+                double randMinutes = Random.NextDouble() * 60;
                 startTimeHomeBlock = new DateTime(date.Year, date.Month, date.Day, randFullHour,
                     (int)randMinutes, 0);
             }
@@ -616,8 +616,8 @@ public static class DayPlanGenerator
             if (randomIntForTime is >= 31 and < 54)
             {
                 //13 bis 16 Uhr
-                var randFullHour = Random.Next(13, 16);
-                var randMinutes = Random.NextDouble() * 60;
+                int randFullHour = Random.Next(13, 16);
+                double randMinutes = Random.NextDouble() * 60;
                 startTimeHomeBlock = new DateTime(date.Year, date.Month, date.Day, randFullHour,
                     (int)randMinutes, 0);
             }
@@ -625,8 +625,8 @@ public static class DayPlanGenerator
             if (randomIntForTime is >= 54 and < 86)
             {
                 //16 bis 19 Uhr
-                var randFullHour = Random.Next(16, 19);
-                var randMinutes = Random.NextDouble() * 60;
+                int randFullHour = Random.Next(16, 19);
+                double randMinutes = Random.NextDouble() * 60;
                 startTimeHomeBlock = new DateTime(date.Year, date.Month, date.Day, randFullHour,
                     (int)randMinutes, 0);
             }
@@ -634,8 +634,8 @@ public static class DayPlanGenerator
             if (randomIntForTime is >= 86 and < 99)
             {
                 //19 bis 22 Uhr
-                var randFullHour = Random.Next(19, 22);
-                var randMinutes = Random.NextDouble() * 60;
+                int randFullHour = Random.Next(19, 22);
+                double randMinutes = Random.NextDouble() * 60;
                 startTimeHomeBlock = new DateTime(date.Year, date.Month, date.Day, randFullHour,
                     (int)randMinutes, 0);
             }
@@ -644,20 +644,20 @@ public static class DayPlanGenerator
             if (randomIntForTime is >= 99 and < 104)
             {
                 //22 bis 24 Uhr
-                var randFullHour = Random.Next(22, 24);
-                var randMinutes = Random.NextDouble() * 60;
+                int randFullHour = Random.Next(22, 24);
+                double randMinutes = Random.NextDouble() * 60;
                 startTimeHomeBlock = new DateTime(date.Year, date.Month, date.Day, randFullHour,
                     (int)randMinutes, 0);
             }
 
 
-            var index = actionList.IndexOf(homeTimeBlock);
+            int index = actionList.IndexOf(homeTimeBlock);
 
-            var timeForStartAction = startTimeHomeBlock;
+            DateTime timeForStartAction = startTimeHomeBlock;
 
-            var tempList = new List<Trip>();
+            List<Trip> tempList = new List<Trip>();
 
-            for (var i = --index; i >= 0; i--)
+            for (int i = --index; i >= 0; i--)
             {
                 double randMinutes;
                 switch (actionList.ElementAt(i))
@@ -685,7 +685,7 @@ public static class DayPlanGenerator
             }
 
 
-            for (var i = tempList.Count - 1; i >= 0; i--) actionWithStartTimes.Add(tempList.ElementAt(i));
+            for (int i = tempList.Count - 1; i >= 0; i--) actionWithStartTimes.Add(tempList.ElementAt(i));
 
             actionWithStartTimes.Add(new Trip(homeTimeBlock, startTimeHomeBlock));
 

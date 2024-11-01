@@ -1,10 +1,13 @@
 using System.Collections.Concurrent;
 using Mars.Common.Core;
 using Mars.Components.Layers.Temporal;
+using Mars.Core.Data;
 using Mars.Interfaces.Data;
 using Mars.Interfaces.Environments;
 using Mars.Interfaces.Layers;
+using NetTopologySuite.Geometries;
 using SOHModel.Domain.Graph;
+using Position = Mars.Interfaces.Environments.Position;
 
 namespace SOHModel.Bicycle.Rental;
 
@@ -88,11 +91,11 @@ public class BicycleRentalStation : IVectorFeature, IQueryFieldProvider
 
     private void Init(VectorStructuredData data)
     {
-        var centroid = data.Geometry.Centroid;
+        Point? centroid = data.Geometry.Centroid;
 
         Position = Position.CreatePosition(centroid.X, centroid.Y);
         Name = data.Data["name"].Value<string>();
-        var initialAmount = data.Data.ContainsKey(KeyCount)
+        int initialAmount = data.Data.ContainsKey(KeyCount)
             ? data.Data[KeyCount].Value<int>()
             : StandardAmount;
         VectorStructured = data;
@@ -106,24 +109,24 @@ public class BicycleRentalStation : IVectorFeature, IQueryFieldProvider
 
     private void InitBicycles(int amount)
     {
-        var entityManager = Layer.EntityManager;
-        var environment = Layer.SpatialGraphMediatorLayer.Environment;
+        IEntityManager? entityManager = Layer.EntityManager;
+        ISpatialGraphEnvironment? environment = Layer.SpatialGraphMediatorLayer.Environment;
         if (environment == null)
             throw new ApplicationException($"{nameof(BicycleRentalLayer)} requires an {nameof(ISpatialGraphLayer)}");
 
-        for (var i = 0; i < amount; i++)
+        for (int i = 0; i < amount; i++)
         {
             if (entityManager != null)
             {
-                var bicycle = entityManager.Create<RentalBicycle>(BicycleType.Item1, BicycleType.Item2);
+                RentalBicycle? bicycle = entityManager.Create<RentalBicycle>(BicycleType.Item1, BicycleType.Item2);
                 bicycle.Environment = environment;
                 bicycle.BicycleRentalStation = this;
                 ParkingBicycles.TryAdd(bicycle, 0);
             }
             else
             {
-                //TODO wird aufgerufen bevor BicycleLayer
-                var bicycle = new RentalBicycle
+                // TODO wird aufgerufen bevor BicycleLayer
+                RentalBicycle bicycle = new RentalBicycle
                 {
                     Height = 0, Length = 2, Width = 1, MaxAcceleration = 0, MaxDeceleration = 0, MaxSpeed = 50,
                     BicycleRentalStation = this,
@@ -147,7 +150,7 @@ public class BicycleRentalStation : IVectorFeature, IQueryFieldProvider
 
         VectorStructured.Data["Returns"] = VectorStructured.Data["Returns"].Value<int>() + 1;
         bicycle.BicycleRentalStation = this;
-        var entered = ParkingBicycles.TryAdd(bicycle, byte.MinValue);
+        bool entered = ParkingBicycles.TryAdd(bicycle, byte.MinValue);
         VectorStructured.Data[KeyCount] = Count;
         return entered;
     }
@@ -160,7 +163,7 @@ public class BicycleRentalStation : IVectorFeature, IQueryFieldProvider
     public bool Leave(IRentalBicycle bicycle)
     {
         bicycle.BicycleRentalStation = null;
-        var vehicleLeft = !ParkingBicycles.ContainsKey(bicycle) || ParkingBicycles.TryRemove(bicycle, out _);
+        bool vehicleLeft = !ParkingBicycles.ContainsKey(bicycle) || ParkingBicycles.TryRemove(bicycle, out _);
 
         VectorStructured.Data["Rents"] = VectorStructured.Data["Rents"].Value<int>() + 1;
         VectorStructured.Data[KeyCount] = Count;
@@ -176,7 +179,7 @@ public class BicycleRentalStation : IVectorFeature, IQueryFieldProvider
     {
         while (ParkingBicycles.Any())
         {
-            var rentalBicycle = ParkingBicycles.FirstOrDefault().Key;
+            IRentalBicycle? rentalBicycle = ParkingBicycles.FirstOrDefault().Key;
             if (rentalBicycle != null && ParkingBicycles.TryRemove(rentalBicycle, out _))
                 return rentalBicycle;
         }
@@ -193,8 +196,8 @@ public class BicycleRentalStation : IVectorFeature, IQueryFieldProvider
         if (LastUpdateCount == null) return;
 
         //hard update strategy
-        var updatedAmount = LastUpdateCount.Value;
-        var update = updatedAmount - Count;
+        int updatedAmount = LastUpdateCount.Value;
+        int update = updatedAmount - Count;
 
         if (updatedAmount > Count)
         {
@@ -202,10 +205,10 @@ public class BicycleRentalStation : IVectorFeature, IQueryFieldProvider
         }
         else
         {
-            var deleteAmount = Count - updatedAmount;
-            for (var i = 0; i < deleteAmount; i++)
+            int deleteAmount = Count - updatedAmount;
+            for (int i = 0; i < deleteAmount; i++)
             {
-                var bicycle = ParkingBicycles.FirstOrDefault().Key;
+                IRentalBicycle? bicycle = ParkingBicycles.FirstOrDefault().Key;
                 bicycle.BicycleRentalStation = null;
                 ParkingBicycles.TryRemove(bicycle, out _);
             }

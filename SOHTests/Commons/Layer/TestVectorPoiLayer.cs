@@ -12,7 +12,7 @@ public class TestVectorPoiLayer : VectorPoiLayer
     /// <returns>An initialized vector layer.</returns>
     public static VectorPoiLayer Create(string filePath)
     {
-        var layer = new TestVectorPoiLayer();
+        TestVectorPoiLayer layer = new TestVectorPoiLayer();
         layer.InitLayer(new LayerInitData { LayerInitConfig = { File = filePath } });
         return layer;
     }

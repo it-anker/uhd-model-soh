@@ -12,11 +12,11 @@ public class WalkingMultimodalRoute : MultimodalRoute
         ISpatialGraphLayer environment, 
         Position start, Position goal)
     {
-        var walk = environment.Environment;
-        var startNode = walk.NearestNode(start, null, SpatialModalityType.Walking);
-        var goalNode = walk.NearestNode(goal, SpatialModalityType.Walking);
+        ISpatialGraphEnvironment walk = environment.Environment;
+        ISpatialNode? startNode = walk.NearestNode(start, null, SpatialModalityType.Walking);
+        ISpatialNode? goalNode = walk.NearestNode(goal, SpatialModalityType.Walking);
 
-        var route = walk.FindShortestRoute(startNode, goalNode,
+        Route? route = walk.FindShortestRoute(startNode, goalNode,
             edge => edge.Modalities.Contains(SpatialModalityType.Walking));
         Add(route, ModalChoice.Walking);
     }

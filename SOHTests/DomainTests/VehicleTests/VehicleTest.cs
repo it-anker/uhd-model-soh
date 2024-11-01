@@ -19,10 +19,10 @@ public partial class VehicleTest
     [Fact]
     public void VehicleHasPositionAfterInsertIntoEnvironment()
     {
-        var fourNodeGraphEnv = new FourNodeGraphEnv();
-        var environment = fourNodeGraphEnv.GraphEnvironment;
+        FourNodeGraphEnv fourNodeGraphEnv = new FourNodeGraphEnv();
+        ISpatialGraphEnvironment environment = fourNodeGraphEnv.GraphEnvironment;
 
-        var car = Golf.Create(environment);
+        Golf car = Golf.Create(environment);
         Assert.Null(car.Position);
 
         Assert.True(environment.Insert(car, fourNodeGraphEnv.Node1));

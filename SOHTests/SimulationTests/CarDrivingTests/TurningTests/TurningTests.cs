@@ -1,9 +1,11 @@
 using System;
 using System.Collections.Generic;
+using System.Data;
 using System.IO;
 using Mars.Common.Core;
 using Mars.Common.IO.Csv;
 using Mars.Components.Starter;
+using Mars.Core.Simulation.Entities;
 using Mars.Interfaces.Model;
 using SOHModel.Car.Model;
 using SOHModel.Domain.Common;
@@ -17,13 +19,13 @@ public class TurningTests
     [Fact]
     public void SlowDownBeforeLeftTurnTest()
     {
-        var modelDescription = new ModelDescription();
+        ModelDescription modelDescription = new ModelDescription();
         modelDescription.AddLayer<CarLayer>();
         modelDescription.AddAgent<CarDriver, CarLayer>();
         modelDescription.AddEntity<Car>();
 
-        var start = DateTime.Parse("2020-01-01T00:00:00");
-        var config = new SimulationConfig
+        DateTime start = DateTime.Parse("2020-01-01T00:00:00");
+        SimulationConfig config = new SimulationConfig
         {
             Globals =
             {
@@ -70,38 +72,38 @@ public class TurningTests
                 }
             }
         };
-        var starter = SimulationStarter.Start(modelDescription, config);
-        var workflowState = starter.Run();
+        SimulationStarter starter = SimulationStarter.Start(modelDescription, config);
+        SimulationWorkflowState workflowState = starter.Run();
 
         Assert.Equal(100, workflowState.Iterations);
 
-        var table = CsvReader.MapData(Path.Combine(GetType().Name, nameof(CarDriver) + ".csv"));
+        DataTable? table = CsvReader.MapData(Path.Combine(GetType().Name, nameof(CarDriver) + ".csv"));
         Assert.NotNull(table);
 
         //check that speed is below allowed turning speed for turn 1
-        var restTurn1 = table.Select("Convert(Tick, 'System.Int32') > 1 AND " +
-                                     "Convert(CurrentEdgeId, 'System.Int32') = 1 AND " +
-                                     "Convert(RemainingDistanceOnEdge, 'System.Decimal') < 4");
+        DataRow[] restTurn1 = table.Select("Convert(Tick, 'System.Int32') > 1 AND " +
+                                           "Convert(CurrentEdgeId, 'System.Int32') = 1 AND " +
+                                           "Convert(RemainingDistanceOnEdge, 'System.Decimal') < 4");
 
         double currentVelocity;
-        foreach (var row in restTurn1)
+        foreach (DataRow row in restTurn1)
         {
             currentVelocity = row["Velocity"].Value<double>();
             Assert.True(currentVelocity < VehicleConstants.RegularTurnSpeed + 0.1);
         }
 
         //check that the car accelerates after the first turning maneuver
-        var speedUpTurn1 = table.Select("Convert(Tick, 'System.Int32') > 1 AND  " +
-                                        "Convert(CurrentEdgeId, 'System.Int32') = 2 AND " +
-                                        "Convert(PositionOnEdge, 'System.Decimal') > 5");
+        DataRow[] speedUpTurn1 = table.Select("Convert(Tick, 'System.Int32') > 1 AND  " +
+                                              "Convert(CurrentEdgeId, 'System.Int32') = 2 AND " +
+                                              "Convert(PositionOnEdge, 'System.Decimal') > 5");
 
         currentVelocity = speedUpTurn1[0]["Velocity"].Value<double>();
         Assert.True(currentVelocity > VehicleConstants.IntersectionSpeed + 0.01);
 
         //check that speed is below allowed turning speed for turn 2
-        var restTurn2 = table.Select("Convert(Tick, 'System.Int32') > 1 AND " +
-                                     "Convert(CurrentEdgeId, 'System.Int32') = 2 AND " +
-                                     "Convert(RemainingDistanceOnEdge, 'System.Decimal') < 4");
+        DataRow[] restTurn2 = table.Select("Convert(Tick, 'System.Int32') > 1 AND " +
+                                           "Convert(CurrentEdgeId, 'System.Int32') = 2 AND " +
+                                           "Convert(RemainingDistanceOnEdge, 'System.Decimal') < 4");
         currentVelocity = restTurn2[0]["Velocity"].Value<double>();
         Assert.True(currentVelocity < VehicleConstants.RegularTurnSpeed + 0.1);
     }

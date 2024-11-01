@@ -25,17 +25,17 @@ public class GatewayLayerTests
     [Fact]
     public void FindGoalWithinEnv()
     {
-        var start = Position.CreateGeoPosition(9.9460806, 53.5525467); //Schomburgstr/Hospitalstr
-        var goal = Position.CreateGeoPosition(9.936516, 53.547820); //Königstr/Nordelbische Kirchenbib
+        Position? start = Position.CreateGeoPosition(9.9460806, 53.5525467); //Schomburgstr/Hospitalstr
+        Position? goal = Position.CreateGeoPosition(9.936516, 53.547820); //Königstr/Nordelbische Kirchenbib
         // Assert.True(_environment.BoundingBox.Envelope.Contains(start.PositionArray));
 
-        var validatedGoal = _gatewayLayer.Validate(start, goal).Item2;
+        Position validatedGoal = _gatewayLayer.Validate(start, goal).Item2;
 
         Assert.Equal(goal, validatedGoal);
 
-        var startNode = _environment.NearestNode(start);
-        var goalNode = _environment.NearestNode(validatedGoal);
-        var route = _environment.FindShortestRoute(startNode, goalNode);
+        ISpatialNode startNode = _environment.NearestNode(start);
+        ISpatialNode goalNode = _environment.NearestNode(validatedGoal);
+        Route route = _environment.FindShortestRoute(startNode, goalNode);
         Assert.NotNull(route);
         Assert.NotEmpty(route);
     }
@@ -43,12 +43,12 @@ public class GatewayLayerTests
     [Fact]
     public void FindExitPointWithinWalkingDistanceToGoal()
     {
-        var start = Position.CreateGeoPosition(9.9460806, 53.5525467);
-        var goal = Position.CreateGeoPosition(9.9672284, 53.5573791);
+        Position? start = Position.CreateGeoPosition(9.9460806, 53.5525467);
+        Position? goal = Position.CreateGeoPosition(9.9672284, 53.5573791);
 
-        var validatedGoal = _gatewayLayer.Validate(start, goal).Item2;
+        Position validatedGoal = _gatewayLayer.Validate(start, goal).Item2;
 
-        var expectedGoal = Position.CreateGeoPosition(9.9590506, 53.5585846);
+        Position? expectedGoal = Position.CreateGeoPosition(9.9590506, 53.5585846);
 
         Assert.Equal(expectedGoal, validatedGoal);
         Assert.InRange(goal.DistanceInKmTo(validatedGoal), 0, 1);
@@ -57,12 +57,12 @@ public class GatewayLayerTests
     [Fact]
     public void FindEntryPointWithinWalkingDistanceToStart()
     {
-        var start = Position.CreateGeoPosition(9.9672284, 53.5573791);
-        var goal = Position.CreateGeoPosition(9.9460806, 53.5525467);
+        Position? start = Position.CreateGeoPosition(9.9672284, 53.5573791);
+        Position? goal = Position.CreateGeoPosition(9.9460806, 53.5525467);
 
-        var validatedGoal = _gatewayLayer.Validate(start, goal).Item1;
+        Position validatedGoal = _gatewayLayer.Validate(start, goal).Item1;
 
-        var expectedGoal = Position.CreateGeoPosition(9.9590506, 53.5585846);
+        Position? expectedGoal = Position.CreateGeoPosition(9.9590506, 53.5585846);
 
         Assert.Equal(expectedGoal, validatedGoal);
         Assert.InRange(start.DistanceInKmTo(validatedGoal), 0, 1);
@@ -71,13 +71,13 @@ public class GatewayLayerTests
     [Fact]
     public void FindExitPointOverGateway()
     {
-        var start = Position.CreateGeoPosition(9.9460806, 53.5525467);
-        var goal = Position.CreateGeoPosition(9.88361, 53.55891);
+        Position? start = Position.CreateGeoPosition(9.9460806, 53.5525467);
+        Position? goal = Position.CreateGeoPosition(9.88361, 53.55891);
 
-        var gatewayPosition = _gatewayLayer.Validate(start, goal).Item2;
+        Position gatewayPosition = _gatewayLayer.Validate(start, goal).Item2;
 
-        var railStation = Position.CreateGeoPosition(9.944125, 53.547752);
-        var railStationNodePosition = _environment.NearestNode(railStation).Position;
+        Position? railStation = Position.CreateGeoPosition(9.944125, 53.547752);
+        Position? railStationNodePosition = _environment.NearestNode(railStation).Position;
 
         Assert.InRange(goal.DistanceInKmTo(gatewayPosition), 1, 10);
         Assert.Equal(railStationNodePosition, gatewayPosition);
@@ -86,13 +86,13 @@ public class GatewayLayerTests
     [Fact]
     public void FindEntryPointOverGateway()
     {
-        var start = Position.CreateGeoPosition(9.88361, 53.55891); //S-Bahn Othmarschen
-        var goal = Position.CreateGeoPosition(9.9460806, 53.5525467); //Schomburgstr/Hospitalstr
+        Position? start = Position.CreateGeoPosition(9.88361, 53.55891); //S-Bahn Othmarschen
+        Position? goal = Position.CreateGeoPosition(9.9460806, 53.5525467); //Schomburgstr/Hospitalstr
 
-        var gatewayPosition = _gatewayLayer.Validate(start, goal).Item1;
+        Position gatewayPosition = _gatewayLayer.Validate(start, goal).Item1;
 
-        var railStation = Position.CreateGeoPosition(9.944125, 53.547752); //S-Bahn Königstr
-        var railStationNodePosition = _environment.NearestNode(railStation).Position;
+        Position? railStation = Position.CreateGeoPosition(9.944125, 53.547752); //S-Bahn Königstr
+        Position? railStationNodePosition = _environment.NearestNode(railStation).Position;
 
         Assert.InRange(start.DistanceInKmTo(gatewayPosition), 1, 10);
         Assert.Equal(railStationNodePosition, gatewayPosition);
@@ -101,10 +101,10 @@ public class GatewayLayerTests
     [Fact]
     public void StartAndGoalOutsideEnvironment()
     {
-        var start = Position.CreateGeoPosition(9.9675872, 53.5614485);
-        var goal = Position.CreateGeoPosition(9.9672284, 53.5573791);
+        Position? start = Position.CreateGeoPosition(9.9675872, 53.5614485);
+        Position? goal = Position.CreateGeoPosition(9.9672284, 53.5573791);
 
-        var validatedGoal = _gatewayLayer.Validate(start, goal).Item2;
+        Position validatedGoal = _gatewayLayer.Validate(start, goal).Item2;
 
         Assert.Equal(goal, validatedGoal);
     }
@@ -112,11 +112,11 @@ public class GatewayLayerTests
     [Fact]
     public void GoalFarOutsideEnvironmentButLayerNotInitialized()
     {
-        var start = Position.CreateGeoPosition(9.9460806, 53.5525467);
-        var goal = Position.CreateGeoPosition(9.88361, 53.55891);
+        Position? start = Position.CreateGeoPosition(9.9460806, 53.5525467);
+        Position? goal = Position.CreateGeoPosition(9.88361, 53.55891);
 
-        var environment = new SpatialGraphEnvironment(ResourcesConstants.WalkGraphAltonaAltstadt);
-        var gatewayLayer = new GatewayLayer(environment);
+        SpatialGraphEnvironment environment = new SpatialGraphEnvironment(ResourcesConstants.WalkGraphAltonaAltstadt);
+        GatewayLayer gatewayLayer = new GatewayLayer(environment);
         Assert.Throws<ApplicationException>(() => gatewayLayer.Validate(start, goal));
     }
 }

@@ -33,7 +33,7 @@ public class InfiniteSteeringDriver : IAgent, ICarSteeringCapable, ITripSavingAg
         ID = Guid.NewGuid();
 
         _edge = graphEnvironment.Edges.First().Value;
-        var route = CreateRoute(_edge, lane);
+        Route route = CreateRoute(_edge, lane);
 
         Car = Golf.Create(graphEnvironment);
         Car.Position = Car.CalculateNewPositionFor(route, out _);
@@ -71,7 +71,7 @@ public class InfiniteSteeringDriver : IAgent, ICarSteeringCapable, ITripSavingAg
     {
         if (_steering.Route.Count < 3) _steering.Route = CreateRoute(_edge, LaneOnCurrentEdge);
 
-        var previousPosition = PositionOnCurrentEdge;
+        double previousPosition = PositionOnCurrentEdge;
         _steering.Move();
 
         if (PositionOnCurrentEdge < previousPosition) RoundsFinished++;
@@ -102,9 +102,9 @@ public class InfiniteSteeringDriver : IAgent, ICarSteeringCapable, ITripSavingAg
 
     private static Route CreateRoute(ISpatialEdge start, int lane)
     {
-        var first = start.To.OutgoingEdges.First().Value;
-        var second = first.To.OutgoingEdges.First().Value;
-        var third = second.To.OutgoingEdges.First().Value;
+        ISpatialEdge? first = start.To.OutgoingEdges.First().Value;
+        ISpatialEdge? second = first.To.OutgoingEdges.First().Value;
+        ISpatialEdge? third = second.To.OutgoingEdges.First().Value;
 
         return new Route
         {

@@ -1,7 +1,9 @@
+using System.Data;
 using Mars.Common.IO.Csv;
 using Mars.Core.Data;
 using Mars.Interfaces;
 using Mars.Interfaces.Data;
+using Mars.Interfaces.Environments;
 using Moq;
 using SOHModel.Car.Model;
 using SOHTests.Commons.Environment;
@@ -14,17 +16,17 @@ public class CarLayerTests
     [Fact]
     public void InitDataEnvironmentOverwritesConstructorEnvironment()
     {
-        var environment = new FourNodeGraphEnv().GraphEnvironment;
+        ISpatialGraphEnvironment environment = new FourNodeGraphEnv().GraphEnvironment;
         
-        var carLayer = new CarLayer(environment);
+        CarLayer carLayer = new CarLayer(environment);
         Assert.Equal(environment, carLayer.Environment);
 
-        var dataTable = CsvReader.MapData(ResourcesConstants.CarCsv);
-        var manager = new EntityManagerImpl(dataTable);
+        DataTable? dataTable = CsvReader.MapData(ResourcesConstants.CarCsv);
+        EntityManagerImpl manager = new EntityManagerImpl(dataTable);
 
-        var mock = new Mock<ISimulationContainer>();
+        Mock<ISimulationContainer> mock = new Mock<ISimulationContainer>();
         mock.Setup(container => container.Resolve<IEntityManager>()).Returns(manager);
-        var layerInitData = new LayerInitData(SimulationContext.Start2020InSeconds)
+        LayerInitData layerInitData = new LayerInitData(SimulationContext.Start2020InSeconds)
         {
             LayerInitConfig =
             {
@@ -39,22 +41,22 @@ public class CarLayerTests
     [Fact]
     public void InitEnvironmentWithConstructor()
     {
-        var carLayer = new CarLayer(new FourNodeGraphEnv().GraphEnvironment);
+        CarLayer carLayer = new CarLayer(new FourNodeGraphEnv().GraphEnvironment);
         Assert.NotNull(carLayer.Environment);
     }
 
     [Fact]
     public void InitEnvironmentWithInitData()
     {
-        var carLayer = new CarLayer();
+        CarLayer carLayer = new CarLayer();
         Assert.Null(carLayer.Environment);
 
-        var dataTable = CsvReader.MapData(ResourcesConstants.CarCsv);
-        var manager = new EntityManagerImpl(dataTable);
+        DataTable? dataTable = CsvReader.MapData(ResourcesConstants.CarCsv);
+        EntityManagerImpl manager = new EntityManagerImpl(dataTable);
 
-        var mock = new Mock<ISimulationContainer>();
+        Mock<ISimulationContainer> mock = new Mock<ISimulationContainer>();
         mock.Setup(container => container.Resolve<IEntityManager>()).Returns(manager);
-        var initData = new LayerInitData
+        LayerInitData initData = new LayerInitData
         {
             LayerInitConfig =
             {

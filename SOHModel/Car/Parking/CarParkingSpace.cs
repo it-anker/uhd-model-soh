@@ -1,8 +1,9 @@
 using Mars.Common.Core;
 using Mars.Common.Core.Collections.NonBlockingDictionary;
 using Mars.Interfaces.Data;
-using Mars.Interfaces.Environments;
 using Mars.Interfaces.Layers;
+using NetTopologySuite.Geometries;
+using Position = Mars.Interfaces.Environments.Position;
 
 namespace SOHModel.Car.Parking;
 
@@ -64,10 +65,10 @@ public class CarParkingSpace : IVectorFeature
     public void Update(VectorStructuredData data)
     {
         VectorStructured = data;
-        var centroid = VectorStructured.Geometry.Centroid;
+        Point? centroid = VectorStructured.Geometry.Centroid;
         Position = Position.CreatePosition(centroid.X, centroid.Y);
 
-        var area = VectorStructured.Data.ContainsKey(Area) ? VectorStructured.Data[Area].Value<double>() : 0;
+        double area = VectorStructured.Data.ContainsKey(Area) ? VectorStructured.Data[Area].Value<double>() : 0;
         if (area < 10) //if smaller than 10m2 then 1 car
             Capacity = 1;
         else if (area < 500) // if smaller than 500m2 then 15m2/car
@@ -106,7 +107,7 @@ public class CarParkingSpace : IVectorFeature
             throw new ArgumentException(
                 $"The car, leaving the parking spot is not placed at spot '{VectorStructured.Geometry}'");
 
-        var success = ParkingVehicles.TryRemove(car, out _);
+        bool success = ParkingVehicles.TryRemove(car, out _);
 
         if (success) car.CarParkingSpace = null;
 

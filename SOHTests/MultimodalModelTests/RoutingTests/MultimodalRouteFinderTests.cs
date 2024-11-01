@@ -5,6 +5,7 @@ using Mars.Components.Environments;
 using Mars.Interfaces.Environments;
 using Mars.Interfaces.Model;
 using Mars.Interfaces.Model.Options;
+using SOHModel.Car.Parking;
 using SOHModel.Domain.Graph;
 using SOHModel.Multimodal.Multimodal;
 using SOHModel.Multimodal.Routing;
@@ -24,10 +25,10 @@ public class MultimodalRouteFinderTests
 
     public MultimodalRouteFinderTests()
     {
-        var fourNodeGraphEnv = new FourNodeGraphEnv();
-        var streetLayer = new StreetLayer { Environment = fourNodeGraphEnv.GraphEnvironment };
+        FourNodeGraphEnv fourNodeGraphEnv = new FourNodeGraphEnv();
+        StreetLayer streetLayer = new StreetLayer { Environment = fourNodeGraphEnv.GraphEnvironment };
 
-        var layer = new TestMultimodalLayer(fourNodeGraphEnv.GraphEnvironment)
+        TestMultimodalLayer layer = new TestMultimodalLayer(fourNodeGraphEnv.GraphEnvironment)
         {
             BicycleRentalLayer = new FourNodeBicycleRentalLayerFixture(streetLayer).BicycleRentalLayer,
             CarParkingLayer = new FourNodeCarParkingLayerFixture(streetLayer).CarParkingLayer
@@ -48,8 +49,8 @@ public class MultimodalRouteFinderTests
     [Fact]
     public void AlwaysFavorDriving()
     {
-        var capabilities = new List<ModalChoice> { ModalChoice.CarDriving };
-        var route = _multimodalRouteFinder.Search(_agent, _start, _goal, capabilities);
+        List<ModalChoice> capabilities = new List<ModalChoice> { ModalChoice.CarDriving };
+        MultimodalRoute route = _multimodalRouteFinder.Search(_agent, _start, _goal, capabilities);
         Assert.Equal(_start, route.Start);
         Assert.Equal(_goal, route.Goal);
 
@@ -84,9 +85,9 @@ public class MultimodalRouteFinderTests
     [Fact]
     public void FavorCyclingOverWalking()
     {
-        var capabilities = new List<ModalChoice>
+        List<ModalChoice> capabilities = new List<ModalChoice>
             { ModalChoice.CyclingRentalBike };
-        var route = _multimodalRouteFinder.Search(_agent, _start, _goal, capabilities);
+        MultimodalRoute route = _multimodalRouteFinder.Search(_agent, _start, _goal, capabilities);
         Assert.Equal(_start, route.Start);
         Assert.Equal(_goal, route.Goal);
 
@@ -110,7 +111,7 @@ public class MultimodalRouteFinderTests
     [Fact]
     public void Walking()
     {
-        var route = _multimodalRouteFinder.Search(_agent, _start, _goal, ModalChoice.Walking);
+        MultimodalRoute route = _multimodalRouteFinder.Search(_agent, _start, _goal, ModalChoice.Walking);
         Assert.Equal(_start, route.Start);
         Assert.Equal(_goal, route.Goal);
 
@@ -121,7 +122,7 @@ public class MultimodalRouteFinderTests
     [Fact]
     public void WalkingAndCycling()
     {
-        var route = _multimodalRouteFinder.Search(_agent, _start, _goal, ModalChoice.CyclingRentalBike);
+        MultimodalRoute route = _multimodalRouteFinder.Search(_agent, _start, _goal, ModalChoice.CyclingRentalBike);
         Assert.Equal(_start, route.Start);
         Assert.Equal(_goal, route.Goal);
 
@@ -134,7 +135,7 @@ public class MultimodalRouteFinderTests
     [Fact]
     public void WalkingAndDriving()
     {
-        var route = _multimodalRouteFinder.Search(_agent, _start, _goal, ModalChoice.CarDriving);
+        MultimodalRoute route = _multimodalRouteFinder.Search(_agent, _start, _goal, ModalChoice.CarDriving);
         Assert.Equal(_start, route.Start);
         Assert.Equal(_goal, route.Goal);
 
@@ -147,7 +148,7 @@ public class MultimodalRouteFinderTests
     [Fact]
     public void FindWalkingDrivingMultimodalRouteButMissingWalkGraph()
     {
-        var environment = new SpatialGraphEnvironment(new SpatialGraphOptions
+        SpatialGraphEnvironment environment = new SpatialGraphEnvironment(new SpatialGraphOptions
         {
             GraphImports = new List<Input>
             {
@@ -167,12 +168,12 @@ public class MultimodalRouteFinderTests
             }
         });
 
-        var parking = new CarParkingLayerFixture(new StreetLayer { Environment = environment }).CarParkingLayer;
-        var layer = new TestMultimodalLayer(environment) { CarParkingLayer = parking };
-        var agent = new TestMultiCapableAgent { StartPosition = Position.CreatePosition(9.9517071, 53.5575623) };
+        CarParkingLayer parking = new CarParkingLayerFixture(new StreetLayer { Environment = environment }).CarParkingLayer;
+        TestMultimodalLayer layer = new TestMultimodalLayer(environment) { CarParkingLayer = parking };
+        TestMultiCapableAgent agent = new TestMultiCapableAgent { StartPosition = Position.CreatePosition(9.9517071, 53.5575623) };
         agent.Init(layer);
 
-        var goal = Position.CreatePosition(9.9517643, 53.5517866);
+        Position? goal = Position.CreatePosition(9.9517643, 53.5517866);
         Assert.Throws<ApplicationException>(() =>
             layer.Search(_agent, agent.StartPosition, goal, ModalChoice.CarDriving));
     }
@@ -180,7 +181,7 @@ public class MultimodalRouteFinderTests
     [Fact]
     public void FindWalkingDrivingMultimodalRouteButMissingDrivingGraph()
     {
-        var environment = new SpatialGraphEnvironment(new SpatialGraphOptions
+        SpatialGraphEnvironment environment = new SpatialGraphEnvironment(new SpatialGraphOptions
         {
             GraphImports = new List<Input>
             {
@@ -199,12 +200,12 @@ public class MultimodalRouteFinderTests
             }
         });
 
-        var parking = new CarParkingLayerFixture(new StreetLayer { Environment = environment }).CarParkingLayer;
-        var layer = new TestMultimodalLayer(environment) { CarParkingLayer = parking };
-        var agent = new TestMultiCapableAgent { StartPosition = Position.CreatePosition(9.9517071, 53.5575623) };
+        CarParkingLayer parking = new CarParkingLayerFixture(new StreetLayer { Environment = environment }).CarParkingLayer;
+        TestMultimodalLayer layer = new TestMultimodalLayer(environment) { CarParkingLayer = parking };
+        TestMultiCapableAgent agent = new TestMultiCapableAgent { StartPosition = Position.CreatePosition(9.9517071, 53.5575623) };
         agent.Init(layer);
 
-        var goal = Position.CreatePosition(9.9517643, 53.5517866);
+        Position? goal = Position.CreatePosition(9.9517643, 53.5517866);
         Assert.Throws<ApplicationException>(() =>
             layer.Search(_agent, agent.StartPosition, goal, ModalChoice.CarDriving));
     }

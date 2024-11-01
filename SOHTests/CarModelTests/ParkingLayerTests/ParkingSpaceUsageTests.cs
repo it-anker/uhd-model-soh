@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Data;
 using Mars.Common.IO.Csv;
 using Mars.Core.Data;
 using Mars.Interfaces;
@@ -23,7 +24,7 @@ public class ParkingSpaceUsageTests
 
     static ParkingSpaceUsageTests()
     {
-        var features = new List<IFeature>
+        List<IFeature> features = new List<IFeature>
         {
             new VectorStructuredData
             {
@@ -46,10 +47,10 @@ public class ParkingSpaceUsageTests
                 Geometry = new Point(9.8968278, 53.55155)
             }
         };
-        var dataTable = CsvReader.MapData(ResourcesConstants.CarCsv);
-        var manager = new EntityManagerImpl(dataTable);
+        DataTable? dataTable = CsvReader.MapData(ResourcesConstants.CarCsv);
+        EntityManagerImpl manager = new EntityManagerImpl(dataTable);
 
-        var mock = new Mock<ISimulationContainer>();
+        Mock<ISimulationContainer> mock = new Mock<ISimulationContainer>();
         mock.Setup(container => container.Resolve<IEntityManager>()).Returns(manager);
         Mapping = new LayerInitData
         {
@@ -69,8 +70,8 @@ public class ParkingSpaceUsageTests
     [Fact]
     public void FindNextFreeParkingSpot()
     {
-        var firstParkingSpace = new CarParkingSpace();
-        var point = new Point(9.8885117, 53.5597505);
+        CarParkingSpace firstParkingSpace = new CarParkingSpace();
+        Point point = new Point(9.8885117, 53.5597505);
         firstParkingSpace.Init(null, new VectorStructuredData
         {
             Geometry = point,
@@ -108,7 +109,7 @@ public class ParkingSpaceUsageTests
         Assert.Empty(firstParkingSpace.ParkingVehicles);
         Assert.NotNull(firstParkingSpace.VectorStructured);
 
-        var golf = Golf.Create(_carParkingLayer);
+        Golf golf = Golf.Create(_carParkingLayer);
         Assert.True(firstParkingSpace.Enter(golf));
 
         Assert.Single(firstParkingSpace.ParkingVehicles);
@@ -122,8 +123,8 @@ public class ParkingSpaceUsageTests
     [Fact]
     public void TestEnterLeaveParkingSpace()
     {
-        var point = new Point(9.8885117, 53.5597505);
-        var firstParkingSpace = new CarParkingSpace();
+        Point point = new Point(9.8885117, 53.5597505);
+        CarParkingSpace firstParkingSpace = new CarParkingSpace();
 
         firstParkingSpace.Init(null, new VectorStructuredData
         {
@@ -133,9 +134,9 @@ public class ParkingSpaceUsageTests
 
         Assert.Equal(2, firstParkingSpace.Capacity);
 
-        var golf = Golf.Create(_carParkingLayer);
-        var golf2 = Golf.Create(_carParkingLayer);
-        var golf3 = Golf.Create(_carParkingLayer);
+        Golf golf = Golf.Create(_carParkingLayer);
+        Golf golf2 = Golf.Create(_carParkingLayer);
+        Golf golf3 = Golf.Create(_carParkingLayer);
         Assert.True(firstParkingSpace.Enter(golf));
 
         Assert.Equal(firstParkingSpace, golf.CarParkingSpace);
@@ -164,9 +165,9 @@ public class ParkingSpaceUsageTests
     [Fact]
     public void TestException()
     {
-        var point = new Point(9.8885117, 53.5597505);
-        var firstParkingSpace = new CarParkingSpace();
-        var secondParkingSpace = new CarParkingSpace();
+        Point point = new Point(9.8885117, 53.5597505);
+        CarParkingSpace firstParkingSpace = new CarParkingSpace();
+        CarParkingSpace secondParkingSpace = new CarParkingSpace();
 
         firstParkingSpace.Init(null, new VectorStructuredData
         {
@@ -180,7 +181,7 @@ public class ParkingSpaceUsageTests
             Data = new Dictionary<string, object> { { "area", 0 } }
         });
 
-        var golf = Golf.Create(_carParkingLayer);
+        Golf golf = Golf.Create(_carParkingLayer);
         Assert.True(firstParkingSpace.Enter(golf));
         Assert.Throws<ArgumentException>(() => firstParkingSpace.Enter(golf));
         Assert.Throws<ArgumentException>(() => secondParkingSpace.Enter(golf));
@@ -191,34 +192,36 @@ public class ParkingSpaceUsageTests
     [Fact]
     public void TestFindFreeEnterAndLeaveParkingSpace()
     {
-        var position = Position.CreatePosition(9.931294, 53.554248);
+        Position? position = Position.CreatePosition(9.931294, 53.554248);
 
-        var parkingSpace = _carParkingLayer.Nearest(position);
+        CarParkingSpace? parkingSpace = _carParkingLayer.Nearest(position);
         Assert.NotNull(parkingSpace);
-        Assert.True(parkingSpace.HasCapacity);
+        Assert.True(parkingSpace!.HasCapacity);
 
         Assert.Equal(1, parkingSpace.Capacity);
-        var golf = Golf.Create(_carParkingLayer);
+        Golf golf = Golf.Create(_carParkingLayer);
         Assert.True(parkingSpace.Enter(golf));
 
-        var parkingSpace2 = _carParkingLayer.Nearest(position);
+        CarParkingSpace? parkingSpace2 = _carParkingLayer.Nearest(position);
         Assert.NotEqual(parkingSpace, parkingSpace2);
-        var golf2 = Golf.Create(_carParkingLayer);
-        Assert.True(parkingSpace2.Enter(golf2));
+        Assert.NotNull(parkingSpace2);
+        Golf golf2 = Golf.Create(_carParkingLayer);
+        Assert.True(parkingSpace2!.Enter(golf2));
 
-        var parkingSpace3 = _carParkingLayer.Nearest(position);
+        CarParkingSpace? parkingSpace3 = _carParkingLayer.Nearest(position);
         Assert.NotEqual(parkingSpace, parkingSpace3);
         Assert.NotEqual(parkingSpace2, parkingSpace3);
-        var golf3 = Golf.Create(_carParkingLayer);
-        Assert.True(parkingSpace3.Enter(golf3));
+        Assert.NotNull(parkingSpace3);
+        Golf golf3 = Golf.Create(_carParkingLayer);
+        Assert.True(parkingSpace3!.Enter(golf3));
 
-
-        var parkingSpace4 = _carParkingLayer.Nearest(position);
+        CarParkingSpace? parkingSpace4 = _carParkingLayer.Nearest(position);
         Assert.NotEqual(parkingSpace4, parkingSpace);
         Assert.NotEqual(parkingSpace4, parkingSpace2);
         Assert.NotEqual(parkingSpace4, parkingSpace3);
-        var golf4 = Golf.Create(_carParkingLayer);
-        Assert.True(parkingSpace4.Enter(golf4));
+        Assert.NotNull(parkingSpace4);
+        Golf golf4 = Golf.Create(_carParkingLayer);
+        Assert.True(parkingSpace4!.Enter(golf4));
 
         Assert.Null(_carParkingLayer.Nearest(position));
     }

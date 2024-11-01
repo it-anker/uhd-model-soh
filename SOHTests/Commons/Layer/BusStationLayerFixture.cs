@@ -11,7 +11,7 @@ public class BusRouteLayerFixture : IDisposable
     public BusRouteLayerFixture()
     {
         BusStationLayer = new BusStationLayerFixture().BusStationLayer;
-        var busRouteLayer = new BusRouteLayer(BusStationLayer);
+        BusRouteLayer busRouteLayer = new BusRouteLayer(BusStationLayer);
         busRouteLayer.InitLayer(
             new LayerInitData
             {

@@ -6,6 +6,7 @@ using Mars.Interfaces.Model;
 using Mars.Interfaces.Model.Options;
 using SOHModel.Bicycle.Rental;
 using SOHModel.Car.Model;
+using SOHModel.Car.Parking;
 using SOHModel.Domain.Graph;
 using SOHTests.Commons.Layer;
 using Xunit;
@@ -19,7 +20,7 @@ public class MultimodalResolverConsumeTests
 
     public MultimodalResolverConsumeTests()
     {
-        var options = new SpatialGraphOptions
+        SpatialGraphOptions options = new SpatialGraphOptions
         {
             GraphImports = new List<Input>
             {
@@ -52,8 +53,8 @@ public class MultimodalResolverConsumeTests
 
         _environment = new SpatialGraphEnvironment(options);
 
-        var bicycleRentalLayer = new BicycleRentalLayerFixture(_environment).BicycleRentalLayer;
-        var carParkingLayer = new CarParkingLayerFixture(new StreetLayer { Environment = _environment })
+        BicycleRentalLayer bicycleRentalLayer = new BicycleRentalLayerFixture(_environment).BicycleRentalLayer;
+        CarParkingLayer carParkingLayer = new CarParkingLayerFixture(new StreetLayer { Environment = _environment })
             .CarParkingLayer;
 
         _multimodalLayer = new TestMultimodalLayer(_environment)
@@ -66,23 +67,23 @@ public class MultimodalResolverConsumeTests
     [Fact]
     public void TestConsumeForWalking()
     {
-        foreach (var node in _environment.Nodes)
+        foreach (ISpatialNode node in _environment.Nodes)
             Assert.True(_multimodalLayer.Consumes(ModalChoice.Walking, node));
     }
 
     [Fact]
     public void TestConsumesForRentalCycling()
     {
-        var foundNodes = new HashSet<ISpatialNode>();
-        foreach (var rentalStation in _multimodalLayer.BicycleRentalLayer.Features.OfType<BicycleRentalStation>())
+        HashSet<ISpatialNode> foundNodes = new HashSet<ISpatialNode>();
+        foreach (BicycleRentalStation rentalStation in _multimodalLayer.BicycleRentalLayer.Features.OfType<BicycleRentalStation>())
         {
-            var nearestNode = _environment.NearestNode(rentalStation.Position);
+            ISpatialNode nearestNode = _environment.NearestNode(rentalStation.Position);
 
             Assert.True(_multimodalLayer.Consumes(ModalChoice.CyclingRentalBike, nearestNode));
             foundNodes.Add(nearestNode);
         }
 
-        foreach (var node in _environment.Nodes)
+        foreach (ISpatialNode node in _environment.Nodes)
             if (!foundNodes.Contains(node))
                 Assert.False(_multimodalLayer.Consumes(ModalChoice.CyclingRentalBike, node));
     }
@@ -90,16 +91,16 @@ public class MultimodalResolverConsumeTests
     [Fact]
     public void TestConsumesForCyclingOwnBike()
     {
-        foreach (var node in _environment.Nodes)
+        foreach (ISpatialNode node in _environment.Nodes)
             Assert.True(_multimodalLayer.Consumes(ModalChoice.CyclingOwnBike, node));
     }
 
     [Fact]
     public void TestConsumesForDriving()
     {
-        var carParkingSpace = _multimodalLayer.CarParkingLayer.Nearest(
+        CarParkingSpace? carParkingSpace = _multimodalLayer.CarParkingLayer.Nearest(
                 Position.CreateGeoPosition(9.9528571, 53.5505072));
-        var nearestNode = _environment.NearestNode(carParkingSpace.Position);
+        ISpatialNode nearestNode = _environment.NearestNode(carParkingSpace.Position);
         
         Assert.False(carParkingSpace.Occupied);
         Assert.True(_multimodalLayer.Consumes(ModalChoice.CarDriving, nearestNode));
@@ -110,7 +111,7 @@ public class MultimodalResolverConsumeTests
         carParkingSpace.Occupied = false;
         Assert.True(_multimodalLayer.Consumes(ModalChoice.CarDriving, nearestNode));
 
-        for (var i = 0; i < carParkingSpace.Capacity; i++) Assert.True(carParkingSpace.Enter(new Car()));
+        for (int i = 0; i < carParkingSpace.Capacity; i++) Assert.True(carParkingSpace.Enter(new Car()));
         Assert.False(_multimodalLayer.Consumes(ModalChoice.CarDriving, nearestNode));
     }
 }

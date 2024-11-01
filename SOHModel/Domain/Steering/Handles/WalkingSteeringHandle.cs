@@ -47,7 +47,7 @@ public class WalkingSteeringHandle : ISteeringHandle
     {
         if (GoalReached) return;
 
-        var distance = CalculateMovementDistance();
+        double distance = CalculateMovementDistance();
 
         if (!Environment.Entities.ContainsKey(WalkingShoes)) // should not occur, but for stability reasons in here
             Environment.Insert(WalkingShoes, Route.First().Edge.From);
@@ -70,7 +70,7 @@ public class WalkingSteeringHandle : ISteeringHandle
             if (_positionValidationRequired)
             {
                 _positionValidationRequired = false;
-                WalkingShoes.Position = WalkingShoes.CalculateNewPositionFor(Route, out var bearing);
+                WalkingShoes.Position = WalkingShoes.CalculateNewPositionFor(Route, out double bearing);
                 WalkingShoes.Bearing = bearing;
             }
 
@@ -91,7 +91,7 @@ public class WalkingSteeringHandle : ISteeringHandle
 
     private static Route UpdateDesiredLanes(Route route)
     {
-        foreach (var edgeStop in route)
+        foreach (EdgeStop? edgeStop in route)
             edgeStop.DesiredLane = edgeStop.Edge.ModalityLaneRanges[SpatialModalityType.Walking].Item1;
 
         return route;
@@ -99,8 +99,8 @@ public class WalkingSteeringHandle : ISteeringHandle
 
     private double CalculateMovementDistance()
     {
-        var distanceToMove = _accelerator.CalculateVelocity(Route.Stops.First().Edge) * _deltaTinSeconds;
-        var distanceToGoal = Route.RemainingRouteDistanceToGoal;
+        double distanceToMove = _accelerator.CalculateVelocity(Route.Stops.First().Edge) * _deltaTinSeconds;
+        double distanceToGoal = Route.RemainingRouteDistanceToGoal;
         return Math.Min(distanceToMove, distanceToGoal);
     }
 }

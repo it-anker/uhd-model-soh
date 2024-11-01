@@ -66,7 +66,7 @@ public class BicycleRentalLayer : VectorLayer<BicycleRentalStation>, IBicycleRen
 
     private void PropagateSynchronization()
     {
-        foreach (var vectorFeature in Features)
+        foreach (IVectorFeature vectorFeature in Features)
         {
             if (vectorFeature is BicycleRentalStation rentalStation)
             {

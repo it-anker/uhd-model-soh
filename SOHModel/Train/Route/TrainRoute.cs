@@ -32,10 +32,10 @@ public class TrainRoute : IEnumerable<TrainRouteEntry>
     /// </returns>
     public TrainRoute Reversed()
     {
-        var reversed = new TrainRoute();
-        for (var index = Entries.Count - 1; index >= 0; index--)
+        TrainRoute reversed = new TrainRoute();
+        for (int index = Entries.Count - 1; index >= 0; index--)
         {
-            var entry = Entries[index];
+            TrainRouteEntry entry = Entries[index];
             reversed.Entries.Add(new TrainRouteEntry(entry.To, entry.From, entry.Minutes));
         }
 

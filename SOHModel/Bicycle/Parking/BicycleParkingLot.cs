@@ -1,6 +1,7 @@
 using Mars.Interfaces.Data;
-using Mars.Interfaces.Environments;
 using Mars.Interfaces.Layers;
+using NetTopologySuite.Geometries;
+using Position = Mars.Interfaces.Environments.Position;
 
 namespace SOHModel.Bicycle.Parking;
 
@@ -15,12 +16,12 @@ public class BicycleParkingLot : IVectorFeature
 
     public void Init(ILayer layer, VectorStructuredData data)
     {
-        var centroid = data.Geometry.Centroid;
+        Point? centroid = data.Geometry.Centroid;
         Position = Position.CreatePosition(centroid.X, centroid.Y);
         VectorStructured = data;
     }
 
-    //TODO manage capacity
+    // TODO manage capacity
 
     public void Update(VectorStructuredData data)
     {

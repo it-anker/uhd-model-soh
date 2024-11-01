@@ -1,6 +1,7 @@
 using Mars.Components.Services;
 using Mars.Interfaces.Data;
 using Mars.Interfaces.Layers;
+using Mars.Interfaces.Model;
 using SOHModel.Multimodal.Multimodal;
 
 namespace SOHModel.Multimodal.Model;
@@ -22,9 +23,9 @@ public class PassengerTravelerLayer : AbstractMultimodalLayer
         RegisterAgent registerAgentHandle = null,
         UnregisterAgent unregisterAgent = null)
     {
-        var initiated = base.InitLayer(layerInitData, registerAgentHandle, unregisterAgent);
+        bool initiated = base.InitLayer(layerInitData, registerAgentHandle, unregisterAgent);
 
-        var agentMapping =
+        AgentMapping? agentMapping =
             layerInitData.AgentInitConfigs.FirstOrDefault(mapping =>
                 mapping.ModelType.MetaType == typeof(PassengerTraveler));
 

@@ -5,6 +5,7 @@ using Mars.Components.Environments;
 using Mars.Components.Starter;
 using Mars.Core.Data;
 using Mars.Core.Simulation;
+using Mars.Interfaces;
 using Mars.Interfaces.Data;
 using Mars.Interfaces.Environments;
 using Mars.Interfaces.Layers;
@@ -24,15 +25,15 @@ public class WalkingPenetrationTests
     [Trait("Category", "External")]
     public void SimulateOneDay()
     {
-        var description = new ModelDescription();
+        ModelDescription description = new ModelDescription();
         description.AddLayer<TestPenetrationPedestrianLayer>();
         description.AddAgent<TestPenetrationPedestrian, TestPenetrationPedestrianLayer>();
 
-        var environment = new FourNodeGraphEnv().GraphEnvironment;
+        ISpatialGraphEnvironment environment = new FourNodeGraphEnv().GraphEnvironment;
         // var environment = new SpatialGraphEnvironment(SimulationTestConstants.AltonaWalkGraph);
 
-        var startPoint = DateTime.Parse("2020-01-01T00:00:00");
-        var config = new SimulationConfig
+        DateTime startPoint = DateTime.Parse("2020-01-01T00:00:00");
+        SimulationConfig config = new SimulationConfig
         {
             Execution =
             {
@@ -86,8 +87,8 @@ public class WalkingPenetrationTests
             }
         };
 
-        var application = SimulationStarter.BuildApplication(description, config);
-        var simulation = application.Resolve<ISimulation>();
+        ISimulationContainer application = SimulationStarter.BuildApplication(description, config);
+        ISimulation? simulation = application.Resolve<ISimulation>();
         simulation.StartSimulation();
     }
 }
@@ -116,8 +117,8 @@ public class TestPenetrationPedestrian : MultiCapableAgent<TestPenetrationPedest
 
     private MultimodalRoute SearchMultimodalRoute()
     {
-        var start = EnvironmentLayer.Environment.NearestNode(StartPosition);
-        var route = EnvironmentLayer.Environment.FindShortestRoute(start,
+        ISpatialNode? start = EnvironmentLayer.Environment.NearestNode(StartPosition);
+        Route? route = EnvironmentLayer.Environment.FindShortestRoute(start,
             EnvironmentLayer.Environment.GetRandomNode(),
             edge => edge.Modalities.Contains(SpatialModalityType.Walking));
         return new MultimodalRoute(route, ModalChoice.Walking);
@@ -151,10 +152,10 @@ public class TestPenetrationPedestrianLayer : AbstractMultimodalLayer
             Context = layerInitData.Context
         };
 
-        var agentInitConfig = layerInitData.AgentInitConfigs.FirstOrDefault();
+        AgentMapping? agentInitConfig = layerInitData.AgentInitConfigs.FirstOrDefault();
         if (agentInitConfig?.IndividualMapping == null) return false;
 
-        var agentManager = layerInitData.Container.Resolve<IAgentManager>();
+        IAgentManager? agentManager = layerInitData.Container.Resolve<IAgentManager>();
         Agents = agentManager.Spawn<TestPenetrationPedestrian, TestPenetrationPedestrianLayer>().ToList();
 
         return Agents.Count != 0;

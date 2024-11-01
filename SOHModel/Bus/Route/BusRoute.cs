@@ -32,10 +32,10 @@ public class BusRoute : IEnumerable<BusRouteEntry>
     /// </returns>
     public BusRoute Reversed()
     {
-        var reversed = new BusRoute();
-        for (var index = Entries.Count - 1; index >= 0; index--)
+        BusRoute reversed = new BusRoute();
+        for (int index = Entries.Count - 1; index >= 0; index--)
         {
-            var entry = Entries[index];
+            BusRouteEntry entry = Entries[index];
             reversed.Entries.Add(new BusRouteEntry(entry.To, entry.From, entry.Minutes));
         }
 

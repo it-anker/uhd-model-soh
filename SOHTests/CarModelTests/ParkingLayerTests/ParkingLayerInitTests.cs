@@ -18,24 +18,24 @@ public class ParkingLayerInitTests
 
     public ParkingLayerInitTests()
     {
-        var streetLayer = new StreetLayer();
+        StreetLayer streetLayer = new StreetLayer();
         _carParkingLayer = new CarParkingLayerFixture(streetLayer).CarParkingLayer;
     }
 
     [Fact]
     public void InitializeParkingSpacesRandomly()
     {
-        var position = Position.CreateGeoPosition(9.931294, 53.554248);
-        var parkingSpace = _carParkingLayer.Nearest(position);
+        Position? position = Position.CreateGeoPosition(9.931294, 53.554248);
+        CarParkingSpace? parkingSpace = _carParkingLayer.Nearest(position);
         Assert.NotNull(parkingSpace);
-        Assert.True(parkingSpace.HasCapacity);
+        Assert.True(parkingSpace!.HasCapacity);
         Assert.Equal(1, parkingSpace.Capacity);
     }
 
     [Fact]
     public void InsertCarInParkingSpace()
     {
-        var parkingSpace = new CarParkingSpace();
+        CarParkingSpace parkingSpace = new CarParkingSpace();
         parkingSpace.Init(null, new VectorStructuredData
         {
             Data = new Dictionary<string, object>(),
@@ -45,7 +45,7 @@ public class ParkingLayerInitTests
         Assert.True(parkingSpace.HasCapacity);
         Assert.Equal(1, parkingSpace.Capacity);
 
-        var car = Golf.Create(_carParkingLayer);
+        Golf car = Golf.Create(_carParkingLayer);
         Assert.True(parkingSpace.Enter(car));
         Assert.False(parkingSpace.HasCapacity);
         Assert.Single(parkingSpace.ParkingVehicles);
@@ -53,7 +53,7 @@ public class ParkingLayerInitTests
 
         Assert.Throws<ArgumentException>(() => parkingSpace.Enter(car));
 
-        var lateCar = Golf.Create(_carParkingLayer);
+        Golf lateCar = Golf.Create(_carParkingLayer);
         Assert.False(parkingSpace.Enter(lateCar));
 
         parkingSpace.Leave(car);

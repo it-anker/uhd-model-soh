@@ -12,13 +12,13 @@ public class PedestrianFourNodeEnvTests
     [Fact]
     public void GoalReachedByWalk()
     {
-        var fourNodeGraphEnv = new FourNodeGraphEnv();
-        var layer = new TestMultimodalLayer(fourNodeGraphEnv.GraphEnvironment);
+        FourNodeGraphEnv fourNodeGraphEnv = new FourNodeGraphEnv();
+        TestMultimodalLayer layer = new TestMultimodalLayer(fourNodeGraphEnv.GraphEnvironment);
 
-        var start = FourNodeGraphEnv.Node1Pos;
-        var goal = FourNodeGraphEnv.Node4Pos;
+        Position start = FourNodeGraphEnv.Node1Pos;
+        Position goal = FourNodeGraphEnv.Node4Pos;
 
-        var agent = new TestMultiCapableAgent
+        TestMultiCapableAgent agent = new TestMultiCapableAgent
         {
             StartPosition = start,
             GoalPosition = goal,
@@ -27,7 +27,7 @@ public class PedestrianFourNodeEnvTests
         agent.Init(layer);
 
         Assert.Equal(Whereabouts.Offside, agent.Whereabouts);
-        for (var tick = 0; tick < 1000 && !agent.GoalReached; tick++, layer.Context.UpdateStep())
+        for (int tick = 0; tick < 1000 && !agent.GoalReached; tick++, layer.Context.UpdateStep())
         {
             agent.Tick();
             if (!agent.GoalReached) Assert.Equal(Whereabouts.Sidewalk, agent.Whereabouts);
@@ -42,13 +42,13 @@ public class PedestrianFourNodeEnvTests
     [Fact]
     public void StartIsGoal()
     {
-        var fourNodeGraphEnv = new FourNodeGraphEnv();
-        var layer = new TestMultimodalLayer(fourNodeGraphEnv.GraphEnvironment);
+        FourNodeGraphEnv fourNodeGraphEnv = new FourNodeGraphEnv();
+        TestMultimodalLayer layer = new TestMultimodalLayer(fourNodeGraphEnv.GraphEnvironment);
 
-        var start = fourNodeGraphEnv.Node2.Position;
-        var goal = fourNodeGraphEnv.Node2.Position;
+        Position? start = fourNodeGraphEnv.Node2.Position;
+        Position? goal = fourNodeGraphEnv.Node2.Position;
 
-        var agent = new TestMultiCapableAgent
+        TestMultiCapableAgent agent = new TestMultiCapableAgent
         {
             StartPosition = start,
             GoalPosition = goal,
@@ -57,7 +57,7 @@ public class PedestrianFourNodeEnvTests
         agent.Init(layer);
 
         Assert.Equal(Whereabouts.Offside, agent.Whereabouts);
-        for (var tick = 0;
+        for (int tick = 0;
              tick < 1000 && !agent.GoalReached;
              tick++, layer.Context.UpdateStep()) agent.Tick();
 

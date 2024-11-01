@@ -8,6 +8,7 @@ using Mars.Common.Core.Logging;
 using Mars.Components.Layers;
 using Mars.Components.Starter;
 using Mars.Core.Simulation;
+using Mars.Core.Simulation.Entities;
 using Mars.Interfaces;
 using Mars.Interfaces.Model;
 using SOHModel.Bicycle.Model;
@@ -34,7 +35,7 @@ internal static class Program
         Thread.CurrentThread.CurrentCulture = new CultureInfo("EN-US");
         LoggerFactory.SetLogLevel(LogLevel.Off);
 
-        var description = new ModelDescription();
+        ModelDescription description = new ModelDescription();
         description.AddLayer<SpatialGraphMediatorLayer>(new[] { typeof(ISpatialGraphLayer) });
         
         description.AddLayer<BicycleParkingLayer>(new[] { typeof(IBicycleParkingLayer) });
@@ -55,21 +56,21 @@ internal static class Program
         ISimulationContainer application;
         if (args != null && args.Length != 0)
         {
-            var container = CommandParser.ParseAndEvaluateArguments(description, args);
-            var config = container.SimulationConfig;
+            CommandArgumentContainer container = CommandParser.ParseAndEvaluateArguments(description, args);
+            SimulationConfig config = container.SimulationConfig;
             application = SimulationStarter.BuildApplication(description, config);
         }
         else
         {
-            var file = File.ReadAllText("config_dammtor.json");
-            var simConfig = SimulationConfig.Deserialize(file);
+            string file = File.ReadAllText("config_dammtor.json");
+            SimulationConfig? simConfig = SimulationConfig.Deserialize(file);
             application = SimulationStarter.BuildApplication(description, simConfig);
         }
 
-        var simulation = application.Resolve<ISimulation>();
+        ISimulation? simulation = application.Resolve<ISimulation>();
         
-        var watch = Stopwatch.StartNew();
-        var state = simulation.StartSimulation();
+        Stopwatch watch = Stopwatch.StartNew();
+        SimulationWorkflowState? state = simulation.StartSimulation();
 
         watch.Stop();
 
