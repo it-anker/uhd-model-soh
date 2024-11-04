@@ -1,0 +1,40 @@
+<Project>
+    <PropertyGroup>
+        <CodeAnalysisRuleSet>$(MSBuildThisFileDirectory)dotnet.ruleset</CodeAnalysisRuleSet>
+        <TargetFramework>net8.0</TargetFramework>
+        <CodeAnalysisTreatWarningsAsErrors>false</CodeAnalysisTreatWarningsAsErrors>
+        <TreatWarningsAsErrors>false</TreatWarningsAsErrors>
+        <GenerateDocumentationFile>true</GenerateDocumentationFile>
+        <NoDefaultExcludes>true</NoDefaultExcludes>
+        <ImplicitUsings>enable</ImplicitUsings>
+        <Nullable>enable</Nullable>
+        <NoWarn>CS8669;IDE0161;SA1133;SA1106;SA1134;SA1117;SA1010;S4487;S2933;SA1116;S1144;SA1200;SA1128;SA1200;SA1513;SA1407;S2325</NoWarn>
+        <WarningsAsErrors>CS8600;CS8602;CS8603;RZ2012;CS0649;S4136;SA1507;CS8618;BL0005;BL0004;BL0001;SA1519;SA1214;SA1201;SA1132;SA1005</WarningsAsErrors>
+        <Product>SOH</Product>
+        <Company>IT Anker GmbH</Company>
+        <Authors>MARS GROUP; Daniel Glake; Florian Ocker</Authors>
+        <AnalysisLevel>latest</AnalysisLevel>
+        <RunAnalyzersDuringBuild>true</RunAnalyzersDuringBuild>
+        <RunAnalyzersDuringLiveAnalysis>true</RunAnalyzersDuringLiveAnalysis>
+        <EnforceCodeStyleInBuild>true</EnforceCodeStyleInBuild>
+    </PropertyGroup>
+    <ItemGroup>
+        <PackageReference Include="Roslynator.Analyzers" Version="4.12.5">
+            <PrivateAssets>all</PrivateAssets>
+            <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+        </PackageReference>
+        <PackageReference Include="StyleCop.Analyzers" Version="1.1.118">
+            <PrivateAssets>all</PrivateAssets>
+            <IncludeAssets>runtime; build; native; contentfiles; analyzers</IncludeAssets>
+        </PackageReference>
+        <AdditionalFiles Include="$(MSBuildThisFileDirectory).editorconfig" Link="Properties\.editorconfig"/>
+        <PackageReference Include="SonarAnalyzer.CSharp" Version="9.32.0.97167">
+            <PrivateAssets>all</PrivateAssets>
+            <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+        </PackageReference>
+    </ItemGroup>
+    <ItemGroup>
+        <!-- Define the global DefaultIdType here. -->
+        <Using Include="System.Guid" Alias="DefaultIdType"/>
+    </ItemGroup>
+</Project>

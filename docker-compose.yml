@@ -1,0 +1,6 @@
+﻿services:
+  soh.process.server:
+    image: soh.process.server
+    build:
+      context: .
+      dockerfile: SOH.Process.Server/Dockerfile
