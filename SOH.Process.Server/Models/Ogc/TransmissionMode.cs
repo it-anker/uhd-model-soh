@@ -5,7 +5,7 @@ using Newtonsoft.Json.Converters;
 namespace SOH.Process.Server.Models.Ogc;
 
 /// <summary>
-///     Gets or Sets transmissionMode
+///     Gets or Sets transmissionMode.
 /// </summary>
 [JsonConverter(typeof(StringEnumConverter))]
 public enum TransmissionMode

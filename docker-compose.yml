@@ -4,3 +4,9 @@
     build:
       context: .
       dockerfile: SOH.Process.Server/Dockerfile
+  redis:
+    container_name: redis
+    image: redis
+    ports:
+      - "6379:6379/tcp"
+    working_dir: /data

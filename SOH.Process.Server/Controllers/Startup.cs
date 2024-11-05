@@ -1,0 +1,110 @@
+using System.Text.Json.Serialization;
+using FluentValidation;
+using IdempotentAPI.Cache.DistributedCache.Extensions.DependencyInjection;
+using IdempotentAPI.Core;
+using IdempotentAPI.Extensions.DependencyInjection;
+using Microsoft.AspNetCore.Diagnostics.HealthChecks;
+using Microsoft.Extensions.Diagnostics.HealthChecks;
+using Newtonsoft.Json;
+using Serilog;
+using SOH.Process.Server.Middlewares;
+using SOH.Process.Server.Simulations.Validators;
+
+namespace SOH.Process.Server.Controllers;
+
+public static class Startup
+{
+    public static IServiceCollection AddApi(
+        this IServiceCollection services, IConfiguration config)
+    {
+        ArgumentNullException.ThrowIfNull(config);
+
+        services.AddHealthChecks();
+
+        return services
+            .AddLocalization()
+            .AddResponseCompression(options => { options.EnableForHttps = true; })
+            .AddSwaggerGen()
+            .AddEndpointsApiExplorer()
+            .AddDistributedMemoryCache()
+            .AddMiddlewares(config)
+            .AddIdempotentAPIUsingDistributedCache()
+            .AddRouting(options => options.LowercaseUrls = true)
+            .AddValidatorsFromAssemblyContaining<ServerSimulationValidator>()
+            .AddIdempotentAPI(new IdempotencyOptions
+            {
+                IsIdempotencyOptional = true, ExpireHours = 1,
+                SerializerSettings = new JsonSerializerSettings
+                {
+                    DefaultValueHandling = DefaultValueHandling.Ignore,
+                    NullValueHandling = NullValueHandling.Ignore,
+                    ReferenceLoopHandling = ReferenceLoopHandling.Ignore,
+                    ObjectCreationHandling = ObjectCreationHandling.Replace
+                }
+            })
+            .AddControllers(options =>
+            {
+                options.SuppressImplicitRequiredAttributeForNonNullableReferenceTypes = true;
+            })
+            .AddJsonOptions(options =>
+            {
+                options.JsonSerializerOptions.ReferenceHandler = ReferenceHandler.IgnoreCycles;
+                options.JsonSerializerOptions.PreferredObjectCreationHandling = JsonObjectCreationHandling.Replace;
+                options.JsonSerializerOptions.DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull;
+            })
+            .Services;
+    }
+
+    public static IApplicationBuilder UseControllers(this IApplicationBuilder builder, IWebHostEnvironment environment)
+    {
+        builder
+            .UseSerilogRequestLogging()
+            .UseExceptionMiddleware()
+            .UseHsts()
+            .UseStaticFiles()
+            .UseRouting()
+            .UseOpenApi()
+            .UseSwagger()
+            .UseSwaggerUi(options =>
+            {
+                options.DefaultModelsExpandDepth = -1;
+                options.DocExpansion = "none";
+                options.TagsSorter = "alpha";
+                options.ValidateSpecification = true;
+                options.DocumentTitle = "Urban Model Plattform - SmartOpenHamburg OGC Processes API";
+                options.CustomHeadContent = "Swagger Documentation of the SmartOpenHamburg OGC Processes API Endpoint" +
+                                            " for Simulation- and Execution Management";
+            })
+            .UseCustomMiddlewares()
+            .UseSwagger()
+            .UseResponseCompression()
+            .UseEndpoints(routeBuilder => routeBuilder.MapControllerEndpoints());
+
+        if (environment.IsProduction())
+        {
+            builder.UseHealthChecks("/healthz",
+                new HealthCheckOptions
+                {
+                    Predicate = _ => true,
+                    ResultStatusCodes =
+                    {
+                        [HealthStatus.Healthy] = StatusCodes.Status200OK,
+                        [HealthStatus.Degraded] = StatusCodes.Status500InternalServerError,
+                        [HealthStatus.Unhealthy] = StatusCodes.Status503ServiceUnavailable
+                    }
+                });
+        }
+
+        return builder;
+    }
+
+    private static IEndpointRouteBuilder MapControllerEndpoints(this IEndpointRouteBuilder builder)
+    {
+        builder
+            .MapControllers()
+            .RequireAuthorization();
+        builder.MapHealthChecks("/api/health")
+            .RequireAuthorization();
+        return builder;
+    }
+}

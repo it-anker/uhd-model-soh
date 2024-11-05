@@ -1,119 +1,40 @@
 using System.Runtime.Serialization;
-using System.Text;
-using Newtonsoft.Json;
+using SOH.Process.Server.Models.Parameters;
 
 namespace SOH.Process.Server.Models.Ogc;
 
-/// <summary>
-/// </summary>
 [DataContract]
-public class Output : IEquatable<Output>
+public sealed class Output : IEquatable<Output>
 {
     /// <summary>
-    ///     Gets or Sets Format
+    ///     Gets or Sets Format.
     /// </summary>
-
     [DataMember(Name = "format")]
-    public Format Format { get; set; }
+    public Format? Format { get; set; }
 
     /// <summary>
-    ///     Gets or Sets TransmissionMode
+    ///     Gets or Sets TransmissionMode.
     /// </summary>
-
     [DataMember(Name = "transmissionMode")]
-    public TransmissionMode TransmissionMode { get; set; }
+    public TransmissionMode? TransmissionMode { get; set; }
 
-    /// <summary>
-    ///     Returns true if Output instances are equal
-    /// </summary>
-    /// <param name="other">Instance of Output to be compared</param>
-    /// <returns>Boolean</returns>
-    public bool Equals(Output other)
+    public bool Equals(Output? other)
     {
-        if (ReferenceEquals(null, other)) return false;
+        if (other is null) return false;
         if (ReferenceEquals(this, other)) return true;
-
-        return
-            (
-                Format == other.Format ||
-                (Format != null &&
-                 Format.Equals(other.Format))
-            ) &&
-            (
-                TransmissionMode == other.TransmissionMode ||
-                (TransmissionMode != null &&
-                 TransmissionMode.Equals(other.TransmissionMode))
-            );
+        return Equals(Format, other.Format) && TransmissionMode == other.TransmissionMode;
     }
 
-    /// <summary>
-    ///     Returns the string presentation of the object
-    /// </summary>
-    /// <returns>String presentation of the object</returns>
-    public override string ToString()
+    public override bool Equals(object? obj)
     {
-        StringBuilder sb = new StringBuilder();
-        sb.Append("class Output {\n");
-        sb.Append("  Format: ").Append(Format).Append("\n");
-        sb.Append("  TransmissionMode: ").Append(TransmissionMode).Append("\n");
-        sb.Append("}\n");
-        return sb.ToString();
-    }
-
-    /// <summary>
-    ///     Returns the JSON string presentation of the object
-    /// </summary>
-    /// <returns>JSON string presentation of the object</returns>
-    public string ToJson()
-    {
-        return JsonConvert.SerializeObject(this, Formatting.Indented);
-    }
-
-    /// <summary>
-    ///     Returns true if objects are equal
-    /// </summary>
-    /// <param name="obj">Object to be compared</param>
-    /// <returns>Boolean</returns>
-    public override bool Equals(object obj)
-    {
-        if (ReferenceEquals(null, obj)) return false;
+        if (obj is null) return false;
         if (ReferenceEquals(this, obj)) return true;
-        return obj.GetType() == GetType() && Equals((Output)obj);
+        if (obj.GetType() != GetType()) return false;
+        return Equals((Output)obj);
     }
 
-    /// <summary>
-    ///     Gets the hash code
-    /// </summary>
-    /// <returns>Hash code</returns>
     public override int GetHashCode()
     {
-        unchecked // Overflow is fine, just wrap
-        {
-            int hashCode = 41;
-            // Suitable nullity checks etc, of course :)
-            if (Format != null)
-                hashCode = hashCode * 59 + Format.GetHashCode();
-            if (TransmissionMode != null)
-                hashCode = hashCode * 59 + TransmissionMode.GetHashCode();
-            return hashCode;
-        }
+        return HashCode.Combine(Format, TransmissionMode);
     }
-
-    #region Operators
-
-#pragma warning disable 1591
-
-    public static bool operator ==(Output left, Output right)
-    {
-        return Equals(left, right);
-    }
-
-    public static bool operator !=(Output left, Output right)
-    {
-        return !Equals(left, right);
-    }
-
-#pragma warning restore 1591
-
-    #endregion Operators
 }
