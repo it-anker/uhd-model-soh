@@ -7,7 +7,7 @@ using Swashbuckle.AspNetCore.Annotations;
 
 namespace SOH.Process.Server.Controllers.V1;
 
-public class JobListApiApiController : BaseApiController
+public class JobListController : BaseApiController
 {
     /// <summary>
     ///     retrieve the list of jobs.

@@ -9,7 +9,7 @@ using Swashbuckle.AspNetCore.Annotations;
 
 namespace SOH.Process.Server.Controllers.V1;
 
-public class ExecuteApiApiController : BaseApiController
+public class ExecuteController : BaseApiController
 {
     /// <summary>
     ///     execute a process.

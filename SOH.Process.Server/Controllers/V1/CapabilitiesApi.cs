@@ -7,7 +7,7 @@ using Swashbuckle.AspNetCore.Annotations;
 
 namespace SOH.Process.Server.Controllers.V1;
 
-public class CapabilitiesApiApiController : BaseApiController
+public class CapabilitiesController : BaseApiController
 {
     /// <summary>
     ///     landing page of this API.

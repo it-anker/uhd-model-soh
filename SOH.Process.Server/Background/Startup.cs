@@ -1,6 +1,8 @@
 using Hangfire;
 using Hangfire.MemoryStorage;
+using Hangfire.Redis.StackExchange;
 using Serilog;
+using StackExchange.Redis;
 using ILogger = Serilog.ILogger;
 
 namespace SOH.Process.Server.Background;
@@ -19,11 +21,13 @@ public static class Startup
         if (!environment.IsEnvironment("Test"))
         {
             Logger.Information("Add Hangfire scheduling and background job engine");
-
-            services.AddHangfire((_, hangfireConfig) =>
+            services.AddHangfire((serviceProvider, hangfireConfig) =>
             {
+                IConnectionMultiplexer redis = serviceProvider.GetRequiredService<IConnectionMultiplexer>();
+
                 hangfireConfig
                     .UseSerilogLogProvider()
+                    .UseRedisStorage(redis)
                     .UseMemoryStorage()
                     .UseFilter(new LogJobFilter())
                     .UseMediatR();

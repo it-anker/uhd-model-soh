@@ -7,10 +7,7 @@ using Swashbuckle.AspNetCore.Annotations;
 
 namespace SOH.Process.Server.Controllers.V1;
 
-/// <summary>
-/// </summary>
-[ApiController]
-public class ResultApiController : ControllerBase
+public class ResultController : BaseApiController
 {
     /// <summary>
     ///     retrieve the result(s) of a job

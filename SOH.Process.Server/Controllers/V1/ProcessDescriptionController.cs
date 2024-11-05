@@ -7,7 +7,7 @@ using Swashbuckle.AspNetCore.Annotations;
 
 namespace SOH.Process.Server.Controllers.V1;
 
-public class ProcessDescriptionApiApiController : BaseApiController
+public class ProcessDescriptionController : BaseApiController
 {
     /// <summary>
     ///     retrieve a process description

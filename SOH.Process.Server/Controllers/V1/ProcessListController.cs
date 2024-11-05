@@ -6,7 +6,7 @@ using Swashbuckle.AspNetCore.Annotations;
 
 namespace SOH.Process.Server.Controllers.V1;
 
-public class ProcessListApiApiController : BaseApiController
+public class ProcessListController : BaseApiController
 {
     /// <summary>
     ///     retrieve the list of available processes

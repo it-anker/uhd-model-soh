@@ -7,7 +7,7 @@ using Swashbuckle.AspNetCore.Annotations;
 
 namespace SOH.Process.Server.Controllers.V1;
 
-public class ConformanceDeclarationApiApiController : BaseApiController
+public class ConformanceDeclarationController : BaseApiController
 {
     /// <summary>
     ///     information about standards that this API conforms to

@@ -6,6 +6,9 @@ using IdempotentAPI.Extensions.DependencyInjection;
 using Microsoft.AspNetCore.Diagnostics.HealthChecks;
 using Microsoft.Extensions.Diagnostics.HealthChecks;
 using Newtonsoft.Json;
+using NJsonSchema;
+using NSwag;
+using NSwag.Generation.Processors.Security;
 using Serilog;
 using SOH.Process.Server.Middlewares;
 using SOH.Process.Server.Simulations.Validators;
@@ -24,8 +27,6 @@ public static class Startup
         return services
             .AddLocalization()
             .AddResponseCompression(options => { options.EnableForHttps = true; })
-            .AddSwaggerGen()
-            .AddEndpointsApiExplorer()
             .AddDistributedMemoryCache()
             .AddMiddlewares(config)
             .AddIdempotentAPIUsingDistributedCache()
@@ -52,7 +53,27 @@ public static class Startup
                 options.JsonSerializerOptions.PreferredObjectCreationHandling = JsonObjectCreationHandling.Replace;
                 options.JsonSerializerOptions.DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull;
             })
-            .Services;
+            .Services
+            .AddSwaggerGen()
+            .AddEndpointsApiExplorer()
+            .AddOpenApiDocument(document =>
+            {
+                document.DocumentName = "ogc-processes";
+                document.Description = "Official OGC Processes API Endpoint for Simulation Execution";
+                document.ApiGroupNames = ["ogc-processes"];
+                document.Version = "0.1.0";
+                document.SchemaSettings.SchemaType = SchemaType.OpenApi3;
+                document.UseControllerSummaryAsTagDescription = true;
+                document.SchemaSettings.AlwaysAllowAdditionalObjectProperties = true;
+                document.SchemaSettings.AllowReferencesWithProperties = true;
+                document.PostProcess = doc =>
+                {
+                    doc.Info.Title = "OGC Process API Simulation";
+                    doc.Info.Version = "0.1.0";
+                };
+
+                document.OperationProcessors.Add(new AspNetCoreOperationSecurityScopeProcessor());
+            });
     }
 
     public static IApplicationBuilder UseControllers(this IApplicationBuilder builder, IWebHostEnvironment environment)

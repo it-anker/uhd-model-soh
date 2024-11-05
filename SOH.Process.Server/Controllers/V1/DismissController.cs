@@ -8,27 +8,27 @@ using Swashbuckle.AspNetCore.Annotations;
 
 namespace SOH.Process.Server.Controllers.V1;
 
-public class StatusApiController : BaseApiController
+public class DismissController : BaseApiController
 {
     /// <summary>
-    ///     retrieve the status of a job.
+    ///     cancel a job execution, remove a finished job.
     /// </summary>
     /// <remarks>
-    ///     Shows the status of a job.   For more information, see [Section
-    ///     7.12](https://docs.ogc.org/is/18-062/18-062.html#sc_retrieve_status_info).
+    ///     Cancel a job execution and remove it from the jobs list.  For more information, see [Section
+    ///     13](https://docs.ogc.org/is/18-062/18-062.html#Dismiss).
     /// </remarks>
     /// <param name="jobId">local identifier of a job</param>
     /// <response code="200">The status of a job.</response>
     /// <response code="404">The requested URI was not found.</response>
     /// <response code="500">A server error occurred.</response>
-    [HttpGet]
+    [HttpDelete]
     [Route("/ogcapi/jobs/{jobId}")]
     [ValidateModelState]
-    [SwaggerOperation("GetStatus")]
+    [SwaggerOperation("Dismiss")]
     [SwaggerResponse(200, type: typeof(StatusInfo), description: "The status of a job.")]
     [SwaggerResponse(404, type: typeof(ExceptionResult), description: "The requested URI was not found.")]
     [SwaggerResponse(500, type: typeof(ExceptionResult), description: "A server error occurred.")]
-    public virtual IActionResult GetStatus([FromRoute] [Required] string jobId)
+    public virtual IActionResult Dismiss([FromRoute] [Required] string jobId)
     {
         // TODO: Uncomment the next line to return response 200 or use other options such as return this.NotFound(), return this.BadRequest(..), ...
         // return StatusCode(200, default(StatusInfo));

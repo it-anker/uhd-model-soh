@@ -1,11 +1,6 @@
 ﻿services:
-  soh.process.server:
-    image: soh.process.server
-    build:
-      context: .
-      dockerfile: SOH.Process.Server/Dockerfile
   redis:
-    container_name: redis
+    container_name: ump-db-redis
     image: redis
     ports:
       - "6379:6379/tcp"
