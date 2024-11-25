@@ -1,11 +1,10 @@
 using System.ComponentModel.DataAnnotations;
 using System.Runtime.Serialization;
-using SOH.Process.Server.Models.Common;
 
 namespace SOH.Process.Server.Models.Ogc;
 
 [DataContract]
-public sealed class Link : IEquatable<Link>
+public sealed class Link
 {
     /// <summary>
     ///     Gets or Sets Href.
@@ -37,24 +36,4 @@ public sealed class Link : IEquatable<Link>
     /// </summary>
     [DataMember(Name = "title")]
     public string? Title { get; set; }
-
-    public bool Equals(Link? other)
-    {
-        if (other is null) return false;
-        if (ReferenceEquals(this, other)) return true;
-        return Href == other.Href && Rel == other.Rel && Type == other.Type && Hreflang == other.Hreflang && Title == other.Title;
-    }
-
-    public override bool Equals(object? obj)
-    {
-        if (obj is null) return false;
-        if (ReferenceEquals(this, obj)) return true;
-        if (obj.GetType() != GetType()) return false;
-        return Equals((Link)obj);
-    }
-
-    public override int GetHashCode()
-    {
-        return HashCode.Combine(Href, Rel, Type, Hreflang, Title);
-    }
 }

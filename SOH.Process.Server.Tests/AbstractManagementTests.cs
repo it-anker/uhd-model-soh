@@ -1,7 +1,5 @@
 using System.Globalization;
-using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.DependencyInjection;
-using Moq;
 
 namespace SOH.Process.Server.Tests;
 
@@ -11,7 +9,7 @@ public abstract class AbstractManagementTests
     protected AbstractManagementTests(OgcIntegration services)
     {
         SmartOpenHamburg = services;
-        IServiceScope scope = services.Services.CreateScope();
+        var scope = services.Services.CreateScope();
         Services = scope.ServiceProvider;
 
         Thread.CurrentThread.CurrentUICulture = CultureInfo.GetCultureInfo("de-DE");

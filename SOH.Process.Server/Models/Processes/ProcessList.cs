@@ -5,7 +5,7 @@ using SOH.Process.Server.Models.Ogc;
 namespace SOH.Process.Server.Models.Processes;
 
 [DataContract]
-public sealed class ProcessList : IEquatable<ProcessList>
+public sealed class ProcessList
 {
     /// <summary>
     ///     Gets or Sets Processes.
@@ -20,24 +20,4 @@ public sealed class ProcessList : IEquatable<ProcessList>
     [Required]
     [DataMember(Name = "links")]
     public List<Link> Links { get; set; } = [];
-
-    public bool Equals(ProcessList? other)
-    {
-        if (other is null) return false;
-        if (ReferenceEquals(this, other)) return true;
-        return Processes.Equals(other.Processes) && Links.Equals(other.Links);
-    }
-
-    public override bool Equals(object? obj)
-    {
-        if (obj is null) return false;
-        if (ReferenceEquals(this, obj)) return true;
-        if (obj.GetType() != GetType()) return false;
-        return Equals((ProcessList)obj);
-    }
-
-    public override int GetHashCode()
-    {
-        return HashCode.Combine(Processes, Links);
-    }
 }

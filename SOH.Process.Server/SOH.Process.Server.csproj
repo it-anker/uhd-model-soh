@@ -16,7 +16,7 @@
         <PackageReference Include="MediatR" Version="12.4.1" />
         <PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="8.0.10" />
         <PackageReference Include="Microsoft.IdentityModel.Logging" Version="8.2.0" />
-        <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
+        <PackageReference Include="NRedisStack" Version="0.13.0" />
         <PackageReference Include="Serilog.AspNetCore" Version="8.0.3" />
         <PackageReference Include="Serilog.Sinks.Console" Version="6.0.0" />
         <PackageReference Include="StackExchange.Redis" Version="2.8.16" />
@@ -40,7 +40,6 @@
     <ItemGroup>
       <Folder Include="Models\Results\" />
       <Folder Include="Models\Subscriptions\" />
-      <Folder Include="Simulations\Workflows\" />
     </ItemGroup>
 
     <ItemGroup>
@@ -56,6 +55,10 @@
         <AutoGen>True</AutoGen>
         <DependentUpon>SharedResource.resx</DependentUpon>
       </Compile>
+    </ItemGroup>
+
+    <ItemGroup>
+      <ProjectReference Include="..\SOH.Model\SOH.Model.csproj" />
     </ItemGroup>
 
 </Project>

@@ -13,8 +13,9 @@ public static class Startup
     public static async Task RunOgcServiceAsync(string[] args)
     {
         Log.Information("OGC Processes API server is starting ...");
-        WebApplicationBuilder builder = CreateWebApplicationBuilder(args);
-        await using WebApplication app = builder
+        var builder = CreateWebApplicationBuilder(args);
+
+        await using var app = builder
             .BuildApplication()
             .Build();
 
@@ -25,11 +26,11 @@ public static class Startup
 
     private static WebApplicationBuilder CreateWebApplicationBuilder(string[] args)
     {
-        WebApplicationBuilder builder = WebApplication.CreateBuilder(args);
+        var builder = WebApplication.CreateBuilder(args);
 
         builder.UseCustomSerilog(builder.Environment);
 
-        IWebHostEnvironment executionEnvironment = builder.Environment;
+        var executionEnvironment = builder.Environment;
         string environmentName = string.IsNullOrEmpty(executionEnvironment.EnvironmentName)
             ? "Development"
             : executionEnvironment.EnvironmentName;
@@ -62,7 +63,7 @@ public static class Startup
 
     private static WebApplicationBuilder BuildApplication(this WebApplicationBuilder builder)
     {
-        System.Reflection.Assembly[] assemblies = AppDomain.CurrentDomain.GetAssemblies();
+        var assemblies = AppDomain.CurrentDomain.GetAssemblies();
 
         builder.Services
             .AddScoped<ISimulationService, SimulationServiceImpl>()

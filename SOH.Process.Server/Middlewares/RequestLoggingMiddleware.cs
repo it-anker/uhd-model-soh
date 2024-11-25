@@ -17,13 +17,13 @@ public class RequestLoggingMiddleware : IMiddleware
         }
         else
         {
-            HttpRequest request = context.Request;
+            var request = context.Request;
 
             if (!string.IsNullOrEmpty(request.ContentType)
                 && request.ContentType.StartsWith("application/json"))
             {
                 request.EnableBuffering();
-                using StreamReader reader = new StreamReader(request.Body, Encoding.UTF8, true, 4096, true);
+                using var reader = new StreamReader(request.Body, Encoding.UTF8, true, 4096, true);
                 requestBody = await reader.ReadToEndAsync();
 
                 // rewind for next middleware.

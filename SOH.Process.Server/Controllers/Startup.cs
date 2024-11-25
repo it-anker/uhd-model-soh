@@ -7,16 +7,18 @@ using Microsoft.AspNetCore.Diagnostics.HealthChecks;
 using Microsoft.Extensions.Diagnostics.HealthChecks;
 using Newtonsoft.Json;
 using NJsonSchema;
-using NSwag;
 using NSwag.Generation.Processors.Security;
 using Serilog;
 using SOH.Process.Server.Middlewares;
+using SOH.Process.Server.Models;
 using SOH.Process.Server.Simulations.Validators;
 
 namespace SOH.Process.Server.Controllers;
 
 public static class Startup
 {
+    private const string CorsPolicy = nameof(CorsPolicy);
+
     public static IServiceCollection AddApi(
         this IServiceCollection services, IConfiguration config)
     {
@@ -25,10 +27,12 @@ public static class Startup
         services.AddHealthChecks();
 
         return services
+            .Configure<OgcSettings>(config.GetSection(nameof(OgcSettings)))
             .AddLocalization()
             .AddResponseCompression(options => { options.EnableForHttps = true; })
             .AddDistributedMemoryCache()
             .AddMiddlewares(config)
+            .AddCorsPolicy(config)
             .AddIdempotentAPIUsingDistributedCache()
             .AddRouting(options => options.LowercaseUrls = true)
             .AddValidatorsFromAssemblyContaining<ServerSimulationValidator>()
@@ -84,6 +88,7 @@ public static class Startup
             .UseHsts()
             .UseStaticFiles()
             .UseRouting()
+            .UseCorsPolicy()
             .UseOpenApi()
             .UseSwagger()
             .UseSwaggerUi(options =>
@@ -123,9 +128,45 @@ public static class Startup
     {
         builder
             .MapControllers()
-            .RequireAuthorization();
-        builder.MapHealthChecks("/api/health")
-            .RequireAuthorization();
+            .RequireCors();
+        builder
+            .MapHealthChecks("/api/health");
         return builder;
     }
+
+    internal static IServiceCollection AddCorsPolicy(this IServiceCollection services, IConfiguration config)
+    {
+        var corsSettings = config.GetSection(nameof(CorsSettings)).Get<CorsSettings>();
+        var origins = new List<string>();
+        if (corsSettings is { Origins: not null })
+        {
+            string[] corsPaths = corsSettings.Origins.Split(';', StringSplitOptions.RemoveEmptyEntries);
+            origins.AddRange(corsPaths);
+        }
+
+        services.AddCors(opt =>
+        {
+            opt.AddPolicy(CorsPolicy, policy =>
+            {
+                policy
+                    .AllowAnyMethod()
+                    .AllowAnyHeader()
+                    .SetIsOriginAllowed(_ => true)
+                    .AllowCredentials()
+                    .WithOrigins(origins.ToArray());
+            });
+        });
+
+        return services;
+    }
+
+    internal static IApplicationBuilder UseCorsPolicy(this IApplicationBuilder app)
+    {
+        return app.UseCors(CorsPolicy);
+    }
+}
+
+public class CorsSettings
+{
+    public string? Origins { get; set; }
 }

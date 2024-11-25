@@ -15,7 +15,7 @@ namespace SOH.Process.Server.Tests;
 public abstract class AbstractOgcServices : WebApplicationFactory<Program.IServerMarker>, IAsyncLifetime
 {
     private readonly RedisContainer _redisContainer = new RedisBuilder()
-        .WithImage("redis:7.0")
+        .WithImage("redis/redis-stack:6.2.6-v17")
         .Build();
 
     public HttpClient RootUserWithToken { get; private set; } = default!;
@@ -31,12 +31,7 @@ public abstract class AbstractOgcServices : WebApplicationFactory<Program.IServe
         await _redisContainer.StartAsync();
     }
 
-    async Task IAsyncLifetime.DisposeAsync()
-    {
-        await ResetExternalServices();
-    }
-
-    protected virtual Task ResetExternalServices()
+    Task IAsyncLifetime.DisposeAsync()
     {
         return Task.CompletedTask;
     }
@@ -47,6 +42,7 @@ public abstract class AbstractOgcServices : WebApplicationFactory<Program.IServe
 
         builder.UseEnvironment("Test");
         builder.UseSetting("Redis:ConnectionString", redisConnectionString);
+        builder.UseSetting("Redis:UseTestcontainers", false.ToString());
     }
 
     private Task SetClients()

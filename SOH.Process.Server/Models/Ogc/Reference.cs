@@ -13,7 +13,7 @@ using SOH.Process.Server.Models.Ogc;
 namespace IO.Swagger.Models;
 
 [DataContract]
-public partial class Reference : IEquatable<Reference>
+public partial class Reference
 {
     /// <summary>
     /// Gets or Sets _Ref.
@@ -21,24 +21,4 @@ public partial class Reference : IEquatable<Reference>
     [Required]
     [DataMember(Name = "$ref")]
     public string _Ref { get; set; } = default!;
-
-    public bool Equals(Reference? other)
-    {
-        if (other is null) return false;
-        if (ReferenceEquals(this, other)) return true;
-        return _Ref == other._Ref;
-    }
-
-    public override bool Equals(object? obj)
-    {
-        if (obj is null) return false;
-        if (ReferenceEquals(this, obj)) return true;
-        if (obj.GetType() != GetType()) return false;
-        return Equals((Reference)obj);
-    }
-
-    public override int GetHashCode()
-    {
-        return _Ref.GetHashCode();
-    }
 }

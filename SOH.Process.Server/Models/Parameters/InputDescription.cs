@@ -5,7 +5,7 @@ using SOH.Process.Server.Models.Ogc;
 namespace SOH.Process.Server.Models.Parameters;
 
 [DataContract]
-public sealed class InputDescription : DescriptionType, IEquatable<InputDescription>
+public sealed class InputDescription : DescriptionType
 {
     /// <summary>
     ///     Gets or Sets MinOccurs.
@@ -25,25 +25,4 @@ public sealed class InputDescription : DescriptionType, IEquatable<InputDescript
     [Required]
     [DataMember(Name = "schema")]
     public Schema Schema { get; set; } = default!;
-
-    public bool Equals(InputDescription? other)
-    {
-        if (other is null) return false;
-        if (ReferenceEquals(this, other)) return true;
-        return base.Equals(other) && MinOccurs == other.MinOccurs &&
-               Equals(MaxOccurs, other.MaxOccurs) && Schema.Equals(other.Schema);
-    }
-
-    public override bool Equals(object? obj)
-    {
-        if (obj is null) return false;
-        if (ReferenceEquals(this, obj)) return true;
-        if (obj.GetType() != GetType()) return false;
-        return Equals((InputDescription)obj);
-    }
-
-    public override int GetHashCode()
-    {
-        return HashCode.Combine(base.GetHashCode(), MinOccurs, MaxOccurs, Schema);
-    }
 }

@@ -23,7 +23,7 @@ public static class Startup
             Logger.Information("Add Hangfire scheduling and background job engine");
             services.AddHangfire((serviceProvider, hangfireConfig) =>
             {
-                IConnectionMultiplexer redis = serviceProvider.GetRequiredService<IConnectionMultiplexer>();
+                var redis = serviceProvider.GetRequiredService<IConnectionMultiplexer>();
 
                 hangfireConfig
                     .UseSerilogLogProvider()

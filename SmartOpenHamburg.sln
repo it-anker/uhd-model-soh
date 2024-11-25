@@ -5,8 +5,6 @@ VisualStudioVersion = 16.0.31424.327
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Tests", "Tests", "{B7027C3F-ECBB-42CB-928F-F982832F9869}"
 EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Models", "Models", "{7605A7C5-DDD8-4DE6-9D16-E8B5E839481E}"
-EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SOH.Process.Server", "SOH.Process.Server\SOH.Process.Server.csproj", "{C8506EAC-E827-43F1-982A-FFF6B9B04453}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{7582C2F4-A80E-42BB-BF4A-2608FB2737E6}"

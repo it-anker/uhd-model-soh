@@ -68,7 +68,7 @@ public class ExceptionMiddleware(IStringLocalizer<SharedResource> localizer) : I
 
     private static async Task HandleValidationException(HttpContext context, ValidationException exception)
     {
-        CustomValidationResult validationResult = new CustomValidationResult
+        var validationResult = new CustomValidationResult
         {
             Errors = exception.Errors.Select(validationFailure => 
                     validationFailure.Adapt<CustomValidationFailure>())

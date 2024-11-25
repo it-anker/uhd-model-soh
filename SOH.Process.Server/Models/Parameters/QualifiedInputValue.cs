@@ -1,6 +1,5 @@
 using System.ComponentModel.DataAnnotations;
 using System.Runtime.Serialization;
-using SOH.Process.Server.Models.Common;
 
 namespace SOH.Process.Server.Models.Parameters;
 

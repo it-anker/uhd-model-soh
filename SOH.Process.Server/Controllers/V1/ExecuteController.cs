@@ -25,14 +25,14 @@ public class ExecuteController : BaseApiController
     /// <response code="404">The requested URI was not found.</response>
     /// <response code="500">A server error occurred.</response>
     [HttpPost]
-    [Route("/ogcapi/processes/{processId}/execution")]
+    [Route("/processes/{processId}/execution")]
     [ValidateModelState]
     [SwaggerOperation("Execute")]
     [SwaggerResponse(200, type: typeof(IInlineResponse200), description: "Result of synchronous execution")]
     [SwaggerResponse(201, type: typeof(StatusInfo), description: "Started asynchronous execution. Created job.")]
     [SwaggerResponse(404, type: typeof(ExceptionResult), description: "The requested URI was not found.")]
     [SwaggerResponse(500, type: typeof(ExceptionResult), description: "A server error occurred.")]
-    public async Task<IActionResult> Execute([FromBody] Execute body, [FromRoute] [Required] string processId)
+    public async Task<ActionResult<StatusCode>> Execute([FromBody] Execute body, [FromRoute] [Required] string processId)
     {
         // TODO: Uncomment the next line to return response 200 or use other options such as return this.NotFound(), return this.BadRequest(..), ...
         // return StatusCode(200, default(InlineResponse200));
@@ -48,7 +48,7 @@ public class ExecuteController : BaseApiController
         string? exampleJson = null;
         exampleJson = "\"\"";
 
-        IInlineResponse200? example = exampleJson != null
+        var example = exampleJson != null
             ? JsonConvert.DeserializeObject<IInlineResponse200>(exampleJson)
             : default; // TODO: Change the data returned
         return Ok(example);

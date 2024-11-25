@@ -8,45 +8,23 @@ namespace SOH.Process.Server.Models.Ogc;
 ///     declaration under &#x60;/conformance&#x60;.
 /// </summary>
 [DataContract]
-public sealed class Subscriber : IEquatable<Subscriber>
+public class Subscriber
 {
     /// <summary>
-    ///     Gets or Sets SuccessUri.
+    ///     Callback uri when process is finished.
     /// </summary>
     [DataMember(Name = "successUri")]
     public string? SuccessUri { get; set; }
 
     /// <summary>
-    ///     Gets or Sets InProgressUri.
+    ///     Callback uri when starting process.
     /// </summary>
     [DataMember(Name = "inProgressUri")]
     public string? InProgressUri { get; set; }
 
     /// <summary>
-    ///     Gets or Sets FailedUri.
+    ///     Callback uri when process failed.
     /// </summary>
     [DataMember(Name = "failedUri")]
     public string? FailedUri { get; set; }
-
-    public bool Equals(Subscriber? other)
-    {
-        if (other is null) return false;
-        if (ReferenceEquals(this, other)) return true;
-        return SuccessUri == other.SuccessUri &&
-               InProgressUri == other.InProgressUri &&
-               FailedUri == other.FailedUri;
-    }
-
-    public override bool Equals(object? obj)
-    {
-        if (obj is null) return false;
-        if (ReferenceEquals(this, obj)) return true;
-        if (obj.GetType() != GetType()) return false;
-        return Equals((Subscriber)obj);
-    }
-
-    public override int GetHashCode()
-    {
-        return HashCode.Combine(SuccessUri, InProgressUri, FailedUri);
-    }
 }

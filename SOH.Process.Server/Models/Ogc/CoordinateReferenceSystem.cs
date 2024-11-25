@@ -5,7 +5,7 @@ using Newtonsoft.Json.Converters;
 namespace SOH.Process.Server.Models.Ogc;
 
 /// <summary>
-///     Gets or Sets Crs.
+///     Predefined coordinate reference system, used by the analyse.
 /// </summary>
 [JsonConverter(typeof(StringEnumConverter))]
 public enum CoordinateReferenceSystem

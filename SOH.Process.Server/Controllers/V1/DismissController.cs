@@ -22,7 +22,7 @@ public class DismissController : BaseApiController
     /// <response code="404">The requested URI was not found.</response>
     /// <response code="500">A server error occurred.</response>
     [HttpDelete]
-    [Route("/ogcapi/jobs/{jobId}")]
+    [Route("/jobs/{jobId}")]
     [ValidateModelState]
     [SwaggerOperation("Dismiss")]
     [SwaggerResponse(200, type: typeof(StatusInfo), description: "The status of a job.")]
@@ -42,7 +42,7 @@ public class DismissController : BaseApiController
         exampleJson =
             "{\n  \"jobID\" : \"jobID\",\n  \"processID\" : \"processID\",\n  \"created\" : \"2000-01-23T04:56:07.000+00:00\",\n  \"progress\" : 8,\n  \"started\" : \"2000-01-23T04:56:07.000+00:00\",\n  \"finished\" : \"2000-01-23T04:56:07.000+00:00\",\n  \"links\" : [ {\n    \"hreflang\" : \"en\",\n    \"rel\" : \"service\",\n    \"href\" : \"href\",\n    \"type\" : \"application/json\",\n    \"title\" : \"title\"\n  }, {\n    \"hreflang\" : \"en\",\n    \"rel\" : \"service\",\n    \"href\" : \"href\",\n    \"type\" : \"application/json\",\n    \"title\" : \"title\"\n  } ],\n  \"type\" : \"process\",\n  \"message\" : \"message\",\n  \"updated\" : \"2000-01-23T04:56:07.000+00:00\",\n  \"status\" : \"accepted\"\n}";
 
-        StatusInfo? example = exampleJson != null
+        var example = exampleJson != null
             ? JsonConvert.DeserializeObject<StatusInfo>(exampleJson)
             : default; // TODO: Change the data returned
         return new ObjectResult(example);

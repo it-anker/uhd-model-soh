@@ -5,7 +5,9 @@ using Newtonsoft.Json.Converters;
 namespace SOH.Process.Server.Models.Ogc;
 
 /// <summary>
-///     Gets or Sets jobControlOptions
+///     The kind, how the process shall be executed,
+///     processing completely in blocking mode
+///     or async in background.
 /// </summary>
 [JsonConverter(typeof(StringEnumConverter))]
 public enum JobControlOptions

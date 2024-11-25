@@ -12,7 +12,7 @@ public static class Startup
 
         builder.Host.UseSerilog((context, _, loggerConfiguration) =>
         {
-            LogOptions? logOptions = context.Configuration.GetSection("Logging").Get<LogOptions>();
+            var logOptions = context.Configuration.GetSection("Logging").Get<LogOptions>();
 
             ArgumentNullException.ThrowIfNull(logOptions);
             loggerConfiguration.ReadFrom.Configuration(context.Configuration);

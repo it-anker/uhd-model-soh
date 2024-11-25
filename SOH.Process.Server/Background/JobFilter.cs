@@ -14,9 +14,9 @@ public class JobFilter(IServiceProvider services) : IClientFilter
         Logger.InfoFormat("Set TenantId and UserId parameters to job {0}.{1}...",
             context.Job.Method.ReflectedType?.FullName, context.Job.Method.Name);
 
-        using IServiceScope scope = services.CreateScope();
+        using var scope = services.CreateScope();
 
-        HttpContext? httpContext = scope.ServiceProvider.GetRequiredService<IHttpContextAccessor>().HttpContext;
+        var httpContext = scope.ServiceProvider.GetRequiredService<IHttpContextAccessor>().HttpContext;
         _ = httpContext ?? throw new InvalidOperationException("Can't create a TenantJob without HttpContext.");
     }
 

@@ -2,8 +2,12 @@ using System.Runtime.Serialization;
 
 namespace SOH.Process.Server.Models.Ogc;
 
+/// <summary>
+///     The common contract to request an execution of a simulation
+///     with <see cref="Inputs"/> and <see cref="Outputs"/> as the result.
+/// </summary>
 [DataContract]
-public sealed class Execute : IEquatable<Execute>
+public class Execute
 {
     /// <summary>
     ///     Gets or Sets Inputs.
@@ -28,22 +32,4 @@ public sealed class Execute : IEquatable<Execute>
     /// </summary>
     [DataMember(Name = "subscriber")]
     public Subscriber? Subscriber { get; set; }
-
-    public bool Equals(Execute? other)
-    {
-        if (other is null) return false;
-        if (ReferenceEquals(this, other)) return true;
-        return Inputs.Equals(other.Inputs) && Outputs.Equals(other.Outputs) &&
-               Response == other.Response && Equals(Subscriber, other.Subscriber);
-    }
-
-    public override bool Equals(object? obj)
-    {
-        return ReferenceEquals(this, obj) || (obj is Execute other && Equals(other));
-    }
-
-    public override int GetHashCode()
-    {
-        return HashCode.Combine(Inputs, Outputs, Response, Subscriber);
-    }
 }

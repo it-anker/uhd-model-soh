@@ -8,7 +8,7 @@ namespace SOH.Process.Server.Models.Common;
 ///     JSON schema for exceptions based on RFC 7807.
 /// </summary>
 [DataContract]
-public sealed class ExceptionResult : Dictionary<string, object>, IEquatable<ExceptionResult>
+public sealed class ExceptionResult : Dictionary<string, object>
 {
     [DataMember(Name = "errorId")]
     [Required]
@@ -34,21 +34,4 @@ public sealed class ExceptionResult : Dictionary<string, object>, IEquatable<Exc
 
     [DataMember(Name = "supportMessage")]
     public string? SupportMessage { get; set; }
-
-    public bool Equals(ExceptionResult? other)
-    {
-        if (other is null) return false;
-        if (ReferenceEquals(this, other)) return true;
-        return ErrorId == other.ErrorId;
-    }
-
-    public override bool Equals(object? obj)
-    {
-        return ReferenceEquals(this, obj) || (obj is ExceptionResult other && Equals(other));
-    }
-
-    public override int GetHashCode()
-    {
-        return ErrorId.GetHashCode();
-    }
 }

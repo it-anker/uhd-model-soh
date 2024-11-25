@@ -1,15 +1,15 @@
 using Microsoft.AspNetCore.Mvc;
-using Newtonsoft.Json;
 using SOH.Process.Server.Attributes;
 using SOH.Process.Server.Models.Processes;
+using SOH.Process.Server.Simulations;
 using Swashbuckle.AspNetCore.Annotations;
 
 namespace SOH.Process.Server.Controllers.V1;
 
-public class ProcessListController : BaseApiController
+public class ProcessListController(ISimulationService simulationService) : BaseApiController
 {
     /// <summary>
-    ///     retrieve the list of available processes
+    ///     retrieve the list of available processes.
     /// </summary>
     /// <remarks>
     ///     The list of processes contains a summary of each process the OGC API - Processes offers, including the link to
@@ -18,21 +18,14 @@ public class ProcessListController : BaseApiController
     /// </remarks>
     /// <response code="200">Information about the available processes</response>
     [HttpGet]
-    [Route("/ogcapi/processes")]
+    [Route("/processes")]
     [ValidateModelState]
     [SwaggerOperation("GetProcesses")]
     [SwaggerResponse(200, type: typeof(ProcessList), description: "Information about the available processes")]
-    public virtual IActionResult GetProcesses()
+    public async Task<ActionResult<ProcessList>> GetProcesses(
+        [FromQuery(Name = "limit")] ParameterLimit paginationFilter,
+        CancellationToken token = default)
     {
-        // TODO: Uncomment the next line to return response 200 or use other options such as return this.NotFound(), return this.BadRequest(..), ...
-        // return StatusCode(200, default(ProcessList));
-        string? exampleJson = null;
-        exampleJson =
-            "{\n  \"processes\" : [ \"\", \"\" ],\n  \"links\" : [ {\n    \"hreflang\" : \"en\",\n    \"rel\" : \"service\",\n    \"href\" : \"href\",\n    \"type\" : \"application/json\",\n    \"title\" : \"title\"\n  }, {\n    \"hreflang\" : \"en\",\n    \"rel\" : \"service\",\n    \"href\" : \"href\",\n    \"type\" : \"application/json\",\n    \"title\" : \"title\"\n  } ]\n}";
-
-        ProcessList? example = exampleJson != null
-            ? JsonConvert.DeserializeObject<ProcessList>(exampleJson)
-            : default; // TODO: Change the data returned
-        return new ObjectResult(example);
+        return Ok(await simulationService.ListProcessesAsync(paginationFilter, token));
     }
 }

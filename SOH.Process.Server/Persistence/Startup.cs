@@ -8,8 +8,7 @@ public static class Startup
     public static IServiceCollection AddPersistence(this IServiceCollection services,
         IConfiguration configuration, IWebHostEnvironment environment)
     {
-        RedisDatabaseSettings? databaseSettings = configuration.GetSection("Redis").Get<RedisDatabaseSettings>();
-
+        var databaseSettings = configuration.GetSection("Redis").Get<RedisDatabaseSettings>();
         ArgumentNullException.ThrowIfNull(databaseSettings);
 
         return services

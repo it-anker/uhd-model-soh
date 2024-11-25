@@ -18,10 +18,10 @@ public class ValidateModelStateAttribute : ActionFilterAttribute
     /// <param name="context"></param>
     public override void OnActionExecuting(ActionExecutingContext context)
     {
-        ControllerActionDescriptor? descriptor = context.ActionDescriptor as ControllerActionDescriptor;
+        var descriptor = context.ActionDescriptor as ControllerActionDescriptor;
         if (descriptor != null)
         {
-            foreach (ParameterInfo parameter in descriptor.MethodInfo.GetParameters())
+            foreach (var parameter in descriptor.MethodInfo.GetParameters())
             {
                 object? args = null;
                 if (context.ActionArguments.TryGetValue(parameter.Name, out object? argument)) args = argument;
@@ -35,11 +35,11 @@ public class ValidateModelStateAttribute : ActionFilterAttribute
 
     private void ValidateAttributes(ParameterInfo parameter, object args, ModelStateDictionary modelState)
     {
-        foreach (CustomAttributeData attributeData in parameter.CustomAttributes)
+        foreach (var attributeData in parameter.CustomAttributes)
         {
-            Attribute? attributeInstance = parameter.GetCustomAttribute(attributeData.AttributeType);
+            var attributeInstance = parameter.GetCustomAttribute(attributeData.AttributeType);
 
-            ValidationAttribute? validationAttribute = attributeInstance as ValidationAttribute;
+            var validationAttribute = attributeInstance as ValidationAttribute;
             if (validationAttribute != null)
             {
                 bool isValid = validationAttribute.IsValid(args);

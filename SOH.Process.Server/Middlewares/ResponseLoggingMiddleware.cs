@@ -8,8 +8,8 @@ public class ResponseLoggingMiddleware : IMiddleware
     public async Task InvokeAsync(HttpContext context, RequestDelegate next)
     {
         await next(context);
-        Stream originalBody = context.Response.Body;
-        await using MemoryStream newBody = new MemoryStream();
+        var originalBody = context.Response.Body;
+        await using var newBody = new MemoryStream();
         context.Response.Body = newBody;
         newBody.Seek(0, SeekOrigin.Begin);
         string responseBody = await new StreamReader(context.Response.Body).ReadToEndAsync();

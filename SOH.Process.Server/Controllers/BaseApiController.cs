@@ -12,3 +12,6 @@ public abstract class BaseApiController : ControllerBase
 
     protected ISender Mediator => _mediator ??= HttpContext.RequestServices.GetRequiredService<ISender>();
 }
+
+[Route("[controller]")]
+public abstract class BaseApiRouteController : BaseApiController;

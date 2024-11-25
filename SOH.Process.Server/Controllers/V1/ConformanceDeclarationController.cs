@@ -31,7 +31,7 @@ public class ConformanceDeclarationController : BaseApiController
     /// </response>
     /// <response code="500">A server error occurred.</response>
     [HttpGet]
-    [Route("/ogcapi/conformance")]
+    [Route("/conformance")]
     [ValidateModelState]
     [SwaggerOperation("GetConformanceClasses")]
     [SwaggerResponse(200, type: typeof(ConfClasses),
@@ -49,7 +49,7 @@ public class ConformanceDeclarationController : BaseApiController
         exampleJson =
             "{\n  \"conformsTo\" : [ \"http://www.opengis.net/spec/ogcapi-processes-1/1.0/conf/core\", \"http://www.opengis.net/spec/ogcapi-processes-1/1.0/conf/core\" ]\n}";
 
-        ConfClasses? example = exampleJson != null
+        var example = exampleJson != null
             ? JsonConvert.DeserializeObject<ConfClasses>(exampleJson)
             : default; // TODO: Change the data returned
         return new ObjectResult(example);

@@ -19,13 +19,13 @@ public enum ProcessingKind
 }
 
 [DataContract]
-public sealed class StatusInfo : IEquatable<StatusInfo>
+public class StatusInfo
 {
     /// <summary>
     ///     Gets or Sets ProcessID.
     /// </summary>
     [DataMember(Name = "processID")]
-    public string? ProcessId { get; set; }
+    public string? SimulationId { get; set; }
 
     /// <summary>
     ///     Gets or Sets Type.
@@ -38,7 +38,7 @@ public sealed class StatusInfo : IEquatable<StatusInfo>
     /// </summary>
     [Required]
     [DataMember(Name = "jobID")]
-    public string JobId { get; set; } = default!;
+    public string JobId { get; set; } = $"job:{Guid.NewGuid()}";
 
     /// <summary>
     ///     Gets or Sets Status.
@@ -54,72 +54,39 @@ public sealed class StatusInfo : IEquatable<StatusInfo>
     public string? Message { get; set; }
 
     /// <summary>
-    ///     Gets or Sets Created.
+    ///     The time in UTC when this job was created.
     /// </summary>
     [DataMember(Name = "created")]
-    public DateTime? Created { get; set; }
+    public DateTime CreatedUtc { get; set; } = DateTime.UtcNow;
 
     /// <summary>
-    ///     Gets or Sets Started.
+    ///     The time in UTC when this job started the analysis.
     /// </summary>
     [DataMember(Name = "started")]
-    public DateTime? Started { get; set; }
+    public DateTime? StartedUtc { get; set; }
 
     /// <summary>
-    ///     Gets or Sets Finished.
+    ///     The time in UTC when this job finished the analysis.
     /// </summary>
     [DataMember(Name = "finished")]
-    public DateTime? Finished { get; set; }
+    public DateTime? FinishedUtc { get; set; }
 
     /// <summary>
-    ///     Gets or Sets Updated.
+    ///     The last modification time in UTC of this job.
     /// </summary>
     [DataMember(Name = "updated")]
-    public DateTime? Updated { get; set; }
+    public DateTime UpdatedUtc { get; set; } = DateTime.UtcNow;
 
     /// <summary>
-    ///     Gets or Sets Progress.
+    ///     The actual progress in percentage (0-100).
     /// </summary>
     [Range(0, 100)]
     [DataMember(Name = "progress")]
     public int? Progress { get; set; }
 
     /// <summary>
-    ///     Gets or Sets Links.
+    ///     Any additional links of this job.
     /// </summary>
     [DataMember(Name = "links")]
     public List<Link> Links { get; set; } = [];
-
-    public bool Equals(StatusInfo? other)
-    {
-        if (other is null) return false;
-        if (ReferenceEquals(this, other)) return true;
-        return ProcessId == other.ProcessId && Type == other.Type &&
-               JobId == other.JobId && Status == other.Status;
-    }
-
-    public override bool Equals(object? obj)
-    {
-        if (obj is null) return false;
-        if (ReferenceEquals(this, obj)) return true;
-        if (obj.GetType() != GetType()) return false;
-        return Equals((StatusInfo)obj);
-    }
-
-    public override int GetHashCode()
-    {
-        var hashCode = new HashCode();
-        hashCode.Add(ProcessId);
-        hashCode.Add(Type);
-        hashCode.Add(JobId);
-        hashCode.Add((int)Status);
-        hashCode.Add(Message);
-        hashCode.Add(Created);
-        hashCode.Add(Started);
-        hashCode.Add(Finished);
-        hashCode.Add(Updated);
-        hashCode.Add(Progress);
-        hashCode.Add(Links);
-        return hashCode.ToHashCode();
-    }
 }
