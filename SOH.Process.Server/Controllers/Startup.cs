@@ -5,6 +5,7 @@ using IdempotentAPI.Core;
 using IdempotentAPI.Extensions.DependencyInjection;
 using Microsoft.AspNetCore.Diagnostics.HealthChecks;
 using Microsoft.Extensions.Diagnostics.HealthChecks;
+using NetTopologySuite.IO.Converters;
 using Newtonsoft.Json;
 using NJsonSchema;
 using NSwag.Generation.Processors.Security;
@@ -56,6 +57,7 @@ public static class Startup
                 options.JsonSerializerOptions.ReferenceHandler = ReferenceHandler.IgnoreCycles;
                 options.JsonSerializerOptions.PreferredObjectCreationHandling = JsonObjectCreationHandling.Replace;
                 options.JsonSerializerOptions.DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull;
+                options.JsonSerializerOptions.Converters.Add(new GeoJsonConverterFactory());
             })
             .Services
             .AddSwaggerGen()

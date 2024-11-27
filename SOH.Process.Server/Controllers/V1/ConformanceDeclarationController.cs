@@ -7,6 +7,9 @@ using Swashbuckle.AspNetCore.Annotations;
 
 namespace SOH.Process.Server.Controllers.V1;
 
+[ApiController]
+[Produces("application/json")]
+[ApiExplorerSettings(GroupName = "ogc-processes")]
 public class ConformanceDeclarationController : BaseApiController
 {
     /// <summary>

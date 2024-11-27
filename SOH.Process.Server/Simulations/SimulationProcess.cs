@@ -1,22 +1,11 @@
 using System.Runtime.Serialization;
 using MediatR;
+using SOH.Process.Server.Models.Ogc;
 
 namespace SOH.Process.Server.Simulations;
 
 public class SimulationProcess : Models.Processes.Process
 {
-    /// <summary>
-    ///     The reference ID to the running job of this process.
-    /// </summary>
-    [DataMember(Name = "jobId")]
-    public string? JobId { get; set; }
-
-    /// <summary>
-    ///     The reference ID to the result of this process.
-    /// </summary>
-    [DataMember(Name = "resultId")]
-    public string? ResultId { get; set; }
-
     /// <summary>
     ///     The time in UTC when this job was created.
     /// </summary>
@@ -33,9 +22,6 @@ public class SimulationProcess : Models.Processes.Process
     {
         ArgumentException.ThrowIfNullOrEmpty(request.Title);
         ArgumentException.ThrowIfNullOrEmpty(request.Version);
-
-        JobId = request.JobId;
-        ResultId = request.ResultId;
 
         Title = request.Title?.Trim();
         Version = request.Version.Trim();
@@ -55,4 +41,17 @@ public class UpdateSimulationProcessRequest : SimulationProcess, IRequest<Simula
 
 public class CreateSimulationProcessRequest : SimulationProcess, IRequest<SimulationProcess>;
 
-public class CreateSimulationJobRequest : SimulationJob, IRequest<SimulationJob>;
+public class CreateSimulationJobRequest : IRequest<SimulationJob>
+{
+    /// <summary>
+    ///     The reference ID to the running job of this process.
+    /// </summary>
+    [DataMember(Name = "processID")]
+    public string SimulationId { get; set; } = default!;
+
+    /// <summary>
+    ///     The details of the execution with inputs and output configuration.
+    /// </summary>
+    [DataMember(Name = "execute")]
+    public Execute Execute { get; set; } = default!;
+}

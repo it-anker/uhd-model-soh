@@ -8,6 +8,7 @@ using Swashbuckle.AspNetCore.Annotations;
 
 namespace SOH.Process.Server.Controllers.V1;
 
+[ApiController]
 public class CapabilitiesController(IOptions<OgcSettings> configuration) : BaseApiController
 {
     /// <summary>

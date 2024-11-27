@@ -36,4 +36,14 @@ public sealed class Link
     /// </summary>
     [DataMember(Name = "title")]
     public string? Title { get; set; }
+
+    public Link Trim()
+    {
+        Href = Href.Trim();
+        Title = !string.IsNullOrEmpty(Title) ? Title.Trim() : null;
+        Rel = !string.IsNullOrEmpty(Rel) ? Rel.Trim() : null;
+        Hreflang = !string.IsNullOrEmpty(Hreflang) ? Hreflang.Trim() : null;
+        Type = !string.IsNullOrEmpty(Type) ? Type.Trim() : null;
+        return this;
+    }
 }

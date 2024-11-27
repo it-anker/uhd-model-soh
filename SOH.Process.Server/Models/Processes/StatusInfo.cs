@@ -22,6 +22,13 @@ public enum ProcessingKind
 public class StatusInfo
 {
     /// <summary>
+    ///     Gets or Sets JobID.
+    /// </summary>
+    [Required]
+    [DataMember(Name = "jobID")]
+    public string JobId { get; set; } = default!;
+
+    /// <summary>
     ///     Gets or Sets ProcessID.
     /// </summary>
     [DataMember(Name = "processID")]
@@ -32,13 +39,6 @@ public class StatusInfo
     /// </summary>
     [DataMember(Name = "type")]
     public ProcessingKind Type { get; set; } = ProcessingKind.ProcessEnum;
-
-    /// <summary>
-    ///     Gets or Sets JobID.
-    /// </summary>
-    [Required]
-    [DataMember(Name = "jobID")]
-    public string JobId { get; set; } = $"job:{Guid.NewGuid()}";
 
     /// <summary>
     ///     Gets or Sets Status.

@@ -6,7 +6,7 @@ namespace SOH.Process.Server.Models.Ogc;
 public abstract class AbstractEntity
 {
     [Required] [DataMember(Name = "id")]
-    public string Id { get; set; } = default!;
+    public virtual string Id { get; set; } = default!;
 
     public bool Equals(AbstractEntity? other)
     {

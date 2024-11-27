@@ -2,6 +2,7 @@ using System.Runtime.Serialization;
 using Microsoft.Extensions.DependencyInjection;
 using SOH.Process.Server.Models.Processes;
 using SOH.Process.Server.Persistence;
+using SOH.Process.Server.Tests.Base;
 
 namespace SOH.Process.Server.Tests;
 

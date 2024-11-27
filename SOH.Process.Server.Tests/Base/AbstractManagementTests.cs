@@ -1,7 +1,6 @@
-using System.Globalization;
 using Microsoft.Extensions.DependencyInjection;
 
-namespace SOH.Process.Server.Tests;
+namespace SOH.Process.Server.Tests.Base;
 
 [Collection("Database collection")]
 public abstract class AbstractManagementTests
@@ -11,9 +10,6 @@ public abstract class AbstractManagementTests
         SmartOpenHamburg = services;
         var scope = services.Services.CreateScope();
         Services = scope.ServiceProvider;
-
-        Thread.CurrentThread.CurrentUICulture = CultureInfo.GetCultureInfo("de-DE");
-        Thread.CurrentThread.CurrentCulture = CultureInfo.GetCultureInfo("de-DE");
     }
 
     protected OgcIntegration SmartOpenHamburg { get; }

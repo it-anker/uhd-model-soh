@@ -3,7 +3,7 @@ using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.DependencyInjection;
 using Moq;
 
-namespace SOH.Process.Server.Tests;
+namespace SOH.Process.Server.Tests.Base;
 
 public class OgcIntegration : AbstractOgcServices
 {

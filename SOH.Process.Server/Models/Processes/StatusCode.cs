@@ -11,27 +11,28 @@ namespace SOH.Process.Server.Models.Processes;
 public enum StatusCode
 {
     /// <summary>
-    ///     Enum AcceptedEnum for accepted
+    ///     The job status when this job was accepted and scheduled but not yet started.
     /// </summary>
-    [EnumMember(Value = "accepted")] AcceptedEnum = 0,
+    [EnumMember(Value = "accepted")] Accepted = 0,
 
     /// <summary>
-    ///     Enum RunningEnum for running
+    ///     The job status when this job is currently running the selected process.
     /// </summary>
-    [EnumMember(Value = "running")] RunningEnum = 1,
+    [EnumMember(Value = "running")] Running = 1,
 
     /// <summary>
-    ///     Enum SuccessfulEnum for successful
+    ///     The job status when this job was successful after running the selected process.
     /// </summary>
-    [EnumMember(Value = "successful")] SuccessfulEnum = 2,
+    [EnumMember(Value = "successful")] Successful = 2,
 
     /// <summary>
-    ///     Enum FailedEnum for failed
+    ///     The job status when this job was not successful and a problem occured during
+    ///     execution of the selected process.
     /// </summary>
-    [EnumMember(Value = "failed")] FailedEnum = 3,
+    [EnumMember(Value = "failed")] Failed = 3,
 
     /// <summary>
-    ///     Enum DismissedEnum for dismissed
+    ///     The job status when this job was created but rejected due to invalid input.
     /// </summary>
-    [EnumMember(Value = "dismissed")] DismissedEnum = 4
+    [EnumMember(Value = "dismissed")] Dismissed = 4
 }

@@ -13,7 +13,7 @@ public interface ISimulationService
 
     Task UpdateAsync(string jobId, SimulationJob request, CancellationToken token = default);
 
-    Task DeleteAsync(string id, CancellationToken token = default);
+    Task DeleteSimulationAsync(string id, CancellationToken token = default);
 
     Task<SimulationProcess> GetSimulationAsync(string simulationId, CancellationToken token = default);
 

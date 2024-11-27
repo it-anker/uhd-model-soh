@@ -2,7 +2,7 @@ using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc.Testing;
 using Testcontainers.Redis;
 
-namespace SOH.Process.Server.Tests;
+namespace SOH.Process.Server.Tests.Base;
 
 /// <summary>
 ///     Use this base class, and inherit from it to construct a bootstrap web application, to testing

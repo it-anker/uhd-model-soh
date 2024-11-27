@@ -4,11 +4,13 @@ using Newtonsoft.Json;
 using SOH.Process.Server.Attributes;
 using SOH.Process.Server.Models.Common;
 using SOH.Process.Server.Models.Processes;
+using SOH.Process.Server.Simulations;
 using Swashbuckle.AspNetCore.Annotations;
 
 namespace SOH.Process.Server.Controllers.V1;
 
-public class DismissController : BaseApiController
+[ApiController]
+public class DismissController(ISimulationService simulationService) : BaseApiController
 {
     /// <summary>
     ///     cancel a job execution, remove a finished job.

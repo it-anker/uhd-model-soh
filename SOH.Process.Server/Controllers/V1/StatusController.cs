@@ -1,7 +1,6 @@
 using System.ComponentModel.DataAnnotations;
 using Mapster;
 using Microsoft.AspNetCore.Mvc;
-using Newtonsoft.Json;
 using SOH.Process.Server.Attributes;
 using SOH.Process.Server.Models.Common;
 using SOH.Process.Server.Models.Processes;
@@ -10,6 +9,7 @@ using Swashbuckle.AspNetCore.Annotations;
 
 namespace SOH.Process.Server.Controllers.V1;
 
+[ApiController]
 public class StatusController(ISimulationService simulationService) : BaseApiController
 {
     /// <summary>

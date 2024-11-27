@@ -7,6 +7,7 @@ using Swashbuckle.AspNetCore.Annotations;
 
 namespace SOH.Process.Server.Controllers.V1;
 
+[ApiController]
 public class JobsListController(ISimulationService simulationService) : BaseApiController
 {
     /// <summary>

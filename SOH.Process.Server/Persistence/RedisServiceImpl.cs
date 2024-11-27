@@ -1,21 +1,22 @@
 using System.Runtime.CompilerServices;
 using System.Text.Json;
+using Microsoft.AspNetCore.Http.Json;
 using SOH.Process.Server.Models.Processes;
 using StackExchange.Redis;
 using static System.ArgumentNullException;
 
 namespace SOH.Process.Server.Persistence;
 
-public class RedisServiceImpl(IConnectionMultiplexer redis) : IPersistence
+public class RedisServiceImpl(IConnectionMultiplexer redis, JsonSerializerOptions jsonOptions) : IPersistence
 {
-    private readonly IDatabase _database = redis.GetDatabase();
+    private readonly IDatabaseAsync _database = redis.GetDatabase();
 
     public async Task UpsertAsync<TEntity>(string key, TEntity entity, CancellationToken token = default)
     {
         ThrowIfNull(entity);
         ArgumentException.ThrowIfNullOrEmpty(key);
 
-        string json = JsonSerializer.Serialize(entity);
+        string json = JsonSerializer.Serialize(entity, jsonOptions);
         await _database.StringSetAsync(key, json);
     }
 
@@ -23,7 +24,10 @@ public class RedisServiceImpl(IConnectionMultiplexer redis) : IPersistence
     {
         var value = await _database.StringGetAsync(key);
 
-        return value.IsNullOrEmpty ? default : JsonSerializer.Deserialize<TEntity>(value!);
+        return value.IsNullOrEmpty
+            ? default
+            : JsonSerializer
+                .Deserialize<TEntity>(value!, jsonOptions);
     }
 
     public async IAsyncEnumerable<TEntity> ListAsync<TEntity>(string query,
@@ -33,10 +37,14 @@ public class RedisServiceImpl(IConnectionMultiplexer redis) : IPersistence
 
         await foreach (var redisKey in keys)
         {
-            var value = _database.StringGet(redisKey);
-            if (value.IsNullOrEmpty) continue;
+            var value = await _database.StringGetAsync(redisKey);
 
-            var entity = JsonSerializer.Deserialize<TEntity>(value!);
+            if (value.IsNullOrEmpty)
+            {
+                continue;
+            }
+
+            var entity = JsonSerializer.Deserialize<TEntity>(value!, jsonOptions);
 
             if (!Equals(entity, default(TEntity)))
             {
@@ -88,15 +96,16 @@ public class RedisServiceImpl(IConnectionMultiplexer redis) : IPersistence
 
         var data = values
             .Where(v => v.HasValue)
-            .Select(v => JsonSerializer.Deserialize<TEntity>(v.ToString())!)
+            .Select(v => JsonSerializer.Deserialize<TEntity>(v.ToString(), jsonOptions)!)
             .ToList();
 
-        return new ParameterLimitResponse<TEntity>(data, totalKeysCount, parameterLimit.PageSize, parameterLimit.PageNumber);
+        return new ParameterLimitResponse<TEntity>(data, totalKeysCount, parameterLimit.PageSize,
+            parameterLimit.PageNumber);
     }
 
     public async Task<TEntity?> DeleteAsync<TEntity>(string key, CancellationToken token = default)
     {
         var value = await _database.StringGetDeleteAsync(key);
-        return value.IsNullOrEmpty ? default : JsonSerializer.Deserialize<TEntity>(value!);
+        return value.IsNullOrEmpty ? default : JsonSerializer.Deserialize<TEntity>(value!, jsonOptions);
     }
 }

@@ -67,6 +67,8 @@ public static class Startup
 
         builder.Services
             .AddScoped<ISimulationService, SimulationServiceImpl>()
+            .AddScoped<IResultService, ResultsServiceImpl>()
+            .AddScoped<ICustomSeeder, ModelSeeder>()
             .AddMediatR(config => config.RegisterServicesFromAssemblies(assemblies))
             .AddPersistence(builder.Configuration, builder.Environment)
             .AddApi(builder.Configuration);
@@ -97,6 +99,7 @@ public static class Startup
         }
 
         app
+            .UseProcesses(app.Environment, app.Configuration)
             .UseControllers(app.Environment);
 
         Log.Information("OGC Processes API server is running");

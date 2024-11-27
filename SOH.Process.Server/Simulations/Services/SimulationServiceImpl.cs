@@ -1,3 +1,4 @@
+using Mapster;
 using Microsoft.Extensions.Localization;
 using SOH.Process.Server.Models.Common.Exceptions;
 using SOH.Process.Server.Models.Ogc;
@@ -26,17 +27,15 @@ public class SimulationServiceImpl(
     public async Task<string> CreateAsync(SimulationJob request, CancellationToken token = default)
     {
         ArgumentNullException.ThrowIfNull(request.SimulationId);
-        ArgumentNullException.ThrowIfNull(request.JobStatusKey);
 
-        var simulationJob = new SimulationJob
-        {
-            JobId = $"job:{Guid.NewGuid()}",
-            JobStatusKey = request.JobStatusKey,
-            SimulationId = request.SimulationId,
-            Message = localizer["simulation created"]
-        };
+        var simulationJob = request.Adapt<SimulationJob>();
 
-        await simulationRepository.UpsertAsync(simulationJob.JobId, request, token);
+        simulationJob.JobId = $"job:{Guid.NewGuid()}";
+        simulationJob.SimulationId = request.SimulationId;
+        request.Message ??= localizer["simulation created"];
+        simulationJob.Update(request);
+
+        await simulationRepository.UpsertAsync(simulationJob.JobId, simulationJob, token);
         return simulationJob.JobId;
     }
 
@@ -54,19 +53,14 @@ public class SimulationServiceImpl(
     {
         ArgumentNullException.ThrowIfNull(request.SimulationId);
         var simulationJob = await GetSimulationJobAsync(jobId, token);
-        simulationJob.JobStatusKey = request.JobStatusKey;
-        simulationJob.UpdatedUtc = DateTime.UtcNow;
+        simulationJob.Update(request);
         await simulationRepository.UpsertAsync(jobId, simulationJob, token);
     }
 
-    public async Task DeleteAsync(string id, CancellationToken token = default)
+    public async Task DeleteSimulationAsync(string id, CancellationToken token = default)
     {
-        var simulation = await simulationRepository.DeleteAsync<SimulationProcess>(id, token);
-
-        if (simulation != null && !string.IsNullOrEmpty(simulation.JobId))
-        {
-            await simulationRepository.DeleteAsync<SimulationJob>(id, token);
-        }
+        await simulationRepository.DeleteAsync<SimulationProcess>(id, token);
+        await simulationRepository.DeleteAsync<SimulationJob>(id, token);
     }
 
     public async Task<SimulationProcess> GetSimulationAsync(string simulationId, CancellationToken token = default)

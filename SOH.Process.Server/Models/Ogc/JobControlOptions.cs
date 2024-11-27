@@ -15,15 +15,15 @@ public enum JobControlOptions
     /// <summary>
     ///     Enum SyncExecuteEnum for sync-execute
     /// </summary>
-    [EnumMember(Value = "sync-execute")] SyncExecuteEnum = 0,
+    [EnumMember(Value = "sync-execute")] SynchronousExecution = 0,
 
     /// <summary>
     ///     Enum AsyncExecuteEnum for async-execute
     /// </summary>
-    [EnumMember(Value = "async-execute")] AsyncExecuteEnum = 1,
+    [EnumMember(Value = "async-execute")] AsyncExecution = 1,
 
     /// <summary>
     ///     Enum DismissEnum for dismiss
     /// </summary>
-    [EnumMember(Value = "dismiss")] DismissEnum = 2
+    [EnumMember(Value = "dismiss")] Dismiss = 2
 }

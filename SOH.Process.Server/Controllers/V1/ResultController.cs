@@ -8,6 +8,7 @@ using Results = Microsoft.AspNetCore.Http.Results;
 
 namespace SOH.Process.Server.Controllers.V1;
 
+[ApiController]
 public class ResultController(
     IResultService resultService,
     ISimulationService simulationService) : BaseApiController
@@ -19,8 +20,8 @@ public class ResultController(
     ///     Lists available results of a job. In case of a failure, lists exceptions instead.  For more information, see
     ///     [Section 7.13](https://docs.ogc.org/is/18-062/18-062.html#sc_retrieve_job_results).
     /// </remarks>
-    /// <param name="jobId">local identifier of a job</param>
-    /// <param name="token">cancellation token</param>
+    /// <param name="jobId">local identifier of a job.</param>
+    /// <param name="token">cancellation token.</param>
     /// <response code="200">The results of a job.</response>
     /// <response code="404">The requested URI was not found.</response>
     /// <response code="500">A server error occurred.</response>
@@ -35,14 +36,14 @@ public class ResultController(
         [FromRoute] [Required] string jobId, CancellationToken token = default)
     {
         var job = await simulationService.GetSimulationJobAsync(jobId, token);
-        var simulation = await simulationService.GetSimulationAsync(job.SimulationId, token);
-        ArgumentNullException.ThrowIfNull(simulation.ResultId);
 
-        var result = await resultService.GetAsync(simulation.ResultId, token);
-
-        return Ok(new Models.Ogc.Results
+        var results = new Models.Ogc.Results();
+        if (!string.IsNullOrEmpty(job.ResultId))
         {
-            { simulation.ResultId, result },
-        });
+            var result = await resultService.GetAsync(job.ResultId, token);
+            results.Add(result.Id, result);
+        }
+
+        return Ok(results);
     }
 }

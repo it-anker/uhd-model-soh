@@ -1,6 +1,7 @@
 using MediatR;
 using Microsoft.Extensions.DependencyInjection;
 using SOH.Process.Server.Simulations;
+using SOH.Process.Server.Tests.Base;
 
 namespace SOH.Process.Server.Tests;
 
