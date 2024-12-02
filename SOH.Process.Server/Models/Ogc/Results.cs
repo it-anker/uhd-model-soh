@@ -13,9 +13,11 @@ public class Result : AbstractEntity
     [Required] [DataMember(Name = "jobID")]
     public string JobId { get; set; } = default!;
 
-    [Required]
+    [DataMember(Name = "fileId")]
+    public string? FileId { get; set; }
+
     [DataMember(Name = "featureCollection")]
-    public FeatureCollection FeatureCollection { get; set; } = default!;
+    public FeatureCollection? FeatureCollection { get; set; }
 
     [Required]
     [DataMember(Name = "resultID")]

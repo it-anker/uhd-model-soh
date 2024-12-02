@@ -37,4 +37,10 @@
       <ProjectReference Include="..\SOH.Process.Server\SOH.Process.Server.csproj" />
     </ItemGroup>
 
+    <ItemGroup>
+      <None Update="ferry_transfer_test_config_2.json">
+        <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      </None>
+    </ItemGroup>
+
 </Project>

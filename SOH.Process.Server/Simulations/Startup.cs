@@ -5,13 +5,13 @@ public static class Startup
     public static IApplicationBuilder UseProcesses(
         this IApplicationBuilder builder, IHostEnvironment env, IConfiguration config)
     {
-        SeedDataAsync(builder.ApplicationServices)
+        SeedDefaultModelDataAsync(builder.ApplicationServices)
             .GetAwaiter().GetResult();
 
         return builder;
     }
 
-    private static async Task SeedDataAsync(IServiceProvider serviceProvider)
+    private static async Task SeedDefaultModelDataAsync(IServiceProvider serviceProvider)
     {
         using var scope = serviceProvider.CreateScope();
 

@@ -34,6 +34,7 @@ public static class Startup
             .AddDistributedMemoryCache()
             .AddMiddlewares(config)
             .AddCorsPolicy(config)
+            .AddHttpContextAccessor()
             .AddIdempotentAPIUsingDistributedCache()
             .AddRouting(options => options.LowercaseUrls = true)
             .AddValidatorsFromAssemblyContaining<ServerSimulationValidator>()

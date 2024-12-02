@@ -1,10 +1,13 @@
+using MediatR;
 using Microsoft.AspNetCore.HttpOverrides;
 using Serilog;
 using SOH.Process.Server.Controllers;
 using SOH.Process.Server.Logging;
+using SOH.Process.Server.Middlewares;
 using SOH.Process.Server.Persistence;
 using SOH.Process.Server.Simulations;
 using SOH.Process.Server.Simulations.Services;
+using SOH.Process.Server.Validation;
 
 namespace SOH.Process.Server;
 
@@ -69,7 +72,11 @@ public static class Startup
             .AddScoped<ISimulationService, SimulationServiceImpl>()
             .AddScoped<IResultService, ResultsServiceImpl>()
             .AddScoped<ICustomSeeder, ModelSeeder>()
-            .AddMediatR(config => config.RegisterServicesFromAssemblies(assemblies))
+            .AddMediatR(config =>
+                config.RegisterServicesFromAssemblies(assemblies)
+                    .AddBehavior(typeof(IPipelineBehavior<,>), typeof(LoggingBehavior<,>))
+                    .AddBehavior(typeof(IPipelineBehavior<,>), typeof(PrepareRequestBehavior<,>))
+                    .AddBehavior(typeof(IPipelineBehavior<,>), typeof(ValidationBehavior<,>)))
             .AddPersistence(builder.Configuration, builder.Environment)
             .AddApi(builder.Configuration);
 

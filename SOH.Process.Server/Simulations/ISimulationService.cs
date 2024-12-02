@@ -7,13 +7,19 @@ public interface ISimulationService
 {
     Task<string> CreateAsync(CreateSimulationProcessRequest request, CancellationToken token = default);
 
+    Task<string> CreateAsync(string id, CreateSimulationProcessRequest request, CancellationToken token = default);
+
     Task<string> CreateAsync(SimulationJob request, CancellationToken token = default);
 
     Task UpdateAsync(string simulationId, UpdateSimulationProcessRequest request, CancellationToken token = default);
 
     Task UpdateAsync(string jobId, SimulationJob request, CancellationToken token = default);
 
-    Task DeleteSimulationAsync(string id, CancellationToken token = default);
+    Task UpdateAsync(string jobId, string backgroundJobId, CancellationToken token = default);
+
+    Task<SimulationJob> CancelJobAsync(string jobId, CancellationToken token = default);
+
+    Task DeleteAsync(string id, CancellationToken token = default);
 
     Task<SimulationProcess> GetSimulationAsync(string simulationId, CancellationToken token = default);
 
@@ -29,4 +35,7 @@ public interface ISimulationService
 
     Task<ParameterLimitResponse<SimulationProcess>> ListProcessesPaginatedAsync(
         ParameterLimit simulation, CancellationToken token = default);
+
+    Task<ParameterLimitResponse<SimulationProcess>> ListProcessesPaginatedAsync(
+        string query, ParameterLimit simulation, CancellationToken token = default);
 }

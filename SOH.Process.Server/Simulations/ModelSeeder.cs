@@ -1,32 +1,76 @@
+using Mapster;
+using Microsoft.Extensions.Localization;
 using SOH.Process.Server.Models.Ogc;
-using SOH.Process.Server.Models.Processes;
+using SOH.Process.Server.Resources;
 
 namespace SOH.Process.Server.Simulations;
 
-internal class ModelSeeder(ISimulationService simulationService) : ICustomSeeder
+internal class ModelSeeder(
+    ISimulationService simulationService,
+    IConfiguration configuration,
+    IStringLocalizer<SharedResource> localizer) : ICustomSeeder
 {
     public async Task InitializeAsync(CancellationToken cancellationToken)
     {
+        await SeedFerrySimulationProcess(cancellationToken);
+    }
+
+    private async Task SeedFerrySimulationProcess(CancellationToken cancellationToken)
+    {
+        string host = configuration["ApiBaseUrl"] !;
+        if (!host.EndsWith('/')) host += "/";
+
         var ferryModel = new CreateSimulationProcessRequest
         {
-            Title = "SOH - Ferry Transfer Model",
-            Description = "Simple transfer model to of the Hamburg HADAG ferry system.",
+            ExecutionKind = ProcessExecutionKind.Direct,
+            Title = localizer["ferry_transfer_model_title"],
+            Description = localizer["ferry_transfer_model_description"],
             Version = "1.0.0",
             Keywords = ["ferry", "transfer", "simulation"],
-            JobControlOptions = [
+            JobControlOptions =
+            [
                 JobControlOptions.SynchronousExecution,
                 JobControlOptions.AsyncExecution
             ],
-            OutputTransmission = [
+            OutputTransmission =
+            [
                 TransmissionMode.ValueEnum
+            ],
+            Outputs = new Dictionary<string, OutputDescription>
+            {
+                {
+                    "agentsOutput", new OutputDescription
+                    {
+                        Description = localizer["ferry_transfer_output_agents"],
+                        Keywords = ["point", "result", "agent"],
+                        Title = localizer["ferry_transfer_output_agents_title"]
+                    }
+                }
+            },
+            Links = [
+                new Link
+                {
+                    Href = new Uri(host + $"/processes/{GlobalConstants.FerryTransferId}").ToString(),
+                    Title = localizer["model_self_description"],
+                    Rel = "self",
+                    Type = "application/json"
+                }
             ]
         };
 
-        var existingProcess = await simulationService.ListProcessesAsync(
-            new ParameterLimit(), cancellationToken);
-        if (existingProcess.Processes.TrueForAll(summary => summary.Title != ferryModel.Title))
+        var existingProcess = await simulationService.FindSimulationAsync(
+            GlobalConstants.FerryTransferId, cancellationToken);
+
+        if (existingProcess == null)
         {
-            await simulationService.CreateAsync(ferryModel, cancellationToken);
+            await simulationService.CreateAsync(GlobalConstants.FerryTransferId,
+                ferryModel, cancellationToken);
+        }
+        else
+        {
+            var update = ferryModel.Adapt<UpdateSimulationProcessRequest>();
+            await simulationService.UpdateAsync(GlobalConstants.FerryTransferId,
+                update, cancellationToken);
         }
     }
 }

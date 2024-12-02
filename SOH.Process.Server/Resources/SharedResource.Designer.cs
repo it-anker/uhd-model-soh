@@ -44,5 +44,35 @@ namespace SOH.Process.Server.Resources {
                 resourceCulture = value;
             }
         }
+        
+        public static string ferry_transfer_model_description {
+            get {
+                return ResourceManager.GetString("ferry_transfer_model_description", resourceCulture);
+            }
+        }
+        
+        public static string ferry_transfer_model_title {
+            get {
+                return ResourceManager.GetString("ferry_transfer_model_title", resourceCulture);
+            }
+        }
+        
+        public static string ferry_transfer_output_agents {
+            get {
+                return ResourceManager.GetString("ferry_transfer_output_agents", resourceCulture);
+            }
+        }
+        
+        public static string ferry_transfer_output_agents_title {
+            get {
+                return ResourceManager.GetString("ferry_transfer_output_agents_title", resourceCulture);
+            }
+        }
+        
+        public static string model_self_description {
+            get {
+                return ResourceManager.GetString("model_self_description", resourceCulture);
+            }
+        }
     }
 }

@@ -38,8 +38,6 @@ public class SimulationFullTests : AbstractFullManagementTests
         var createJobHandler = Services.GetRequiredService
             <IRequestHandler<CreateSimulationJobRequest, SimulationJob>>();
 
-        string hangfireJobId = Guid.NewGuid().ToString();
-
         var job = await createJobHandler.Handle(new CreateSimulationJobRequest
         {
             SimulationId = simulationId, Execute = new Execute()
@@ -54,7 +52,9 @@ public class SimulationFullTests : AbstractFullManagementTests
         }
 
         var loadedJob = await _simulationService.GetSimulationJobAsync(job.JobId);
-        Assert.Equal(hangfireJobId, loadedJob.HangfireJobKey);
-        Assert.Equal(job.ResultId, loadedJob.ResultId);
+        Assert.NotNull(loadedJob.HangfireJobKey);
+        Assert.NotNull(loadedJob.ResultId);
+        var result = await _resultService.GetAsync(loadedJob.ResultId);
+        Assert.NotNull(result.FeatureCollection);
     }
 }

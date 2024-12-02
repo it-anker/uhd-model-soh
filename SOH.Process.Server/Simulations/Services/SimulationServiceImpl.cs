@@ -12,11 +12,18 @@ public class SimulationServiceImpl(
     IPersistence simulationRepository,
     IStringLocalizer<SharedResource> localizer) : ISimulationService
 {
-    public async Task<string> CreateAsync(CreateSimulationProcessRequest request, CancellationToken token = default)
+    public async Task<string> CreateAsync(
+        CreateSimulationProcessRequest request,
+        CancellationToken token = default)
+    {
+        return await CreateAsync($"simulation:{Guid.NewGuid()}", request, token);
+    }
+
+    public async Task<string> CreateAsync(string id, CreateSimulationProcessRequest request, CancellationToken token = default)
     {
         var simulation = new SimulationProcess
         {
-            Id = $"simulation:{Guid.NewGuid()}"
+            Id = id
         };
 
         simulation.Update(request);
@@ -29,8 +36,7 @@ public class SimulationServiceImpl(
         ArgumentNullException.ThrowIfNull(request.SimulationId);
 
         var simulationJob = request.Adapt<SimulationJob>();
-
-        simulationJob.JobId = $"job:{Guid.NewGuid()}";
+        simulationJob.JobId = $"job:{request.SimulationId}:{request}:{Guid.NewGuid()}";
         simulationJob.SimulationId = request.SimulationId;
         request.Message ??= localizer["simulation created"];
         simulationJob.Update(request);
@@ -57,7 +63,27 @@ public class SimulationServiceImpl(
         await simulationRepository.UpsertAsync(jobId, simulationJob, token);
     }
 
-    public async Task DeleteSimulationAsync(string id, CancellationToken token = default)
+    public async Task UpdateAsync(string jobId, string backgroundJobId, CancellationToken token = default)
+    {
+        ArgumentNullException.ThrowIfNull(backgroundJobId);
+        var simulationJob = await GetSimulationJobAsync(jobId, token);
+        simulationJob.HangfireJobKey = backgroundJobId;
+        await simulationRepository.UpsertAsync(jobId, simulationJob, token);
+    }
+
+    public async Task<SimulationJob> CancelJobAsync(string jobId, CancellationToken token = default)
+    {
+        var simulationJob = await GetSimulationJobAsync(jobId, token);
+        if (simulationJob.Status == StatusCode.Running)
+        {
+            simulationJob.IsCancellationRequested = true;
+            simulationJob.Status = StatusCode.Dismissed;
+        }
+        await simulationRepository.UpsertAsync(jobId, simulationJob, token);
+        return simulationJob;
+    }
+
+    public async Task DeleteAsync(string id, CancellationToken token = default)
     {
         await simulationRepository.DeleteAsync<SimulationProcess>(id, token);
         await simulationRepository.DeleteAsync<SimulationJob>(id, token);
@@ -112,5 +138,11 @@ public class SimulationServiceImpl(
     {
         return simulationRepository
             .ListPaginatedAsync<SimulationProcess>("simulation", simulation, token);
+    }
+
+    public Task<ParameterLimitResponse<SimulationProcess>> ListProcessesPaginatedAsync(
+        string query, ParameterLimit simulation, CancellationToken token = default)
+    {
+        return simulationRepository.ListPaginatedAsync<SimulationProcess>(query, simulation, token);
     }
 }

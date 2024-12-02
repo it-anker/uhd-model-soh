@@ -1,6 +1,5 @@
 using System.Runtime.CompilerServices;
 using System.Text.Json;
-using Microsoft.AspNetCore.Http.Json;
 using SOH.Process.Server.Models.Processes;
 using StackExchange.Redis;
 using static System.ArgumentNullException;
@@ -18,6 +17,11 @@ public class RedisServiceImpl(IConnectionMultiplexer redis, JsonSerializerOption
 
         string json = JsonSerializer.Serialize(entity, jsonOptions);
         await _database.StringSetAsync(key, json);
+    }
+
+    public Task UploadFileAsync(string key, Stream stream, CancellationToken token = default)
+    {
+        throw new NotImplementedException();
     }
 
     public async Task<TEntity?> FindAsync<TEntity>(string key, CancellationToken token = default)

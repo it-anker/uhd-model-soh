@@ -18,4 +18,19 @@
     <resheader name="writer">
         <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
     </resheader>
+    <data name="ferry_transfer_model_description" xml:space="preserve">
+        <value>Simple transfer model to of the Hamburg HADAG ferry system.</value>
+    </data>
+    <data name="ferry_transfer_model_title" xml:space="preserve">
+        <value>SOH - Ferry Transfer Model</value>
+    </data>
+    <data name="ferry_transfer_output_agents" xml:space="preserve">
+        <value>Point-based output of each agent and their values with different simulation times.</value>
+    </data>
+    <data name="ferry_transfer_output_agents_title" xml:space="preserve">
+        <value>Ferry transfer agents result</value>
+    </data>
+    <data name="model_self_description" xml:space="preserve">
+        <value>The process description</value>
+    </data>
 </root>

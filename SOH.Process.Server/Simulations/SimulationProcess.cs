@@ -7,6 +7,12 @@ namespace SOH.Process.Server.Simulations;
 public class SimulationProcess : Models.Processes.Process
 {
     /// <summary>
+    ///     The reference name to concrete point on the entrypoint or name.
+    /// </summary>
+    [DataMember(Name = "executionKind")]
+    public ProcessExecutionKind ExecutionKind { get; set; }
+
+    /// <summary>
     ///     The time in UTC when this job was created.
     /// </summary>
     [DataMember(Name = "created")]
@@ -37,6 +43,11 @@ public class SimulationProcess : Models.Processes.Process
     }
 }
 
+public enum ProcessExecutionKind
+{
+    [EnumMember(Value = "direct")] Direct
+}
+
 public class UpdateSimulationProcessRequest : SimulationProcess, IRequest<SimulationProcess>;
 
 public class CreateSimulationProcessRequest : SimulationProcess, IRequest<SimulationProcess>;
@@ -54,4 +65,10 @@ public class CreateSimulationJobRequest : IRequest<SimulationJob>
     /// </summary>
     [DataMember(Name = "execute")]
     public Execute Execute { get; set; } = default!;
+
+    /// <summary>
+    ///     Gets or sets the preferred option.
+    /// </summary>
+    [DataMember(Name = "execute")]
+    public JobControlOptions? Prefer { get; set; }
 }

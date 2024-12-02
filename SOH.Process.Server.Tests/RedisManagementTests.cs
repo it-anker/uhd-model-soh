@@ -18,7 +18,7 @@ public class RedisManagementTests : AbstractManagementTests
     [Fact]
     public async Task TestSearchForSubProperty()
     {
-        TestEntity entity1 = new()
+        TestEntity entity1 = new ()
         {
             Description = "my desc",
             Sub = new SubType
@@ -28,7 +28,7 @@ public class RedisManagementTests : AbstractManagementTests
             }
         };
 
-        TestEntity entity2 = new()
+        TestEntity entity2 = new ()
         {
             Description = "my other desc",
         };

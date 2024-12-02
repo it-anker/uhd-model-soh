@@ -1,5 +1,3 @@
-using System.Linq.Expressions;
-using Hangfire;
 using Hangfire.Common;
 using Hangfire.States;
 using Mapster;
@@ -163,6 +161,160 @@ public class SimulationManagementTests : AbstractManagementTests
     }
 
     [Fact]
+    public async Task TestRunFerrySimulationSyncWithoutAgents()
+    {
+        var ferryTransferProcess = await _simulationService.GetSimulationAsync(GlobalConstants.FerryTransferId);
+
+        Assert.Equal("Simple transfer model to of the Hamburg HADAG ferry system.", ferryTransferProcess.Description);
+        Assert.Equal("SOH - Ferry Transfer Model", ferryTransferProcess.Title);
+        Assert.Single(ferryTransferProcess.Outputs);
+        var singleOutput = ferryTransferProcess.Outputs.Values.First();
+        Assert.Equal("Point-based output of each agent and their values with different simulation times.",
+            singleOutput.Description);
+        Assert.Equal("Ferry transfer agents result", singleOutput.Title);
+
+        Assert.Contains(GlobalConstants.FerryTransfer, ferryTransferProcess.Id);
+        Assert.Equal(ProcessExecutionKind.Direct, ferryTransferProcess.ExecutionKind);
+        Assert.Contains("simulation", ferryTransferProcess.Keywords);
+
+        var createJobHandler = Services.GetRequiredService
+            <IRequestHandler<CreateSimulationJobRequest, SimulationJob>>();
+
+        string configContent = await File.ReadAllTextAsync("ferry_transfer_test_config.json");
+        var job = await createJobHandler.Handle(new CreateSimulationJobRequest
+        {
+            SimulationId = ferryTransferProcess.Id, Execute = new Execute
+            {
+                Inputs = new Dictionary<string, object>
+                {
+                    { "config", configContent }
+                }
+            }
+        }, CancellationToken.None);
+
+        Assert.Null(job.HangfireJobKey);
+        Assert.NotNull(job.StartedUtc);
+        Assert.NotNull(job.FinishedUtc);
+        Assert.NotNull(job.ResultId);
+
+        var result = await _resultService.FindAsync(job.ResultId);
+
+        Assert.NotNull(result);
+        Assert.NotNull(result.FeatureCollection);
+        Assert.Empty(result.FeatureCollection);
+        var loadedJob = await _simulationService.GetSimulationJobAsync(job.JobId);
+        Assert.Null(loadedJob.HangfireJobKey);
+        Assert.Equal(job.ResultId, loadedJob.ResultId);
+        Assert.Equal(100, loadedJob.Progress);
+        Assert.Equal(StatusCode.Successful, loadedJob.Status);
+    }
+
+    [Fact]
+    public async Task TestRunFerrySimulationSyncWithAgents()
+    {
+        var ferryTransferProcess = await _simulationService.GetSimulationAsync(GlobalConstants.FerryTransferId);
+
+        Assert.Equal("Simple transfer model to of the Hamburg HADAG ferry system.", ferryTransferProcess.Description);
+        Assert.Equal("SOH - Ferry Transfer Model", ferryTransferProcess.Title);
+        Assert.Single(ferryTransferProcess.Outputs);
+        var singleOutput = ferryTransferProcess.Outputs.Values.First();
+        Assert.Equal("Point-based output of each agent and their values with different simulation times.",
+            singleOutput.Description);
+        Assert.Equal("Ferry transfer agents result", singleOutput.Title);
+
+        Assert.Contains(GlobalConstants.FerryTransfer, ferryTransferProcess.Id);
+        Assert.Equal(ProcessExecutionKind.Direct, ferryTransferProcess.ExecutionKind);
+        Assert.Contains("simulation", ferryTransferProcess.Keywords);
+
+        var createJobHandler = Services.GetRequiredService
+            <IRequestHandler<CreateSimulationJobRequest, SimulationJob>>();
+
+        string configContent = await File.ReadAllTextAsync("ferry_transfer_test_config_2.json");
+        var job = await createJobHandler.Handle(new CreateSimulationJobRequest
+        {
+            SimulationId = ferryTransferProcess.Id, Execute = new Execute
+            {
+                Inputs = new Dictionary<string, object>
+                {
+                    { "config", configContent }
+                }
+            }
+        }, CancellationToken.None);
+
+        Assert.Null(job.HangfireJobKey);
+        Assert.NotNull(job.StartedUtc);
+        Assert.NotNull(job.FinishedUtc);
+        Assert.NotNull(job.ResultId);
+
+        var result = await _resultService.FindAsync(job.ResultId);
+
+        Assert.NotNull(result);
+        Assert.NotNull(result.FeatureCollection);
+        // Assert.NotEmpty(result.FeatureCollection);
+        // Assert.Contains(result.FeatureCollection, feature =>
+        //     feature.Attributes["ActiveCapability"].ToString() == "Walking");
+        var loadedJob = await _simulationService.GetSimulationJobAsync(job.JobId);
+        Assert.Null(loadedJob.HangfireJobKey);
+        Assert.Equal(job.ResultId, loadedJob.ResultId);
+        Assert.Equal(100, loadedJob.Progress);
+        Assert.Equal(StatusCode.Successful, loadedJob.Status);
+    }
+
+    [Fact]
+    public async Task TestFailedJsonSimulation()
+    {
+        var ferryTransferProcess = await _simulationService.GetSimulationAsync(GlobalConstants.FerryTransferId);
+        var createJobHandler = Services.GetRequiredService
+            <IRequestHandler<CreateSimulationJobRequest, SimulationJob>>();
+
+        await Assert.ThrowsAsync<BadRequestException>(() => createJobHandler.Handle(new CreateSimulationJobRequest
+            {
+                SimulationId = ferryTransferProcess.Id, Execute = new Execute
+                {
+                    Inputs = new Dictionary<string, object>
+                    {
+                        { "config", "invalid json" }
+                    }
+                }
+            }, CancellationToken.None));
+    }
+
+    [Fact]
+    public async Task TestFailedSimulation()
+    {
+        var create = new CreateSimulationProcessRequest
+        {
+            Title = "TestFailedSimulationAsync",
+            Version = "1.0.0",
+            Description = "my failed sim",
+            JobControlOptions = [JobControlOptions.SynchronousExecution]
+        };
+
+        string simulationId = await _simulationService.CreateAsync(create);
+        Assert.NotNull(simulationId);
+
+        var createJobHandler = Services.GetRequiredService
+            <IRequestHandler<CreateSimulationJobRequest, SimulationJob>>();
+
+        var job = await createJobHandler.Handle(new CreateSimulationJobRequest
+        {
+            SimulationId = simulationId, Execute = new Execute
+            {
+                Inputs = new Dictionary<string, object>
+                {
+                    {
+                        "func", new Action(() =>
+                            throw new InvalidOperationException("any error during sim run"))
+                    }
+                }
+            }
+        }, CancellationToken.None);
+        Assert.Equal(StatusCode.Failed, job.Status);
+        Assert.Null(job.ResultId);
+        Assert.NotNull(job.FinishedUtc);
+    }
+
+    [Fact]
     public async Task TestRunSimulationAsync()
     {
         var create = new CreateSimulationProcessRequest
@@ -215,7 +367,7 @@ public class SimulationManagementTests : AbstractManagementTests
 
         var found = await _simulationService.FindSimulationAsync(simulationId);
         Assert.NotNull(found);
-        await _simulationService.DeleteSimulationAsync(simulationId);
+        await _simulationService.DeleteAsync(simulationId);
         var notFound = await _simulationService.FindSimulationAsync(simulationId);
         Assert.Null(notFound);
         await Assert.ThrowsAsync<NotFoundException>(() =>

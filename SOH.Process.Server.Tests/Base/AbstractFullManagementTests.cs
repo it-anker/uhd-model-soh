@@ -2,7 +2,7 @@ using Microsoft.Extensions.DependencyInjection;
 
 namespace SOH.Process.Server.Tests.Base;
 
-[CollectionDefinition("Full collection")]
+[Collection("Full collection")]
 public abstract class AbstractFullManagementTests
 {
     protected AbstractFullManagementTests(OgcFullIntegration services)

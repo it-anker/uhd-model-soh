@@ -5,6 +5,7 @@
         <Nullable>enable</Nullable>
         <ImplicitUsings>enable</ImplicitUsings>
         <DockerDefaultTargetOS>Linux</DockerDefaultTargetOS>
+        <SatelliteResourceLanguages>en</SatelliteResourceLanguages>
     </PropertyGroup>
 
     <ItemGroup>
@@ -13,7 +14,6 @@
         <PackageReference Include="Hangfire.MemoryStorage" Version="1.8.1.1" />
         <PackageReference Include="Hangfire.Redis.StackExchange" Version="1.9.4" />
         <PackageReference Include="Mapster.DependencyInjection" Version="1.0.1" />
-        <PackageReference Include="Mars.Life.Simulations" Version="5.1.1" />
         <PackageReference Include="MediatR" Version="12.4.1" />
         <PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="9.0.0" />
         <PackageReference Include="Microsoft.IdentityModel.Logging" Version="8.2.1" />
@@ -63,7 +63,7 @@
     </ItemGroup>
 
     <ItemGroup>
-      <ProjectReference Include="..\SOH.Model\SOH.Model.csproj" />
+      <ProjectReference Include="..\SOHFerryTransferBox\SOHFerryTransferBox.csproj" />
     </ItemGroup>
 
 </Project>

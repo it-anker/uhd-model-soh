@@ -11,11 +11,12 @@ public class SimulationJob : StatusInfo
     [DataMember(Name = "resultId")]
     public string? ResultId { get; set; }
 
+    [DataMember(Name = "cancelRequested")]
+    public bool IsCancellationRequested { get; set; }
+
     public void Update(SimulationJob job)
     {
         ResultId = job.ResultId;
-        HangfireJobKey = job.HangfireJobKey;
-
         Message = job.Message?.Trim();
         UpdatedUtc = DateTime.UtcNow;
         StartedUtc = job.StartedUtc;

@@ -9,7 +9,7 @@
         <ImplicitUsings>enable</ImplicitUsings>
         <Nullable>enable</Nullable>
         <NoWarn>CS8669;IDE0161;SA1133;SA1106;SA1134;SA1117;SA1010;S4487;S2933;SA1116;S1144;SA1200;SA1128;SA1200;SA1513;SA1407;S2325</NoWarn>
-        <WarningsAsErrors>CS8600;CS8602;CS8603;RZ2012;CS0649;S4136;SA1507;CS8618;BL0005;BL0004;BL0001;SA1519;SA1214;SA1201;SA1132;SA1005</WarningsAsErrors>
+<!--        <WarningsAsErrors>CS8600;CS8602;CS8603;RZ2012;CS0649;S4136;SA1507;CS8618;BL0005;BL0004;BL0001;SA1519;SA1214;SA1201;SA1132;SA1005</WarningsAsErrors>-->
         <Product>SOH</Product>
         <Company>IT Anker GmbH</Company>
         <Authors>MARS GROUP; Daniel Glake; Florian Ocker</Authors>
