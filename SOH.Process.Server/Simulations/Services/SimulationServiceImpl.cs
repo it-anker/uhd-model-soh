@@ -13,31 +13,31 @@ public class SimulationServiceImpl(
     IStringLocalizer<SharedResource> localizer) : ISimulationService
 {
     public async Task<string> CreateAsync(
-        CreateSimulationProcessRequest request,
+        CreateSimulationProcessDescriptionRequest descriptionRequest,
         CancellationToken token = default)
     {
-        return await CreateAsync($"simulation:{Guid.NewGuid()}", request, token);
+        return await CreateAsync($"simulation:{Guid.NewGuid()}", descriptionRequest, token);
     }
 
-    public async Task<string> CreateAsync(string id, CreateSimulationProcessRequest request, CancellationToken token = default)
+    public async Task<string> CreateAsync(string id, CreateSimulationProcessDescriptionRequest descriptionRequest, CancellationToken token = default)
     {
-        var simulation = new SimulationProcess
+        var simulation = new SimulationProcessDescription
         {
             Id = id
         };
 
-        simulation.Update(request);
+        simulation.Update(descriptionRequest);
         await simulationRepository.UpsertAsync(simulation.Id, simulation, token);
         return simulation.Id;
     }
 
     public async Task<string> CreateAsync(SimulationJob request, CancellationToken token = default)
     {
-        ArgumentNullException.ThrowIfNull(request.SimulationId);
+        ArgumentNullException.ThrowIfNull(request.ProcessId);
 
         var simulationJob = request.Adapt<SimulationJob>();
-        simulationJob.JobId = $"job:{request.SimulationId}:{request}:{Guid.NewGuid()}";
-        simulationJob.SimulationId = request.SimulationId;
+        simulationJob.JobId = $"job:{request.ProcessId}:{request}:{Guid.NewGuid()}";
+        simulationJob.ProcessId = request.ProcessId;
         request.Message ??= localizer["simulation created"];
         simulationJob.Update(request);
 
@@ -46,18 +46,18 @@ public class SimulationServiceImpl(
     }
 
     public async Task UpdateAsync(string simulationId,
-        UpdateSimulationProcessRequest request, CancellationToken token = default)
+        UpdateSimulationProcessDescriptionRequest descriptionRequest, CancellationToken token = default)
     {
         ArgumentNullException.ThrowIfNull(simulationId);
         var simulation = await GetSimulationAsync(simulationId, token);
-        simulation.Update(request);
+        simulation.Update(descriptionRequest);
         simulation.UpdatedUtc = DateTime.UtcNow;
         await simulationRepository.UpsertAsync(simulationId, simulation, token);
     }
 
     public async Task UpdateAsync(string jobId, SimulationJob request, CancellationToken token = default)
     {
-        ArgumentNullException.ThrowIfNull(request.SimulationId);
+        ArgumentNullException.ThrowIfNull(request.ProcessId);
         var simulationJob = await GetSimulationJobAsync(jobId, token);
         simulationJob.Update(request);
         await simulationRepository.UpsertAsync(jobId, simulationJob, token);
@@ -85,13 +85,13 @@ public class SimulationServiceImpl(
 
     public async Task DeleteAsync(string id, CancellationToken token = default)
     {
-        await simulationRepository.DeleteAsync<SimulationProcess>(id, token);
+        await simulationRepository.DeleteAsync<SimulationProcessDescription>(id, token);
         await simulationRepository.DeleteAsync<SimulationJob>(id, token);
     }
 
-    public async Task<SimulationProcess> GetSimulationAsync(string simulationId, CancellationToken token = default)
+    public async Task<SimulationProcessDescription> GetSimulationAsync(string simulationId, CancellationToken token = default)
     {
-        return await simulationRepository.FindAsync<SimulationProcess>(simulationId, token) ??
+        return await simulationRepository.FindAsync<SimulationProcessDescription>(simulationId, token) ??
                throw new NotFoundException(localizer[$"simulation with id {simulationId} could not be found"]);
     }
 
@@ -101,9 +101,9 @@ public class SimulationServiceImpl(
                throw new NotFoundException(localizer[$"job with id {jobId} could not be found"]);
     }
 
-    public async Task<SimulationProcess?> FindSimulationAsync(string simulationId, CancellationToken token = default)
+    public async Task<SimulationProcessDescription?> FindSimulationAsync(string simulationId, CancellationToken token = default)
     {
-        return await simulationRepository.FindAsync<SimulationProcess>(simulationId, token);
+        return await simulationRepository.FindAsync<SimulationProcessDescription>(simulationId, token);
     }
 
     public async Task<SimulationJob?> FindJobAsync(string jobId, CancellationToken token = default)
@@ -126,7 +126,7 @@ public class SimulationServiceImpl(
     public async Task<ProcessList> ListProcessesAsync(ParameterLimit simulation, CancellationToken token = default)
     {
         var processes = await simulationRepository
-            .ListPaginatedAsync<SimulationProcess>("simulation*", simulation, token);
+            .ListPaginatedAsync<SimulationProcessDescription>("simulation*", simulation, token);
 
         return new ProcessList
         {
@@ -134,15 +134,15 @@ public class SimulationServiceImpl(
         };
     }
 
-    public Task<ParameterLimitResponse<SimulationProcess>> ListProcessesPaginatedAsync(ParameterLimit simulation, CancellationToken token = default)
+    public Task<ParameterLimitResponse<SimulationProcessDescription>> ListProcessesPaginatedAsync(ParameterLimit simulation, CancellationToken token = default)
     {
         return simulationRepository
-            .ListPaginatedAsync<SimulationProcess>("simulation", simulation, token);
+            .ListPaginatedAsync<SimulationProcessDescription>("simulation", simulation, token);
     }
 
-    public Task<ParameterLimitResponse<SimulationProcess>> ListProcessesPaginatedAsync(
+    public Task<ParameterLimitResponse<SimulationProcessDescription>> ListProcessesPaginatedAsync(
         string query, ParameterLimit simulation, CancellationToken token = default)
     {
-        return simulationRepository.ListPaginatedAsync<SimulationProcess>(query, simulation, token);
+        return simulationRepository.ListPaginatedAsync<SimulationProcessDescription>(query, simulation, token);
     }
 }

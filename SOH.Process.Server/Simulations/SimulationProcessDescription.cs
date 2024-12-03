@@ -1,10 +1,12 @@
 using System.Runtime.Serialization;
 using MediatR;
+using Newtonsoft.Json;
+using Newtonsoft.Json.Converters;
 using SOH.Process.Server.Models.Ogc;
 
 namespace SOH.Process.Server.Simulations;
 
-public class SimulationProcess : Models.Processes.Process
+public class SimulationProcessDescription : Models.Processes.ProcessDescription
 {
     /// <summary>
     ///     The reference name to concrete point on the entrypoint or name.
@@ -24,7 +26,7 @@ public class SimulationProcess : Models.Processes.Process
     [DataMember(Name = "updated")]
     public DateTime UpdatedUtc { get; set; } = DateTime.UtcNow;
 
-    public void Update(SimulationProcess request)
+    public void Update(SimulationProcessDescription request)
     {
         ArgumentException.ThrowIfNullOrEmpty(request.Title);
         ArgumentException.ThrowIfNullOrEmpty(request.Version);
@@ -34,23 +36,24 @@ public class SimulationProcess : Models.Processes.Process
         Keywords = request.Keywords.Select(s => s.Trim())
             .Where(s => !string.IsNullOrEmpty(s)).Distinct().ToList();
         Description = request.Description?.Trim();
-        OutputTransmission = request.OutputTransmission;
         Inputs = request.Inputs;
         Outputs = request.Outputs;
         Metadata = request.Metadata;
         AdditionalParameters = request.AdditionalParameters;
-        JobControlOptions = request.JobControlOptions;
+        JobControlOptions = request.JobControlOptions.Distinct().ToList();
+        OutputTransmission = request.OutputTransmission.Distinct().ToList();
     }
 }
 
+[JsonConverter(typeof(StringEnumConverter))]
 public enum ProcessExecutionKind
 {
     [EnumMember(Value = "direct")] Direct
 }
 
-public class UpdateSimulationProcessRequest : SimulationProcess, IRequest<SimulationProcess>;
+public class UpdateSimulationProcessDescriptionRequest : SimulationProcessDescription, IRequest<SimulationProcessDescription>;
 
-public class CreateSimulationProcessRequest : SimulationProcess, IRequest<SimulationProcess>;
+public class CreateSimulationProcessDescriptionRequest : SimulationProcessDescription, IRequest<SimulationProcessDescription>;
 
 public class CreateSimulationJobRequest : IRequest<SimulationJob>
 {

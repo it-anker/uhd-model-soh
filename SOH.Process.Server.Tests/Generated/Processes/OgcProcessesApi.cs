@@ -6,8 +6,10 @@
 
 #nullable enable
 
-using System.Net;
 using FluentValidation.Results;
+using NetTopologySuite.Features;
+using System.Net;
+using Microsoft.AspNetCore.Mvc;
 using SOH.Process.Server.Models.Common;
 using SOH.Process.Server.Models.Common.Exceptions;
 using SOH.Process.Server.Models.Ogc;
@@ -124,7 +126,7 @@ namespace SOH.Process.Server.Generated
                     request_.Headers.Accept.Add(System.Net.Http.Headers.MediaTypeWithQualityHeaderValue.Parse("application/json"));
 
                     var urlBuilder_ = new System.Text.StringBuilder();
-
+                
                     // Operation Path: ""
 
                     PrepareRequest(client_, request_, urlBuilder_);
@@ -162,12 +164,12 @@ namespace SOH.Process.Server.Generated
                         else
                         if (status_ == 500)
                         {
-                            var objectResponse_ = await ReadObjectResponseAsync<ExceptionResult>(response_, headers_, cancellationToken).ConfigureAwait(false);
+                            var objectResponse_ = await ReadObjectResponseAsync<ProblemDetails>(response_, headers_, cancellationToken).ConfigureAwait(false);
                             if (objectResponse_.Object == null)
                             {
                                 throw new ApiException("Response was null which was not expected.", status_, objectResponse_.Text, headers_, null);
                             }
-                            throw new ApiException<ExceptionResult>("A server error occurred.", status_, objectResponse_.Text, headers_, objectResponse_.Object, null);
+                            throw new ApiException<ProblemDetails>("A server error occurred.", status_, objectResponse_.Text, headers_, objectResponse_.Object, null);
                         }
                         else
                         {
@@ -261,7 +263,7 @@ namespace SOH.Process.Server.Generated
                     var field = System.Reflection.IntrospectionExtensions.GetTypeInfo(value.GetType()).GetDeclaredField(name);
                     if (field != null)
                     {
-                        var attribute = System.Reflection.CustomAttributeExtensions.GetCustomAttribute(field, typeof(System.Runtime.Serialization.EnumMemberAttribute))
+                        var attribute = System.Reflection.CustomAttributeExtensions.GetCustomAttribute(field, typeof(System.Runtime.Serialization.EnumMemberAttribute)) 
                             as System.Runtime.Serialization.EnumMemberAttribute;
                         if (attribute != null)
                         {
@@ -273,7 +275,7 @@ namespace SOH.Process.Server.Generated
                     return converted == null ? string.Empty : converted;
                 }
             }
-            else if (value is bool)
+            else if (value is bool) 
             {
                 return System.Convert.ToString((bool)value, cultureInfo).ToLowerInvariant();
             }
@@ -423,7 +425,7 @@ namespace SOH.Process.Server.Generated
                     request_.Headers.Accept.Add(System.Net.Http.Headers.MediaTypeWithQualityHeaderValue.Parse("application/json"));
 
                     var urlBuilder_ = new System.Text.StringBuilder();
-
+                
                     // Operation Path: "conformance"
                     urlBuilder_.Append("conformance");
 
@@ -462,12 +464,12 @@ namespace SOH.Process.Server.Generated
                         else
                         if (status_ == 500)
                         {
-                            var objectResponse_ = await ReadObjectResponseAsync<ExceptionResult>(response_, headers_, cancellationToken).ConfigureAwait(false);
+                            var objectResponse_ = await ReadObjectResponseAsync<ProblemDetails>(response_, headers_, cancellationToken).ConfigureAwait(false);
                             if (objectResponse_.Object == null)
                             {
                                 throw new ApiException("Response was null which was not expected.", status_, objectResponse_.Text, headers_, null);
                             }
-                            throw new ApiException<ExceptionResult>("A server error occurred.", status_, objectResponse_.Text, headers_, objectResponse_.Object, null);
+                            throw new ApiException<ProblemDetails>("A server error occurred.", status_, objectResponse_.Text, headers_, objectResponse_.Object, null);
                         }
                         else
                         {
@@ -561,7 +563,7 @@ namespace SOH.Process.Server.Generated
                     var field = System.Reflection.IntrospectionExtensions.GetTypeInfo(value.GetType()).GetDeclaredField(name);
                     if (field != null)
                     {
-                        var attribute = System.Reflection.CustomAttributeExtensions.GetCustomAttribute(field, typeof(System.Runtime.Serialization.EnumMemberAttribute))
+                        var attribute = System.Reflection.CustomAttributeExtensions.GetCustomAttribute(field, typeof(System.Runtime.Serialization.EnumMemberAttribute)) 
                             as System.Runtime.Serialization.EnumMemberAttribute;
                         if (attribute != null)
                         {
@@ -573,7 +575,7 @@ namespace SOH.Process.Server.Generated
                     return converted == null ? string.Empty : converted;
                 }
             }
-            else if (value is bool)
+            else if (value is bool) 
             {
                 return System.Convert.ToString((bool)value, cultureInfo).ToLowerInvariant();
             }
@@ -766,7 +768,7 @@ namespace SOH.Process.Server.Generated
                     request_.Headers.Accept.Add(System.Net.Http.Headers.MediaTypeWithQualityHeaderValue.Parse("application/json"));
 
                     var urlBuilder_ = new System.Text.StringBuilder();
-
+                
                     // Operation Path: "jobs"
                     urlBuilder_.Append("jobs");
 
@@ -805,12 +807,12 @@ namespace SOH.Process.Server.Generated
                         else
                         if (status_ == 404)
                         {
-                            var objectResponse_ = await ReadObjectResponseAsync<ExceptionResult>(response_, headers_, cancellationToken).ConfigureAwait(false);
+                            var objectResponse_ = await ReadObjectResponseAsync<ProblemDetails>(response_, headers_, cancellationToken).ConfigureAwait(false);
                             if (objectResponse_.Object == null)
                             {
                                 throw new ApiException("Response was null which was not expected.", status_, objectResponse_.Text, headers_, null);
                             }
-                            throw new ApiException<ExceptionResult>("The requested URI was not found.", status_, objectResponse_.Text, headers_, objectResponse_.Object, null);
+                            throw new ApiException<ProblemDetails>("The requested URI was not found.", status_, objectResponse_.Text, headers_, objectResponse_.Object, null);
                         }
                         else
                         {
@@ -873,7 +875,7 @@ namespace SOH.Process.Server.Generated
                     request_.Headers.Accept.Add(System.Net.Http.Headers.MediaTypeWithQualityHeaderValue.Parse("application/json"));
 
                     var urlBuilder_ = new System.Text.StringBuilder();
-
+                
                     // Operation Path: "jobs/{jobId}"
                     urlBuilder_.Append("jobs/");
                     urlBuilder_.Append(System.Uri.EscapeDataString(ConvertToString(jobId, System.Globalization.CultureInfo.InvariantCulture)));
@@ -913,22 +915,22 @@ namespace SOH.Process.Server.Generated
                         else
                         if (status_ == 404)
                         {
-                            var objectResponse_ = await ReadObjectResponseAsync<ExceptionResult>(response_, headers_, cancellationToken).ConfigureAwait(false);
+                            var objectResponse_ = await ReadObjectResponseAsync<ProblemDetails>(response_, headers_, cancellationToken).ConfigureAwait(false);
                             if (objectResponse_.Object == null)
                             {
                                 throw new ApiException("Response was null which was not expected.", status_, objectResponse_.Text, headers_, null);
                             }
-                            throw new ApiException<ExceptionResult>("The requested URI was not found.", status_, objectResponse_.Text, headers_, objectResponse_.Object, null);
+                            throw new ApiException<ProblemDetails>("The requested URI was not found.", status_, objectResponse_.Text, headers_, objectResponse_.Object, null);
                         }
                         else
                         if (status_ == 500)
                         {
-                            var objectResponse_ = await ReadObjectResponseAsync<ExceptionResult>(response_, headers_, cancellationToken).ConfigureAwait(false);
+                            var objectResponse_ = await ReadObjectResponseAsync<ProblemDetails>(response_, headers_, cancellationToken).ConfigureAwait(false);
                             if (objectResponse_.Object == null)
                             {
                                 throw new ApiException("Response was null which was not expected.", status_, objectResponse_.Text, headers_, null);
                             }
-                            throw new ApiException<ExceptionResult>("A server error occurred.", status_, objectResponse_.Text, headers_, objectResponse_.Object, null);
+                            throw new ApiException<ProblemDetails>("A server error occurred.", status_, objectResponse_.Text, headers_, objectResponse_.Object, null);
                         }
                         else
                         {
@@ -991,7 +993,7 @@ namespace SOH.Process.Server.Generated
                     request_.Headers.Accept.Add(System.Net.Http.Headers.MediaTypeWithQualityHeaderValue.Parse("application/json"));
 
                     var urlBuilder_ = new System.Text.StringBuilder();
-
+                
                     // Operation Path: "jobs/{jobId}"
                     urlBuilder_.Append("jobs/");
                     urlBuilder_.Append(System.Uri.EscapeDataString(ConvertToString(jobId, System.Globalization.CultureInfo.InvariantCulture)));
@@ -1031,22 +1033,22 @@ namespace SOH.Process.Server.Generated
                         else
                         if (status_ == 404)
                         {
-                            var objectResponse_ = await ReadObjectResponseAsync<ExceptionResult>(response_, headers_, cancellationToken).ConfigureAwait(false);
+                            var objectResponse_ = await ReadObjectResponseAsync<ProblemDetails>(response_, headers_, cancellationToken).ConfigureAwait(false);
                             if (objectResponse_.Object == null)
                             {
                                 throw new ApiException("Response was null which was not expected.", status_, objectResponse_.Text, headers_, null);
                             }
-                            throw new ApiException<ExceptionResult>("The requested URI was not found.", status_, objectResponse_.Text, headers_, objectResponse_.Object, null);
+                            throw new ApiException<ProblemDetails>("The requested URI was not found.", status_, objectResponse_.Text, headers_, objectResponse_.Object, null);
                         }
                         else
                         if (status_ == 500)
                         {
-                            var objectResponse_ = await ReadObjectResponseAsync<ExceptionResult>(response_, headers_, cancellationToken).ConfigureAwait(false);
+                            var objectResponse_ = await ReadObjectResponseAsync<ProblemDetails>(response_, headers_, cancellationToken).ConfigureAwait(false);
                             if (objectResponse_.Object == null)
                             {
                                 throw new ApiException("Response was null which was not expected.", status_, objectResponse_.Text, headers_, null);
                             }
-                            throw new ApiException<ExceptionResult>("A server error occurred.", status_, objectResponse_.Text, headers_, objectResponse_.Object, null);
+                            throw new ApiException<ProblemDetails>("A server error occurred.", status_, objectResponse_.Text, headers_, objectResponse_.Object, null);
                         }
                         else
                         {
@@ -1109,7 +1111,7 @@ namespace SOH.Process.Server.Generated
                     request_.Headers.Accept.Add(System.Net.Http.Headers.MediaTypeWithQualityHeaderValue.Parse("application/json"));
 
                     var urlBuilder_ = new System.Text.StringBuilder();
-
+                
                     // Operation Path: "jobs/{jobId}/results"
                     urlBuilder_.Append("jobs/");
                     urlBuilder_.Append(System.Uri.EscapeDataString(ConvertToString(jobId, System.Globalization.CultureInfo.InvariantCulture)));
@@ -1150,22 +1152,22 @@ namespace SOH.Process.Server.Generated
                         else
                         if (status_ == 404)
                         {
-                            var objectResponse_ = await ReadObjectResponseAsync<ExceptionResult>(response_, headers_, cancellationToken).ConfigureAwait(false);
+                            var objectResponse_ = await ReadObjectResponseAsync<ProblemDetails>(response_, headers_, cancellationToken).ConfigureAwait(false);
                             if (objectResponse_.Object == null)
                             {
                                 throw new ApiException("Response was null which was not expected.", status_, objectResponse_.Text, headers_, null);
                             }
-                            throw new ApiException<ExceptionResult>("The requested URI was not found.", status_, objectResponse_.Text, headers_, objectResponse_.Object, null);
+                            throw new ApiException<ProblemDetails>("The requested URI was not found.", status_, objectResponse_.Text, headers_, objectResponse_.Object, null);
                         }
                         else
                         if (status_ == 500)
                         {
-                            var objectResponse_ = await ReadObjectResponseAsync<ExceptionResult>(response_, headers_, cancellationToken).ConfigureAwait(false);
+                            var objectResponse_ = await ReadObjectResponseAsync<ProblemDetails>(response_, headers_, cancellationToken).ConfigureAwait(false);
                             if (objectResponse_.Object == null)
                             {
                                 throw new ApiException("Response was null which was not expected.", status_, objectResponse_.Text, headers_, null);
                             }
-                            throw new ApiException<ExceptionResult>("A server error occurred.", status_, objectResponse_.Text, headers_, objectResponse_.Object, null);
+                            throw new ApiException<ProblemDetails>("A server error occurred.", status_, objectResponse_.Text, headers_, objectResponse_.Object, null);
                         }
                         else
                         {
@@ -1259,7 +1261,7 @@ namespace SOH.Process.Server.Generated
                     var field = System.Reflection.IntrospectionExtensions.GetTypeInfo(value.GetType()).GetDeclaredField(name);
                     if (field != null)
                     {
-                        var attribute = System.Reflection.CustomAttributeExtensions.GetCustomAttribute(field, typeof(System.Runtime.Serialization.EnumMemberAttribute))
+                        var attribute = System.Reflection.CustomAttributeExtensions.GetCustomAttribute(field, typeof(System.Runtime.Serialization.EnumMemberAttribute)) 
                             as System.Runtime.Serialization.EnumMemberAttribute;
                         if (attribute != null)
                         {
@@ -1271,7 +1273,7 @@ namespace SOH.Process.Server.Generated
                     return converted == null ? string.Empty : converted;
                 }
             }
-            else if (value is bool)
+            else if (value is bool) 
             {
                 return System.Convert.ToString((bool)value, cultureInfo).ToLowerInvariant();
             }
@@ -1339,7 +1341,7 @@ namespace SOH.Process.Server.Generated
         /// </remarks>
         /// <returns>A process description.</returns>
         /// <exception cref="ApiException">A server side error occurred.</exception>
-        System.Threading.Tasks.Task<Process> GetProcessDescriptionAsync(string processId);
+        System.Threading.Tasks.Task<ProcessDescription> GetProcessDescriptionAsync(string processId);
 
         /// <param name="cancellationToken">A cancellation token that can be used by other objects or threads to receive notice of cancellation.</param>
         /// <summary>
@@ -1354,7 +1356,7 @@ namespace SOH.Process.Server.Generated
         /// </remarks>
         /// <returns>A process description.</returns>
         /// <exception cref="ApiException">A server side error occurred.</exception>
-        System.Threading.Tasks.Task<Process> GetProcessDescriptionAsync(string processId, System.Threading.CancellationToken cancellationToken);
+        System.Threading.Tasks.Task<ProcessDescription> GetProcessDescriptionAsync(string processId, System.Threading.CancellationToken cancellationToken);
 
         /// <summary>
         /// execute a process.
@@ -1367,7 +1369,7 @@ namespace SOH.Process.Server.Generated
         /// <param name="request">Mandatory execute request JSON.</param>
         /// <returns>Result of synchronous execution</returns>
         /// <exception cref="ApiException">A server side error occurred.</exception>
-        System.Threading.Tasks.Task<IInlineResponse200> ExecuteAsync(string processId, Execute request);
+        System.Threading.Tasks.Task<Result> ExecuteAsync(string processId, Execute request);
 
         /// <param name="cancellationToken">A cancellation token that can be used by other objects or threads to receive notice of cancellation.</param>
         /// <summary>
@@ -1381,7 +1383,7 @@ namespace SOH.Process.Server.Generated
         /// <param name="request">Mandatory execute request JSON.</param>
         /// <returns>Result of synchronous execution</returns>
         /// <exception cref="ApiException">A server side error occurred.</exception>
-        System.Threading.Tasks.Task<IInlineResponse200> ExecuteAsync(string processId, Execute request, System.Threading.CancellationToken cancellationToken);
+        System.Threading.Tasks.Task<Result> ExecuteAsync(string processId, Execute request, System.Threading.CancellationToken cancellationToken);
 
     }
 
@@ -1449,7 +1451,7 @@ namespace SOH.Process.Server.Generated
                     request_.Headers.Accept.Add(System.Net.Http.Headers.MediaTypeWithQualityHeaderValue.Parse("application/json"));
 
                     var urlBuilder_ = new System.Text.StringBuilder();
-
+                
                     // Operation Path: "processes"
                     urlBuilder_.Append("processes");
             urlBuilder_.Append('?');
@@ -1523,7 +1525,7 @@ namespace SOH.Process.Server.Generated
         /// </remarks>
         /// <returns>A process description.</returns>
         /// <exception cref="ApiException">A server side error occurred.</exception>
-        public virtual System.Threading.Tasks.Task<Process> GetProcessDescriptionAsync(string processId)
+        public virtual System.Threading.Tasks.Task<ProcessDescription> GetProcessDescriptionAsync(string processId)
         {
             return GetProcessDescriptionAsync(processId, System.Threading.CancellationToken.None);
         }
@@ -1541,7 +1543,7 @@ namespace SOH.Process.Server.Generated
         /// </remarks>
         /// <returns>A process description.</returns>
         /// <exception cref="ApiException">A server side error occurred.</exception>
-        public virtual async System.Threading.Tasks.Task<Process> GetProcessDescriptionAsync(string processId, System.Threading.CancellationToken cancellationToken)
+        public virtual async System.Threading.Tasks.Task<ProcessDescription> GetProcessDescriptionAsync(string processId, System.Threading.CancellationToken cancellationToken)
         {
             if (processId == null)
                 throw new System.ArgumentNullException("processId");
@@ -1556,7 +1558,7 @@ namespace SOH.Process.Server.Generated
                     request_.Headers.Accept.Add(System.Net.Http.Headers.MediaTypeWithQualityHeaderValue.Parse("application/json"));
 
                     var urlBuilder_ = new System.Text.StringBuilder();
-
+                
                     // Operation Path: "processes/{processId}"
                     urlBuilder_.Append("processes/");
                     urlBuilder_.Append(System.Uri.EscapeDataString(ConvertToString(processId, System.Globalization.CultureInfo.InvariantCulture)));
@@ -1586,7 +1588,7 @@ namespace SOH.Process.Server.Generated
                         var status_ = (int)response_.StatusCode;
                         if (status_ == 200)
                         {
-                            var objectResponse_ = await ReadObjectResponseAsync<Process>(response_, headers_, cancellationToken).ConfigureAwait(false);
+                            var objectResponse_ = await ReadObjectResponseAsync<ProcessDescription>(response_, headers_, cancellationToken).ConfigureAwait(false);
                             if (objectResponse_.Object == null)
                             {
                                 throw new ApiException("Response was null which was not expected.", status_, objectResponse_.Text, headers_, null);
@@ -1596,12 +1598,12 @@ namespace SOH.Process.Server.Generated
                         else
                         if (status_ == 404)
                         {
-                            var objectResponse_ = await ReadObjectResponseAsync<ExceptionResult>(response_, headers_, cancellationToken).ConfigureAwait(false);
+                            var objectResponse_ = await ReadObjectResponseAsync<ProblemDetails>(response_, headers_, cancellationToken).ConfigureAwait(false);
                             if (objectResponse_.Object == null)
                             {
                                 throw new ApiException("Response was null which was not expected.", status_, objectResponse_.Text, headers_, null);
                             }
-                            throw new ApiException<ExceptionResult>("The requested URI was not found.", status_, objectResponse_.Text, headers_, objectResponse_.Object, null);
+                            throw new ApiException<ProblemDetails>("The requested URI was not found.", status_, objectResponse_.Text, headers_, objectResponse_.Object, null);
                         }
                         else
                         {
@@ -1634,7 +1636,7 @@ namespace SOH.Process.Server.Generated
         /// <param name="request">Mandatory execute request JSON.</param>
         /// <returns>Result of synchronous execution</returns>
         /// <exception cref="ApiException">A server side error occurred.</exception>
-        public virtual System.Threading.Tasks.Task<IInlineResponse200> ExecuteAsync(string processId, Execute request)
+        public virtual System.Threading.Tasks.Task<Result> ExecuteAsync(string processId, Execute request)
         {
             return ExecuteAsync(processId, request, System.Threading.CancellationToken.None);
         }
@@ -1651,7 +1653,7 @@ namespace SOH.Process.Server.Generated
         /// <param name="request">Mandatory execute request JSON.</param>
         /// <returns>Result of synchronous execution</returns>
         /// <exception cref="ApiException">A server side error occurred.</exception>
-        public virtual async System.Threading.Tasks.Task<IInlineResponse200> ExecuteAsync(string processId, Execute request, System.Threading.CancellationToken cancellationToken)
+        public virtual async System.Threading.Tasks.Task<Result> ExecuteAsync(string processId, Execute request, System.Threading.CancellationToken cancellationToken)
         {
             if (processId == null)
                 throw new System.ArgumentNullException("processId");
@@ -1673,7 +1675,7 @@ namespace SOH.Process.Server.Generated
                     request_.Headers.Accept.Add(System.Net.Http.Headers.MediaTypeWithQualityHeaderValue.Parse("application/json"));
 
                     var urlBuilder_ = new System.Text.StringBuilder();
-
+                
                     // Operation Path: "processes/{processId}/execution"
                     urlBuilder_.Append("processes/");
                     urlBuilder_.Append(System.Uri.EscapeDataString(ConvertToString(processId, System.Globalization.CultureInfo.InvariantCulture)));
@@ -1704,7 +1706,7 @@ namespace SOH.Process.Server.Generated
                         var status_ = (int)response_.StatusCode;
                         if (status_ == 200)
                         {
-                            var objectResponse_ = await ReadObjectResponseAsync<IInlineResponse200>(response_, headers_, cancellationToken).ConfigureAwait(false);
+                            var objectResponse_ = await ReadObjectResponseAsync<Result>(response_, headers_, cancellationToken).ConfigureAwait(false);
                             if (objectResponse_.Object == null)
                             {
                                 throw new ApiException("Response was null which was not expected.", status_, objectResponse_.Text, headers_, null);
@@ -1724,22 +1726,22 @@ namespace SOH.Process.Server.Generated
                         else
                         if (status_ == 404)
                         {
-                            var objectResponse_ = await ReadObjectResponseAsync<ExceptionResult>(response_, headers_, cancellationToken).ConfigureAwait(false);
+                            var objectResponse_ = await ReadObjectResponseAsync<ProblemDetails>(response_, headers_, cancellationToken).ConfigureAwait(false);
                             if (objectResponse_.Object == null)
                             {
                                 throw new ApiException("Response was null which was not expected.", status_, objectResponse_.Text, headers_, null);
                             }
-                            throw new ApiException<ExceptionResult>("The requested URI was not found.", status_, objectResponse_.Text, headers_, objectResponse_.Object, null);
+                            throw new ApiException<ProblemDetails>("The requested URI was not found.", status_, objectResponse_.Text, headers_, objectResponse_.Object, null);
                         }
                         else
                         if (status_ == 500)
                         {
-                            var objectResponse_ = await ReadObjectResponseAsync<ExceptionResult>(response_, headers_, cancellationToken).ConfigureAwait(false);
+                            var objectResponse_ = await ReadObjectResponseAsync<ProblemDetails>(response_, headers_, cancellationToken).ConfigureAwait(false);
                             if (objectResponse_.Object == null)
                             {
                                 throw new ApiException("Response was null which was not expected.", status_, objectResponse_.Text, headers_, null);
                             }
-                            throw new ApiException<ExceptionResult>("A server error occurred.", status_, objectResponse_.Text, headers_, objectResponse_.Object, null);
+                            throw new ApiException<ProblemDetails>("A server error occurred.", status_, objectResponse_.Text, headers_, objectResponse_.Object, null);
                         }
                         else
                         {
@@ -1833,7 +1835,7 @@ namespace SOH.Process.Server.Generated
                     var field = System.Reflection.IntrospectionExtensions.GetTypeInfo(value.GetType()).GetDeclaredField(name);
                     if (field != null)
                     {
-                        var attribute = System.Reflection.CustomAttributeExtensions.GetCustomAttribute(field, typeof(System.Runtime.Serialization.EnumMemberAttribute))
+                        var attribute = System.Reflection.CustomAttributeExtensions.GetCustomAttribute(field, typeof(System.Runtime.Serialization.EnumMemberAttribute)) 
                             as System.Runtime.Serialization.EnumMemberAttribute;
                         if (attribute != null)
                         {
@@ -1845,7 +1847,7 @@ namespace SOH.Process.Server.Generated
                     return converted == null ? string.Empty : converted;
                 }
             }
-            else if (value is bool)
+            else if (value is bool) 
             {
                 return System.Convert.ToString((bool)value, cultureInfo).ToLowerInvariant();
             }
@@ -1878,21 +1880,21 @@ namespace SOH.Process.Server.Generated
     {
         /// <summary>
         /// Gets or Sets Title.
-        /// <br/>
+        /// <br/>            
         /// </summary>
         [Newtonsoft.Json.JsonProperty("title", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
         public string? Title { get; set; } = default!;
 
         /// <summary>
         /// Gets or Sets Description.
-        /// <br/>
+        /// <br/>            
         /// </summary>
         [Newtonsoft.Json.JsonProperty("description", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
         public string? Description { get; set; } = default!;
 
         /// <summary>
         /// Gets or Sets Links.
-        /// <br/>
+        /// <br/>            
         /// </summary>
         [Newtonsoft.Json.JsonProperty("links", Required = Newtonsoft.Json.Required.Always)]
         [System.ComponentModel.DataAnnotations.Required]
@@ -1927,7 +1929,7 @@ namespace SOH.Process.Server.Generated
     {
         /// <summary>
         /// Gets or Sets Href.
-        /// <br/>
+        /// <br/>            
         /// </summary>
         [Newtonsoft.Json.JsonProperty("href", Required = Newtonsoft.Json.Required.Always)]
         [System.ComponentModel.DataAnnotations.Required]
@@ -1935,28 +1937,28 @@ namespace SOH.Process.Server.Generated
 
         /// <summary>
         /// Gets or Sets Rel.
-        /// <br/>
+        /// <br/>            
         /// </summary>
         [Newtonsoft.Json.JsonProperty("rel", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
         public string? Rel { get; set; } = default!;
 
         /// <summary>
         /// Gets or Sets Type.
-        /// <br/>
+        /// <br/>            
         /// </summary>
         [Newtonsoft.Json.JsonProperty("type", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
         public string? Type { get; set; } = default!;
 
         /// <summary>
         /// Gets or Sets Hreflang.
-        /// <br/>
+        /// <br/>            
         /// </summary>
         [Newtonsoft.Json.JsonProperty("hreflang", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
         public string? Hreflang { get; set; } = default!;
 
         /// <summary>
         /// Gets or Sets Title.
-        /// <br/>
+        /// <br/>            
         /// </summary>
         [Newtonsoft.Json.JsonProperty("title", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
         public string? Title { get; set; } = default!;
@@ -1985,67 +1987,12 @@ namespace SOH.Process.Server.Generated
 
     }
 
-    /// <summary>
-    /// JSON schema for exceptions based on RFC 7807.
-    /// <br/>
-    /// </summary>
-    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.0.0.0 (NJsonSchema v11.0.0.0 (Newtonsoft.Json v13.0.0.0))")]
-    public partial class ExceptionResult : System.Collections.Generic.Dictionary<string, object>
-    {
-        [Newtonsoft.Json.JsonProperty("ErrorId", Required = Newtonsoft.Json.Required.Always)]
-        [System.ComponentModel.DataAnnotations.Required]
-        public string ErrorId { get; set; } = default!;
-
-        [Newtonsoft.Json.JsonProperty("Source", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
-        public string? Source { get; set; } = default!;
-
-        [Newtonsoft.Json.JsonProperty("StatusCode", Required = Newtonsoft.Json.Required.Always)]
-        public HttpStatusCode StatusCode { get; set; } = default!;
-
-        [Newtonsoft.Json.JsonProperty("StackTrace", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
-        public string? StackTrace { get; set; } = default!;
-
-        [Newtonsoft.Json.JsonProperty("Exception", Required = Newtonsoft.Json.Required.Always)]
-        [System.ComponentModel.DataAnnotations.Required]
-        public string Exception { get; set; } = default!;
-
-        [Newtonsoft.Json.JsonProperty("Messages", Required = Newtonsoft.Json.Required.Always)]
-        [System.ComponentModel.DataAnnotations.Required]
-        public System.Collections.Generic.ICollection<string> Messages { get; set; } = new System.Collections.ObjectModel.Collection<string>();
-
-        [Newtonsoft.Json.JsonProperty("SupportMessage", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
-        public string? SupportMessage { get; set; } = default!;
-
-        private System.Collections.Generic.IDictionary<string, object>? _additionalProperties;
-
-        [Newtonsoft.Json.JsonExtensionData]
-        public System.Collections.Generic.IDictionary<string, object> AdditionalProperties
-        {
-            get { return _additionalProperties ?? (_additionalProperties = new System.Collections.Generic.Dictionary<string, object>()); }
-            set { _additionalProperties = value; }
-        }
-
-        public string ToJson()
-        {
-
-            return Newtonsoft.Json.JsonConvert.SerializeObject(this, CustomJsonSerializerSettings(new Newtonsoft.Json.JsonSerializerSettings {  }));
-
-        }
-        public static ExceptionResult FromJson(string data)
-        {
-
-            return Newtonsoft.Json.JsonConvert.DeserializeObject<ExceptionResult>(data, CustomJsonSerializerSettings(new Newtonsoft.Json.JsonSerializerSettings {  }));
-
-        }
-
-    }
-
     [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.0.0.0 (NJsonSchema v11.0.0.0 (Newtonsoft.Json v13.0.0.0))")]
     public partial class ConfClasses
     {
         /// <summary>
         /// Gets or Sets ConformsTo.
-        /// <br/>
+        /// <br/>            
         /// </summary>
         [Newtonsoft.Json.JsonProperty("conformsTo", Required = Newtonsoft.Json.Required.Always)]
         [System.ComponentModel.DataAnnotations.Required]
@@ -2080,7 +2027,7 @@ namespace SOH.Process.Server.Generated
     {
         /// <summary>
         /// Gets or Sets Jobs.
-        /// <br/>
+        /// <br/>            
         /// </summary>
         [Newtonsoft.Json.JsonProperty("jobs", Required = Newtonsoft.Json.Required.Always)]
         [System.ComponentModel.DataAnnotations.Required]
@@ -2088,7 +2035,7 @@ namespace SOH.Process.Server.Generated
 
         /// <summary>
         /// Gets or Sets Links.
-        /// <br/>
+        /// <br/>            
         /// </summary>
         [Newtonsoft.Json.JsonProperty("links", Required = Newtonsoft.Json.Required.Always)]
         [System.ComponentModel.DataAnnotations.Required]
@@ -2118,118 +2065,9 @@ namespace SOH.Process.Server.Generated
 
     }
 
-    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.0.0.0 (NJsonSchema v11.0.0.0 (Newtonsoft.Json v13.0.0.0))")]
-    public partial class StatusInfo
-    {
-        /// <summary>
-        /// Gets or Sets JobID.
-        /// <br/>
-        /// </summary>
-        [Newtonsoft.Json.JsonProperty("jobID", Required = Newtonsoft.Json.Required.Always)]
-        [System.ComponentModel.DataAnnotations.Required]
-        public string JobID { get; set; } = default!;
-
-        /// <summary>
-        /// Gets or Sets ProcessID.
-        /// <br/>
-        /// </summary>
-        [Newtonsoft.Json.JsonProperty("processID", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
-        public string? ProcessID { get; set; } = default!;
-
-        /// <summary>
-        /// Gets or Sets Type.
-        /// <br/>
-        /// </summary>
-        [Newtonsoft.Json.JsonProperty("type", Required = Newtonsoft.Json.Required.DisallowNull, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
-        [Newtonsoft.Json.JsonConverter(typeof(Newtonsoft.Json.Converters.StringEnumConverter))]
-        public ProcessingKind Type { get; set; } = default!;
-
-        /// <summary>
-        /// Gets or Sets Status.
-        /// <br/>
-        /// </summary>
-        [Newtonsoft.Json.JsonProperty("status", Required = Newtonsoft.Json.Required.Always)]
-        [System.ComponentModel.DataAnnotations.Required(AllowEmptyStrings = true)]
-        [Newtonsoft.Json.JsonConverter(typeof(Newtonsoft.Json.Converters.StringEnumConverter))]
-        public StatusCode Status { get; set; } = default!;
-
-        /// <summary>
-        /// Gets or Sets Message.
-        /// <br/>
-        /// </summary>
-        [Newtonsoft.Json.JsonProperty("message", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
-        public string? Message { get; set; } = default!;
-
-        /// <summary>
-        /// The time in UTC when this job was created.
-        /// <br/>
-        /// </summary>
-        [Newtonsoft.Json.JsonProperty("created", Required = Newtonsoft.Json.Required.DisallowNull, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
-        public System.DateTime Created { get; set; } = default!;
-
-        /// <summary>
-        /// The time in UTC when this job started the analysis.
-        /// <br/>
-        /// </summary>
-        [Newtonsoft.Json.JsonProperty("started", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
-        public System.DateTime? Started { get; set; } = default!;
-
-        /// <summary>
-        /// The time in UTC when this job finished the analysis.
-        /// <br/>
-        /// </summary>
-        [Newtonsoft.Json.JsonProperty("finished", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
-        public System.DateTime? Finished { get; set; } = default!;
-
-        /// <summary>
-        /// The last modification time in UTC of this job.
-        /// <br/>
-        /// </summary>
-        [Newtonsoft.Json.JsonProperty("updated", Required = Newtonsoft.Json.Required.DisallowNull, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
-        public System.DateTime Updated { get; set; } = default!;
-
-        /// <summary>
-        /// The actual progress in percentage (0-100).
-        /// <br/>
-        /// </summary>
-        [Newtonsoft.Json.JsonProperty("progress", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
-        [System.ComponentModel.DataAnnotations.Range(0, 100)]
-        public int? Progress { get; set; } = default!;
-
-        /// <summary>
-        /// Any additional links of this job.
-        /// <br/>
-        /// </summary>
-        [Newtonsoft.Json.JsonProperty("links", Required = Newtonsoft.Json.Required.DisallowNull, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
-        public System.Collections.Generic.ICollection<Link> Links { get; set; } = default!;
-
-        private System.Collections.Generic.IDictionary<string, object>? _additionalProperties;
-
-        [Newtonsoft.Json.JsonExtensionData]
-        public System.Collections.Generic.IDictionary<string, object> AdditionalProperties
-        {
-            get { return _additionalProperties ?? (_additionalProperties = new System.Collections.Generic.Dictionary<string, object>()); }
-            set { _additionalProperties = value; }
-        }
-
-        public string ToJson()
-        {
-
-            return Newtonsoft.Json.JsonConvert.SerializeObject(this, CustomJsonSerializerSettings(new Newtonsoft.Json.JsonSerializerSettings {  }));
-
-        }
-        public static StatusInfo FromJson(string data)
-        {
-
-            return Newtonsoft.Json.JsonConvert.DeserializeObject<StatusInfo>(data, CustomJsonSerializerSettings(new Newtonsoft.Json.JsonSerializerSettings {  }));
-
-        }
-
-    }
-
     /// <summary>
     /// Gets or Sets Type.
-    /// <br/>
+    /// <br/>            
     /// </summary>
     [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.0.0.0 (NJsonSchema v11.0.0.0 (Newtonsoft.Json v13.0.0.0))")]
     public enum ProcessingKind
@@ -2242,7 +2080,7 @@ namespace SOH.Process.Server.Generated
 
     /// <summary>
     /// Gets or Sets statusCode.
-    /// <br/>
+    /// <br/>            
     /// </summary>
     [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.0.0.0 (NJsonSchema v11.0.0.0 (Newtonsoft.Json v13.0.0.0))")]
     public enum StatusCode
@@ -2266,42 +2104,79 @@ namespace SOH.Process.Server.Generated
     }
 
     [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.0.0.0 (NJsonSchema v11.0.0.0 (Newtonsoft.Json v13.0.0.0))")]
-    public partial class Results : System.Collections.Generic.Dictionary<string, object>
-    {
-
-        public string ToJson()
-        {
-
-            return Newtonsoft.Json.JsonConvert.SerializeObject(this, CustomJsonSerializerSettings(new Newtonsoft.Json.JsonSerializerSettings {  }));
-
-        }
-        public static Results FromJson(string data)
-        {
-
-            return Newtonsoft.Json.JsonConvert.DeserializeObject<Results>(data, CustomJsonSerializerSettings(new Newtonsoft.Json.JsonSerializerSettings {  }));
-
-        }
-
-    }
-
-    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.0.0.0 (NJsonSchema v11.0.0.0 (Newtonsoft.Json v13.0.0.0))")]
-    public partial class ProcessList
+    public partial class ProcessSummary
     {
         /// <summary>
-        /// Gets or Sets Processes.
-        /// <br/>
+        /// The unique identifier of this process.
+        /// <br/>            
         /// </summary>
-        [Newtonsoft.Json.JsonProperty("processes", Required = Newtonsoft.Json.Required.Always)]
+        [Newtonsoft.Json.JsonProperty("id", Required = Newtonsoft.Json.Required.Always)]
         [System.ComponentModel.DataAnnotations.Required]
-        public System.Collections.Generic.ICollection<ProcessSummary> Processes { get; set; } = new System.Collections.ObjectModel.Collection<ProcessSummary>();
+        public string Id { get; set; } = default!;
+
+        /// <summary>
+        /// Gets or sets the title to display.
+        /// <br/>            
+        /// </summary>
+        [Newtonsoft.Json.JsonProperty("title", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
+        public string? Title { get; set; } = default!;
+
+        /// <summary>
+        /// An optional description of this element to present.
+        /// <br/>            
+        /// </summary>
+        [Newtonsoft.Json.JsonProperty("description", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
+        public string? Description { get; set; } = default!;
+
+        /// <summary>
+        /// A list of special keywords.
+        /// <br/>            
+        /// </summary>
+        [Newtonsoft.Json.JsonProperty("keywords", Required = Newtonsoft.Json.Required.DisallowNull, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
+        public System.Collections.Generic.ICollection<string> Keywords { get; set; } = default!;
+
+        /// <summary>
+        /// Gets or sets some additional metadata used external.
+        /// <br/>            
+        /// </summary>
+        [Newtonsoft.Json.JsonProperty("metadata", Required = Newtonsoft.Json.Required.DisallowNull, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
+        public System.Collections.Generic.ICollection<Metadata> Metadata { get; set; } = default!;
+
+        /// <summary>
+        /// Gets or sets some additional parameter used external.
+        /// <br/>            
+        /// </summary>
+        [Newtonsoft.Json.JsonProperty("additionalParameters", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
+        public AllOfdescriptionTypeAdditionalParameters? AdditionalParameters { get; set; } = default!;
+
+        /// <summary>
+        /// Gets or Sets Version.
+        /// <br/>            
+        /// </summary>
+        [Newtonsoft.Json.JsonProperty("version", Required = Newtonsoft.Json.Required.Always)]
+        [System.ComponentModel.DataAnnotations.Required]
+        public string Version { get; set; } = default!;
+
+        /// <summary>
+        /// Gets or Sets JobControlOptions.
+        /// <br/>            
+        /// </summary>
+        [Newtonsoft.Json.JsonProperty("jobControlOptions", Required = Newtonsoft.Json.Required.DisallowNull, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore, ItemConverterType = typeof(Newtonsoft.Json.Converters.StringEnumConverter))]
+        public System.Collections.Generic.ICollection<JobControlOptions> JobControlOptions { get; set; } = default!;
+
+        /// <summary>
+        /// Gets or Sets OutputTransmission.
+        /// <br/>            
+        /// </summary>
+        [Newtonsoft.Json.JsonProperty("outputTransmission", Required = Newtonsoft.Json.Required.DisallowNull, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore, ItemConverterType = typeof(Newtonsoft.Json.Converters.StringEnumConverter))]
+        public System.Collections.Generic.ICollection<TransmissionMode> OutputTransmission { get; set; } = default!;
 
         /// <summary>
         /// Gets or Sets Links.
-        /// <br/>
+        /// <br/>            
         /// </summary>
-        [Newtonsoft.Json.JsonProperty("links", Required = Newtonsoft.Json.Required.Always)]
-        [System.ComponentModel.DataAnnotations.Required]
-        public System.Collections.Generic.ICollection<Link> Links { get; set; } = new System.Collections.ObjectModel.Collection<Link>();
+        [Newtonsoft.Json.JsonProperty("links", Required = Newtonsoft.Json.Required.DisallowNull, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
+        public System.Collections.Generic.ICollection<Link> Links { get; set; } = default!;
 
         private System.Collections.Generic.IDictionary<string, object>? _additionalProperties;
 
@@ -2311,88 +2186,6 @@ namespace SOH.Process.Server.Generated
             get { return _additionalProperties ?? (_additionalProperties = new System.Collections.Generic.Dictionary<string, object>()); }
             set { _additionalProperties = value; }
         }
-
-        public string ToJson()
-        {
-
-            return Newtonsoft.Json.JsonConvert.SerializeObject(this, CustomJsonSerializerSettings(new Newtonsoft.Json.JsonSerializerSettings {  }));
-
-        }
-        public static ProcessList FromJson(string data)
-        {
-
-            return Newtonsoft.Json.JsonConvert.DeserializeObject<ProcessList>(data, CustomJsonSerializerSettings(new Newtonsoft.Json.JsonSerializerSettings {  }));
-
-        }
-
-    }
-
-    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.0.0.0 (NJsonSchema v11.0.0.0 (Newtonsoft.Json v13.0.0.0))")]
-    public partial class ProcessSummary : AbstractEntity
-    {
-        /// <summary>
-        /// A title to display.
-        /// <br/>
-        /// </summary>
-        [Newtonsoft.Json.JsonProperty("title", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
-        public string? Title { get; set; } = default!;
-
-        /// <summary>
-        /// An optional description of this element to present.
-        /// <br/>
-        /// </summary>
-        [Newtonsoft.Json.JsonProperty("description", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
-        public string? Description { get; set; } = default!;
-
-        /// <summary>
-        /// A list of special keywords.
-        /// <br/>
-        /// </summary>
-        [Newtonsoft.Json.JsonProperty("keywords", Required = Newtonsoft.Json.Required.DisallowNull, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
-        public System.Collections.Generic.ICollection<string> Keywords { get; set; } = default!;
-
-        /// <summary>
-        /// Gets or sets some additional metadata used external.
-        /// <br/>
-        /// </summary>
-        [Newtonsoft.Json.JsonProperty("metadata", Required = Newtonsoft.Json.Required.DisallowNull, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
-        public System.Collections.Generic.ICollection<Metadata> Metadata { get; set; } = default!;
-
-        /// <summary>
-        /// Gets or sets some additional parameter used external.
-        /// <br/>
-        /// </summary>
-        [Newtonsoft.Json.JsonProperty("additionalParameters", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
-        public AllOfdescriptionTypeAdditionalParameters? AdditionalParameters { get; set; } = default!;
-
-        /// <summary>
-        /// Gets or Sets Version.
-        /// <br/>
-        /// </summary>
-        [Newtonsoft.Json.JsonProperty("version", Required = Newtonsoft.Json.Required.Always)]
-        [System.ComponentModel.DataAnnotations.Required]
-        public string Version { get; set; } = default!;
-
-        /// <summary>
-        /// Gets or Sets JobControlOptions.
-        /// <br/>
-        /// </summary>
-        [Newtonsoft.Json.JsonProperty("jobControlOptions", Required = Newtonsoft.Json.Required.DisallowNull, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore, ItemConverterType = typeof(Newtonsoft.Json.Converters.StringEnumConverter))]
-        public System.Collections.Generic.ICollection<JobControlOptions> JobControlOptions { get; set; } = default!;
-
-        /// <summary>
-        /// Gets or Sets OutputTransmission.
-        /// <br/>
-        /// </summary>
-        [Newtonsoft.Json.JsonProperty("outputTransmission", Required = Newtonsoft.Json.Required.DisallowNull, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore, ItemConverterType = typeof(Newtonsoft.Json.Converters.StringEnumConverter))]
-        public System.Collections.Generic.ICollection<TransmissionMode> OutputTransmission { get; set; } = default!;
-
-        /// <summary>
-        /// Gets or Sets Links.
-        /// <br/>
-        /// </summary>
-        [Newtonsoft.Json.JsonProperty("links", Required = Newtonsoft.Json.Required.DisallowNull, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
-        public System.Collections.Generic.ICollection<Link> Links { get; set; } = default!;
 
         public string ToJson()
         {
@@ -2414,21 +2207,21 @@ namespace SOH.Process.Server.Generated
     {
         /// <summary>
         /// Gets or Sets Title.
-        /// <br/>
+        /// <br/>            
         /// </summary>
         [Newtonsoft.Json.JsonProperty("title", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
         public string? Title { get; set; } = default!;
 
         /// <summary>
         /// Gets or Sets Role.
-        /// <br/>
+        /// <br/>            
         /// </summary>
         [Newtonsoft.Json.JsonProperty("role", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
         public string? Role { get; set; } = default!;
 
         /// <summary>
         /// Gets or Sets Href.
-        /// <br/>
+        /// <br/>            
         /// </summary>
         [Newtonsoft.Json.JsonProperty("href", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
         public string? Href { get; set; } = default!;
@@ -2462,7 +2255,7 @@ namespace SOH.Process.Server.Generated
     {
         /// <summary>
         /// Gets or Sets Parameters.
-        /// <br/>
+        /// <br/>            
         /// </summary>
         [Newtonsoft.Json.JsonProperty("parameters", Required = Newtonsoft.Json.Required.DisallowNull, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
         public System.Collections.Generic.ICollection<AdditionalParameter> Parameters { get; set; } = default!;
@@ -2487,7 +2280,7 @@ namespace SOH.Process.Server.Generated
     {
         /// <summary>
         /// Gets or Sets Name.
-        /// <br/>
+        /// <br/>            
         /// </summary>
         [Newtonsoft.Json.JsonProperty("name", Required = Newtonsoft.Json.Required.Always)]
         [System.ComponentModel.DataAnnotations.Required]
@@ -2495,7 +2288,7 @@ namespace SOH.Process.Server.Generated
 
         /// <summary>
         /// Gets or Sets Value.
-        /// <br/>
+        /// <br/>            
         /// </summary>
         [Newtonsoft.Json.JsonProperty("value", Required = Newtonsoft.Json.Required.Always)]
         [System.ComponentModel.DataAnnotations.Required]
@@ -2529,7 +2322,7 @@ namespace SOH.Process.Server.Generated
     /// The kind, how the process shall be executed,
     /// <br/>processing completely in blocking mode
     /// <br/>or async in background.
-    /// <br/>
+    /// <br/>            
     /// </summary>
     [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.0.0.0 (NJsonSchema v11.0.0.0 (Newtonsoft.Json v13.0.0.0))")]
     public enum JobControlOptions
@@ -2546,66 +2339,19 @@ namespace SOH.Process.Server.Generated
 
     }
 
-    /// <summary>
-    /// The kind, how result shall be transmitted - as providing only the referecne or the concrete value.
-    /// <br/>
-    /// </summary>
     [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.0.0.0 (NJsonSchema v11.0.0.0 (Newtonsoft.Json v13.0.0.0))")]
-    public enum TransmissionMode
-    {
-
-        [System.Runtime.Serialization.EnumMember(Value = @"value")]
-        ValueEnum = 0,
-
-        [System.Runtime.Serialization.EnumMember(Value = @"reference")]
-        ReferenceEnum = 1,
-
-    }
-
-    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.0.0.0 (NJsonSchema v11.0.0.0 (Newtonsoft.Json v13.0.0.0))")]
-    public abstract partial class AbstractEntity
-    {
-        [Newtonsoft.Json.JsonProperty("id", Required = Newtonsoft.Json.Required.Always)]
-        [System.ComponentModel.DataAnnotations.Required]
-        public string Id { get; set; } = default!;
-
-        private System.Collections.Generic.IDictionary<string, object>? _additionalProperties;
-
-        [Newtonsoft.Json.JsonExtensionData]
-        public System.Collections.Generic.IDictionary<string, object> AdditionalProperties
-        {
-            get { return _additionalProperties ?? (_additionalProperties = new System.Collections.Generic.Dictionary<string, object>()); }
-            set { _additionalProperties = value; }
-        }
-
-        public string ToJson()
-        {
-
-            return Newtonsoft.Json.JsonConvert.SerializeObject(this, CustomJsonSerializerSettings(new Newtonsoft.Json.JsonSerializerSettings {  }));
-
-        }
-        public static AbstractEntity FromJson(string data)
-        {
-
-            return Newtonsoft.Json.JsonConvert.DeserializeObject<AbstractEntity>(data, CustomJsonSerializerSettings(new Newtonsoft.Json.JsonSerializerSettings {  }));
-
-        }
-
-    }
-
-    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.0.0.0 (NJsonSchema v11.0.0.0 (Newtonsoft.Json v13.0.0.0))")]
-    public partial class Process : ProcessSummary
+    public partial class ProcessDescription : ProcessSummary
     {
         /// <summary>
-        /// Gets or Sets Inputs.
-        /// <br/>
+        /// All inputs of this process.
+        /// <br/>            
         /// </summary>
         [Newtonsoft.Json.JsonProperty("inputs", Required = Newtonsoft.Json.Required.DisallowNull, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
         public System.Collections.Generic.IDictionary<string, InputDescription> Inputs { get; set; } = default!;
 
         /// <summary>
-        /// Gets or Sets Outputs.
-        /// <br/>
+        /// All outputs of this process.
+        /// <br/>            
         /// </summary>
         [Newtonsoft.Json.JsonProperty("outputs", Required = Newtonsoft.Json.Required.DisallowNull, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
         public System.Collections.Generic.IDictionary<string, OutputDescription> Outputs { get; set; } = default!;
@@ -2616,80 +2362,10 @@ namespace SOH.Process.Server.Generated
             return Newtonsoft.Json.JsonConvert.SerializeObject(this, CustomJsonSerializerSettings(new Newtonsoft.Json.JsonSerializerSettings {  }));
 
         }
-        public static Process FromJson(string data)
+        public static ProcessDescription FromJson(string data)
         {
 
-            return Newtonsoft.Json.JsonConvert.DeserializeObject<Process>(data, CustomJsonSerializerSettings(new Newtonsoft.Json.JsonSerializerSettings {  }));
-
-        }
-
-    }
-
-    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.0.0.0 (NJsonSchema v11.0.0.0 (Newtonsoft.Json v13.0.0.0))")]
-    public partial class InputDescription : DescriptionType
-    {
-        /// <summary>
-        /// Gets or Sets MinOccurs.
-        /// <br/>
-        /// </summary>
-        [Newtonsoft.Json.JsonProperty("minOccurs", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
-        public int? MinOccurs { get; set; } = default!;
-
-        /// <summary>
-        /// Gets or Sets MaxOccurs.
-        /// <br/>
-        /// </summary>
-        [Newtonsoft.Json.JsonProperty("maxOccurs", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
-        public object? MaxOccurs { get; set; } = default!;
-
-        /// <summary>
-        /// Gets or Sets Schema.
-        /// <br/>
-        /// </summary>
-        [Newtonsoft.Json.JsonProperty("schema", Required = Newtonsoft.Json.Required.Always)]
-        [System.ComponentModel.DataAnnotations.Required]
-        public Schema Schema { get; set; } = new Schema();
-
-        public string ToJson()
-        {
-
-            return Newtonsoft.Json.JsonConvert.SerializeObject(this, CustomJsonSerializerSettings(new Newtonsoft.Json.JsonSerializerSettings {  }));
-
-        }
-        public static InputDescription FromJson(string data)
-        {
-
-            return Newtonsoft.Json.JsonConvert.DeserializeObject<InputDescription>(data, CustomJsonSerializerSettings(new Newtonsoft.Json.JsonSerializerSettings {  }));
-
-        }
-
-    }
-
-    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.0.0.0 (NJsonSchema v11.0.0.0 (Newtonsoft.Json v13.0.0.0))")]
-    public partial class Schema
-    {
-        [Newtonsoft.Json.JsonProperty("description", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
-        public string? Description { get; set; } = default!;
-
-        private System.Collections.Generic.IDictionary<string, object>? _additionalProperties;
-
-        [Newtonsoft.Json.JsonExtensionData]
-        public System.Collections.Generic.IDictionary<string, object> AdditionalProperties
-        {
-            get { return _additionalProperties ?? (_additionalProperties = new System.Collections.Generic.Dictionary<string, object>()); }
-            set { _additionalProperties = value; }
-        }
-
-        public string ToJson()
-        {
-
-            return Newtonsoft.Json.JsonConvert.SerializeObject(this, CustomJsonSerializerSettings(new Newtonsoft.Json.JsonSerializerSettings {  }));
-
-        }
-        public static Schema FromJson(string data)
-        {
-
-            return Newtonsoft.Json.JsonConvert.DeserializeObject<Schema>(data, CustomJsonSerializerSettings(new Newtonsoft.Json.JsonSerializerSettings {  }));
+            return Newtonsoft.Json.JsonConvert.DeserializeObject<ProcessDescription>(data, CustomJsonSerializerSettings(new Newtonsoft.Json.JsonSerializerSettings {  }));
 
         }
 
@@ -2700,35 +2376,35 @@ namespace SOH.Process.Server.Generated
     {
         /// <summary>
         /// A title to display.
-        /// <br/>
+        /// <br/>            
         /// </summary>
         [Newtonsoft.Json.JsonProperty("title", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
         public string? Title { get; set; } = default!;
 
         /// <summary>
         /// An optional description of this element to present.
-        /// <br/>
+        /// <br/>            
         /// </summary>
         [Newtonsoft.Json.JsonProperty("description", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
         public string? Description { get; set; } = default!;
 
         /// <summary>
         /// A list of special keywords.
-        /// <br/>
+        /// <br/>            
         /// </summary>
         [Newtonsoft.Json.JsonProperty("keywords", Required = Newtonsoft.Json.Required.DisallowNull, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
         public System.Collections.Generic.ICollection<string> Keywords { get; set; } = default!;
 
         /// <summary>
         /// Gets or sets some additional metadata used external.
-        /// <br/>
+        /// <br/>            
         /// </summary>
         [Newtonsoft.Json.JsonProperty("metadata", Required = Newtonsoft.Json.Required.DisallowNull, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
         public System.Collections.Generic.ICollection<Metadata> Metadata { get; set; } = default!;
 
         /// <summary>
         /// Gets or sets some additional parameter used external.
-        /// <br/>
+        /// <br/>            
         /// </summary>
         [Newtonsoft.Json.JsonProperty("additionalParameters", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
         public AllOfdescriptionTypeAdditionalParameters? AdditionalParameters { get; set; } = default!;
@@ -2758,11 +2434,52 @@ namespace SOH.Process.Server.Generated
     }
 
     [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.0.0.0 (NJsonSchema v11.0.0.0 (Newtonsoft.Json v13.0.0.0))")]
-    public partial class OutputDescription : DescriptionType
+    public partial class Envelope
     {
-        [Newtonsoft.Json.JsonProperty("schema", Required = Newtonsoft.Json.Required.Always)]
-        [System.ComponentModel.DataAnnotations.Required]
-        public Schema Schema { get; set; } = new Schema();
+        [Newtonsoft.Json.JsonProperty("isNull", Required = Newtonsoft.Json.Required.DisallowNull, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
+        public bool IsNull { get; set; } = default!;
+
+        [Newtonsoft.Json.JsonProperty("width", Required = Newtonsoft.Json.Required.DisallowNull, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
+        public double Width { get; set; } = default!;
+
+        [Newtonsoft.Json.JsonProperty("height", Required = Newtonsoft.Json.Required.DisallowNull, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
+        public double Height { get; set; } = default!;
+
+        [Newtonsoft.Json.JsonProperty("diameter", Required = Newtonsoft.Json.Required.DisallowNull, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
+        public double Diameter { get; set; } = default!;
+
+        [Newtonsoft.Json.JsonProperty("minX", Required = Newtonsoft.Json.Required.DisallowNull, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
+        public double MinX { get; set; } = default!;
+
+        [Newtonsoft.Json.JsonProperty("maxX", Required = Newtonsoft.Json.Required.DisallowNull, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
+        public double MaxX { get; set; } = default!;
+
+        [Newtonsoft.Json.JsonProperty("minY", Required = Newtonsoft.Json.Required.DisallowNull, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
+        public double MinY { get; set; } = default!;
+
+        [Newtonsoft.Json.JsonProperty("maxY", Required = Newtonsoft.Json.Required.DisallowNull, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
+        public double MaxY { get; set; } = default!;
+
+        [Newtonsoft.Json.JsonProperty("area", Required = Newtonsoft.Json.Required.DisallowNull, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
+        public double Area { get; set; } = default!;
+
+        [Newtonsoft.Json.JsonProperty("minExtent", Required = Newtonsoft.Json.Required.DisallowNull, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
+        public double MinExtent { get; set; } = default!;
+
+        [Newtonsoft.Json.JsonProperty("maxExtent", Required = Newtonsoft.Json.Required.DisallowNull, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
+        public double MaxExtent { get; set; } = default!;
+
+        [Newtonsoft.Json.JsonProperty("centre", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
+        public Coordinate? Centre { get; set; } = default!;
+
+        private System.Collections.Generic.IDictionary<string, object>? _additionalProperties;
+
+        [Newtonsoft.Json.JsonExtensionData]
+        public System.Collections.Generic.IDictionary<string, object> AdditionalProperties
+        {
+            get { return _additionalProperties ?? (_additionalProperties = new System.Collections.Generic.Dictionary<string, object>()); }
+            set { _additionalProperties = value; }
+        }
 
         public string ToJson()
         {
@@ -2770,17 +2487,430 @@ namespace SOH.Process.Server.Generated
             return Newtonsoft.Json.JsonConvert.SerializeObject(this, CustomJsonSerializerSettings(new Newtonsoft.Json.JsonSerializerSettings {  }));
 
         }
-        public static OutputDescription FromJson(string data)
+        public static Envelope FromJson(string data)
         {
 
-            return Newtonsoft.Json.JsonConvert.DeserializeObject<OutputDescription>(data, CustomJsonSerializerSettings(new Newtonsoft.Json.JsonSerializerSettings {  }));
+            return Newtonsoft.Json.JsonConvert.DeserializeObject<Envelope>(data, CustomJsonSerializerSettings(new Newtonsoft.Json.JsonSerializerSettings {  }));
 
         }
 
     }
 
     [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.0.0.0 (NJsonSchema v11.0.0.0 (Newtonsoft.Json v13.0.0.0))")]
-    public abstract partial class IInlineResponse200
+    public partial class Coordinate
+    {
+        [Newtonsoft.Json.JsonProperty("x", Required = Newtonsoft.Json.Required.DisallowNull, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
+        public double X { get; set; } = default!;
+
+        [Newtonsoft.Json.JsonProperty("y", Required = Newtonsoft.Json.Required.DisallowNull, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
+        public double Y { get; set; } = default!;
+
+        [Newtonsoft.Json.JsonProperty("z", Required = Newtonsoft.Json.Required.DisallowNull, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
+        public double Z { get; set; } = default!;
+
+        [Newtonsoft.Json.JsonProperty("m", Required = Newtonsoft.Json.Required.DisallowNull, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
+        public double M { get; set; } = default!;
+
+        [Newtonsoft.Json.JsonProperty("coordinateValue", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
+        public Coordinate? CoordinateValue { get; set; } = default!;
+
+        [Newtonsoft.Json.JsonProperty("isValid", Required = Newtonsoft.Json.Required.DisallowNull, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
+        public bool IsValid { get; set; } = default!;
+
+        private System.Collections.Generic.IDictionary<string, object>? _additionalProperties;
+
+        [Newtonsoft.Json.JsonExtensionData]
+        public System.Collections.Generic.IDictionary<string, object> AdditionalProperties
+        {
+            get { return _additionalProperties ?? (_additionalProperties = new System.Collections.Generic.Dictionary<string, object>()); }
+            set { _additionalProperties = value; }
+        }
+
+        public string ToJson()
+        {
+
+            return Newtonsoft.Json.JsonConvert.SerializeObject(this, CustomJsonSerializerSettings(new Newtonsoft.Json.JsonSerializerSettings {  }));
+
+        }
+        public static Coordinate FromJson(string data)
+        {
+
+            return Newtonsoft.Json.JsonConvert.DeserializeObject<Coordinate>(data, CustomJsonSerializerSettings(new Newtonsoft.Json.JsonSerializerSettings {  }));
+
+        }
+
+    }
+
+    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.0.0.0 (NJsonSchema v11.0.0.0 (Newtonsoft.Json v13.0.0.0))")]
+    public abstract partial class IFeature
+    {
+        [Newtonsoft.Json.JsonProperty("geometry", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
+        public Geometry? Geometry { get; set; } = default!;
+
+        [Newtonsoft.Json.JsonProperty("boundingBox", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
+        public Envelope? BoundingBox { get; set; } = default!;
+
+        [Newtonsoft.Json.JsonProperty("attributes", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
+        public IAttributesTable? Attributes { get; set; } = default!;
+
+        private System.Collections.Generic.IDictionary<string, object>? _additionalProperties;
+
+        [Newtonsoft.Json.JsonExtensionData]
+        public System.Collections.Generic.IDictionary<string, object> AdditionalProperties
+        {
+            get { return _additionalProperties ?? (_additionalProperties = new System.Collections.Generic.Dictionary<string, object>()); }
+            set { _additionalProperties = value; }
+        }
+
+        public string ToJson()
+        {
+
+            return Newtonsoft.Json.JsonConvert.SerializeObject(this, CustomJsonSerializerSettings(new Newtonsoft.Json.JsonSerializerSettings {  }));
+
+        }
+        public static IFeature FromJson(string data)
+        {
+
+            return Newtonsoft.Json.JsonConvert.DeserializeObject<IFeature>(data, CustomJsonSerializerSettings(new Newtonsoft.Json.JsonSerializerSettings {  }));
+
+        }
+
+    }
+
+    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.0.0.0 (NJsonSchema v11.0.0.0 (Newtonsoft.Json v13.0.0.0))")]
+    public abstract partial class Geometry
+    {
+        [Newtonsoft.Json.JsonProperty("factory", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
+        public GeometryFactory? Factory { get; set; } = default!;
+
+        [Newtonsoft.Json.JsonProperty("userData", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
+        public object? UserData { get; set; } = default!;
+
+        [Newtonsoft.Json.JsonProperty("srid", Required = Newtonsoft.Json.Required.DisallowNull, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
+        public int Srid { get; set; } = default!;
+
+        [Newtonsoft.Json.JsonProperty("precisionModel", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
+        public PrecisionModel? PrecisionModel { get; set; } = default!;
+
+        [Newtonsoft.Json.JsonProperty("numGeometries", Required = Newtonsoft.Json.Required.DisallowNull, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
+        public int NumGeometries { get; set; } = default!;
+
+        [Newtonsoft.Json.JsonProperty("isSimple", Required = Newtonsoft.Json.Required.DisallowNull, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
+        public bool IsSimple { get; set; } = default!;
+
+        [Newtonsoft.Json.JsonProperty("isValid", Required = Newtonsoft.Json.Required.DisallowNull, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
+        public bool IsValid { get; set; } = default!;
+
+        [Newtonsoft.Json.JsonProperty("area", Required = Newtonsoft.Json.Required.DisallowNull, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
+        public double Area { get; set; } = default!;
+
+        [Newtonsoft.Json.JsonProperty("length", Required = Newtonsoft.Json.Required.DisallowNull, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
+        public double Length { get; set; } = default!;
+
+        [Newtonsoft.Json.JsonProperty("centroid", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
+        public Point? Centroid { get; set; } = default!;
+
+        [Newtonsoft.Json.JsonProperty("interiorPoint", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
+        public Point? InteriorPoint { get; set; } = default!;
+
+        [Newtonsoft.Json.JsonProperty("pointOnSurface", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
+        public Point? PointOnSurface { get; set; } = default!;
+
+        [Newtonsoft.Json.JsonProperty("envelope", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
+        public Geometry? Envelope { get; set; } = default!;
+
+        [Newtonsoft.Json.JsonProperty("envelopeInternal", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
+        public Envelope? EnvelopeInternal { get; set; } = default!;
+
+        [Newtonsoft.Json.JsonProperty("isRectangle", Required = Newtonsoft.Json.Required.DisallowNull, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
+        public bool IsRectangle { get; set; } = default!;
+
+        private System.Collections.Generic.IDictionary<string, object>? _additionalProperties;
+
+        [Newtonsoft.Json.JsonExtensionData]
+        public System.Collections.Generic.IDictionary<string, object> AdditionalProperties
+        {
+            get { return _additionalProperties ?? (_additionalProperties = new System.Collections.Generic.Dictionary<string, object>()); }
+            set { _additionalProperties = value; }
+        }
+
+        public string ToJson()
+        {
+
+            return Newtonsoft.Json.JsonConvert.SerializeObject(this, CustomJsonSerializerSettings(new Newtonsoft.Json.JsonSerializerSettings {  }));
+
+        }
+        public static Geometry FromJson(string data)
+        {
+
+            return Newtonsoft.Json.JsonConvert.DeserializeObject<Geometry>(data, CustomJsonSerializerSettings(new Newtonsoft.Json.JsonSerializerSettings {  }));
+
+        }
+
+    }
+
+    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.0.0.0 (NJsonSchema v11.0.0.0 (Newtonsoft.Json v13.0.0.0))")]
+    public partial class GeometryFactory
+    {
+        [Newtonsoft.Json.JsonProperty("precisionModel", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
+        public PrecisionModel? PrecisionModel { get; set; } = default!;
+
+        [Newtonsoft.Json.JsonProperty("coordinateSequenceFactory", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
+        public CoordinateSequenceFactory? CoordinateSequenceFactory { get; set; } = default!;
+
+        [Newtonsoft.Json.JsonProperty("srid", Required = Newtonsoft.Json.Required.DisallowNull, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
+        public int Srid { get; set; } = default!;
+
+        [Newtonsoft.Json.JsonProperty("geometryServices", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
+        public NtsGeometryServices? GeometryServices { get; set; } = default!;
+
+        private System.Collections.Generic.IDictionary<string, object>? _additionalProperties;
+
+        [Newtonsoft.Json.JsonExtensionData]
+        public System.Collections.Generic.IDictionary<string, object> AdditionalProperties
+        {
+            get { return _additionalProperties ?? (_additionalProperties = new System.Collections.Generic.Dictionary<string, object>()); }
+            set { _additionalProperties = value; }
+        }
+
+        public string ToJson()
+        {
+
+            return Newtonsoft.Json.JsonConvert.SerializeObject(this, CustomJsonSerializerSettings(new Newtonsoft.Json.JsonSerializerSettings {  }));
+
+        }
+        public static GeometryFactory FromJson(string data)
+        {
+
+            return Newtonsoft.Json.JsonConvert.DeserializeObject<GeometryFactory>(data, CustomJsonSerializerSettings(new Newtonsoft.Json.JsonSerializerSettings {  }));
+
+        }
+
+    }
+
+    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.0.0.0 (NJsonSchema v11.0.0.0 (Newtonsoft.Json v13.0.0.0))")]
+    public partial class PrecisionModel
+    {
+        [Newtonsoft.Json.JsonProperty("isFloating", Required = Newtonsoft.Json.Required.DisallowNull, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
+        public bool IsFloating { get; set; } = default!;
+
+        [Newtonsoft.Json.JsonProperty("maximumSignificantDigits", Required = Newtonsoft.Json.Required.DisallowNull, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
+        public int MaximumSignificantDigits { get; set; } = default!;
+
+        [Newtonsoft.Json.JsonProperty("scale", Required = Newtonsoft.Json.Required.DisallowNull, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
+        public double Scale { get; set; } = default!;
+
+        [Newtonsoft.Json.JsonProperty("gridSize", Required = Newtonsoft.Json.Required.DisallowNull, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
+        public double GridSize { get; set; } = default!;
+
+        [Newtonsoft.Json.JsonProperty("precisionModelType", Required = Newtonsoft.Json.Required.DisallowNull, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
+        public PrecisionModels PrecisionModelType { get; set; } = default!;
+
+        private System.Collections.Generic.IDictionary<string, object>? _additionalProperties;
+
+        [Newtonsoft.Json.JsonExtensionData]
+        public System.Collections.Generic.IDictionary<string, object> AdditionalProperties
+        {
+            get { return _additionalProperties ?? (_additionalProperties = new System.Collections.Generic.Dictionary<string, object>()); }
+            set { _additionalProperties = value; }
+        }
+
+        public string ToJson()
+        {
+
+            return Newtonsoft.Json.JsonConvert.SerializeObject(this, CustomJsonSerializerSettings(new Newtonsoft.Json.JsonSerializerSettings {  }));
+
+        }
+        public static PrecisionModel FromJson(string data)
+        {
+
+            return Newtonsoft.Json.JsonConvert.DeserializeObject<PrecisionModel>(data, CustomJsonSerializerSettings(new Newtonsoft.Json.JsonSerializerSettings {  }));
+
+        }
+
+    }
+
+    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.0.0.0 (NJsonSchema v11.0.0.0 (Newtonsoft.Json v13.0.0.0))")]
+    public enum PrecisionModels
+    {
+
+        Floating = 0,
+
+        FloatingSingle = 1,
+
+        Fixed = 2,
+
+    }
+
+    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.0.0.0 (NJsonSchema v11.0.0.0 (Newtonsoft.Json v13.0.0.0))")]
+    public abstract partial class CoordinateSequenceFactory
+    {
+        [Newtonsoft.Json.JsonProperty("ordinates", Required = Newtonsoft.Json.Required.DisallowNull, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
+        public Ordinates Ordinates { get; set; } = default!;
+
+        private System.Collections.Generic.IDictionary<string, object>? _additionalProperties;
+
+        [Newtonsoft.Json.JsonExtensionData]
+        public System.Collections.Generic.IDictionary<string, object> AdditionalProperties
+        {
+            get { return _additionalProperties ?? (_additionalProperties = new System.Collections.Generic.Dictionary<string, object>()); }
+            set { _additionalProperties = value; }
+        }
+
+        public string ToJson()
+        {
+
+            return Newtonsoft.Json.JsonConvert.SerializeObject(this, CustomJsonSerializerSettings(new Newtonsoft.Json.JsonSerializerSettings {  }));
+
+        }
+        public static CoordinateSequenceFactory FromJson(string data)
+        {
+
+            return Newtonsoft.Json.JsonConvert.DeserializeObject<CoordinateSequenceFactory>(data, CustomJsonSerializerSettings(new Newtonsoft.Json.JsonSerializerSettings {  }));
+
+        }
+
+    }
+
+    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.0.0.0 (NJsonSchema v11.0.0.0 (Newtonsoft.Json v13.0.0.0))")]
+    [System.Flags]
+    public enum Ordinates
+    {
+
+        None = 0,
+
+        X = 1,
+
+        Spatial1 = 1,
+
+        Y = 2,
+
+        Spatial2 = 2,
+
+        XY = 3,
+
+        Z = 4,
+
+        Spatial3 = 4,
+
+        XYZ = 7,
+
+        Spatial4 = 8,
+
+        Spatial5 = 16,
+
+        Spatial6 = 32,
+
+        Spatial7 = 64,
+
+        Spatial8 = 128,
+
+        Spatial9 = 256,
+
+        Spatial10 = 512,
+
+        Spatial11 = 1024,
+
+        Spatial12 = 2048,
+
+        Spatial13 = 4096,
+
+        Spatial14 = 8192,
+
+        Spatial15 = 16384,
+
+        Spatial16 = 32768,
+
+        AllSpatialOrdinates = 65535,
+
+        M = 65536,
+
+        Measure1 = 65536,
+
+        XYM = 65539,
+
+        XYZM = 65543,
+
+        Measure2 = 131072,
+
+        Measure3 = 262144,
+
+        Measure4 = 524288,
+
+        Measure5 = 1048576,
+
+        Measure6 = 2097152,
+
+        Measure7 = 4194304,
+
+        Measure8 = 8388608,
+
+        Measure9 = 16777216,
+
+        Measure10 = 33554432,
+
+        Measure11 = 67108864,
+
+        Measure12 = 134217728,
+
+        Measure13 = 268435456,
+
+        Measure14 = 536870912,
+
+        Measure15 = 1073741824,
+
+        Measure16 = -2147483648,
+
+        AllMeasureOrdinates = -65536,
+
+        AllOrdinates = -1,
+
+    }
+
+    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.0.0.0 (NJsonSchema v11.0.0.0 (Newtonsoft.Json v13.0.0.0))")]
+    public partial class NtsGeometryServices
+    {
+        [Newtonsoft.Json.JsonProperty("geometryOverlay", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
+        public GeometryOverlay? GeometryOverlay { get; set; } = default!;
+
+        [Newtonsoft.Json.JsonProperty("coordinateEqualityComparer", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
+        public CoordinateEqualityComparer? CoordinateEqualityComparer { get; set; } = default!;
+
+        [Newtonsoft.Json.JsonProperty("defaultSRID", Required = Newtonsoft.Json.Required.DisallowNull, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
+        public int DefaultSRID { get; set; } = default!;
+
+        [Newtonsoft.Json.JsonProperty("defaultCoordinateSequenceFactory", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
+        public CoordinateSequenceFactory? DefaultCoordinateSequenceFactory { get; set; } = default!;
+
+        [Newtonsoft.Json.JsonProperty("defaultPrecisionModel", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
+        public PrecisionModel? DefaultPrecisionModel { get; set; } = default!;
+
+        private System.Collections.Generic.IDictionary<string, object>? _additionalProperties;
+
+        [Newtonsoft.Json.JsonExtensionData]
+        public System.Collections.Generic.IDictionary<string, object> AdditionalProperties
+        {
+            get { return _additionalProperties ?? (_additionalProperties = new System.Collections.Generic.Dictionary<string, object>()); }
+            set { _additionalProperties = value; }
+        }
+
+        public string ToJson()
+        {
+
+            return Newtonsoft.Json.JsonConvert.SerializeObject(this, CustomJsonSerializerSettings(new Newtonsoft.Json.JsonSerializerSettings {  }));
+
+        }
+        public static NtsGeometryServices FromJson(string data)
+        {
+
+            return Newtonsoft.Json.JsonConvert.DeserializeObject<NtsGeometryServices>(data, CustomJsonSerializerSettings(new Newtonsoft.Json.JsonSerializerSettings {  }));
+
+        }
+
+    }
+
+    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.0.0.0 (NJsonSchema v11.0.0.0 (Newtonsoft.Json v13.0.0.0))")]
+    public abstract partial class GeometryOverlay
     {
 
         private System.Collections.Generic.IDictionary<string, object>? _additionalProperties;
@@ -2798,51 +2928,37 @@ namespace SOH.Process.Server.Generated
             return Newtonsoft.Json.JsonConvert.SerializeObject(this, CustomJsonSerializerSettings(new Newtonsoft.Json.JsonSerializerSettings {  }));
 
         }
-        public static IInlineResponse200 FromJson(string data)
+        public static GeometryOverlay FromJson(string data)
         {
 
-            return Newtonsoft.Json.JsonConvert.DeserializeObject<IInlineResponse200>(data, CustomJsonSerializerSettings(new Newtonsoft.Json.JsonSerializerSettings {  }));
+            return Newtonsoft.Json.JsonConvert.DeserializeObject<GeometryOverlay>(data, CustomJsonSerializerSettings(new Newtonsoft.Json.JsonSerializerSettings {  }));
 
         }
 
     }
 
-    /// <summary>
-    /// The common contract to request an execution of a simulation
-    /// <br/>with Inputs and Outputs as the result.
-    /// <br/>
-    /// </summary>
     [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.0.0.0 (NJsonSchema v11.0.0.0 (Newtonsoft.Json v13.0.0.0))")]
-    public partial class Execute
+    public partial class CoordinateEqualityComparer : EqualityComparerOfCoordinate
     {
-        /// <summary>
-        /// Gets or Sets Inputs.
-        /// <br/>
-        /// </summary>
-        [Newtonsoft.Json.JsonProperty("inputs", Required = Newtonsoft.Json.Required.DisallowNull, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
-        public System.Collections.Generic.IDictionary<string, object> Inputs { get; set; } = default!;
 
-        /// <summary>
-        /// Gets or Sets Outputs.
-        /// <br/>
-        /// </summary>
-        [Newtonsoft.Json.JsonProperty("outputs", Required = Newtonsoft.Json.Required.DisallowNull, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
-        public System.Collections.Generic.IDictionary<string, Output> Outputs { get; set; } = default!;
+        public string ToJson()
+        {
 
-        /// <summary>
-        /// Gets or Sets Response.
-        /// <br/>
-        /// </summary>
-        [Newtonsoft.Json.JsonProperty("response", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
-        [Newtonsoft.Json.JsonConverter(typeof(Newtonsoft.Json.Converters.StringEnumConverter))]
-        public ResponseKind? Response { get; set; } = default!;
+            return Newtonsoft.Json.JsonConvert.SerializeObject(this, CustomJsonSerializerSettings(new Newtonsoft.Json.JsonSerializerSettings {  }));
 
-        /// <summary>
-        /// Gets or Sets Subscriber.
-        /// <br/>
-        /// </summary>
-        [Newtonsoft.Json.JsonProperty("subscriber", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
-        public Subscriber? Subscriber { get; set; } = default!;
+        }
+        public static CoordinateEqualityComparer FromJson(string data)
+        {
+
+            return Newtonsoft.Json.JsonConvert.DeserializeObject<CoordinateEqualityComparer>(data, CustomJsonSerializerSettings(new Newtonsoft.Json.JsonSerializerSettings {  }));
+
+        }
+
+    }
+
+    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.0.0.0 (NJsonSchema v11.0.0.0 (Newtonsoft.Json v13.0.0.0))")]
+    public abstract partial class EqualityComparerOfCoordinate
+    {
 
         private System.Collections.Generic.IDictionary<string, object>? _additionalProperties;
 
@@ -2859,10 +2975,226 @@ namespace SOH.Process.Server.Generated
             return Newtonsoft.Json.JsonConvert.SerializeObject(this, CustomJsonSerializerSettings(new Newtonsoft.Json.JsonSerializerSettings {  }));
 
         }
-        public static Execute FromJson(string data)
+        public static EqualityComparerOfCoordinate FromJson(string data)
         {
 
-            return Newtonsoft.Json.JsonConvert.DeserializeObject<Execute>(data, CustomJsonSerializerSettings(new Newtonsoft.Json.JsonSerializerSettings {  }));
+            return Newtonsoft.Json.JsonConvert.DeserializeObject<EqualityComparerOfCoordinate>(data, CustomJsonSerializerSettings(new Newtonsoft.Json.JsonSerializerSettings {  }));
+
+        }
+
+    }
+
+    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.0.0.0 (NJsonSchema v11.0.0.0 (Newtonsoft.Json v13.0.0.0))")]
+    public partial class Point : Geometry
+    {
+        [Newtonsoft.Json.JsonProperty("coordinateSequence", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
+        public CoordinateSequence? CoordinateSequence { get; set; } = default!;
+
+        [Newtonsoft.Json.JsonProperty("coordinates", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
+        public System.Collections.Generic.ICollection<Coordinate>? Coordinates { get; set; } = default!;
+
+        [Newtonsoft.Json.JsonProperty("numPoints", Required = Newtonsoft.Json.Required.DisallowNull, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
+        public int NumPoints { get; set; } = default!;
+
+        [Newtonsoft.Json.JsonProperty("isEmpty", Required = Newtonsoft.Json.Required.DisallowNull, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
+        public bool IsEmpty { get; set; } = default!;
+
+        [Newtonsoft.Json.JsonProperty("dimension", Required = Newtonsoft.Json.Required.DisallowNull, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
+        public Dimension Dimension { get; set; } = default!;
+
+        [Newtonsoft.Json.JsonProperty("boundaryDimension", Required = Newtonsoft.Json.Required.DisallowNull, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
+        public Dimension BoundaryDimension { get; set; } = default!;
+
+        [Newtonsoft.Json.JsonProperty("x", Required = Newtonsoft.Json.Required.DisallowNull, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
+        public double X { get; set; } = default!;
+
+        [Newtonsoft.Json.JsonProperty("y", Required = Newtonsoft.Json.Required.DisallowNull, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
+        public double Y { get; set; } = default!;
+
+        [Newtonsoft.Json.JsonProperty("coordinate", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
+        public Coordinate? Coordinate { get; set; } = default!;
+
+        [Newtonsoft.Json.JsonProperty("geometryType", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
+        public string? GeometryType { get; set; } = default!;
+
+        [Newtonsoft.Json.JsonProperty("ogcGeometryType", Required = Newtonsoft.Json.Required.DisallowNull, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
+        public OgcGeometryType OgcGeometryType { get; set; } = default!;
+
+        [Newtonsoft.Json.JsonProperty("boundary", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
+        public Geometry? Boundary { get; set; } = default!;
+
+        [Newtonsoft.Json.JsonProperty("z", Required = Newtonsoft.Json.Required.DisallowNull, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
+        public double Z { get; set; } = default!;
+
+        [Newtonsoft.Json.JsonProperty("m", Required = Newtonsoft.Json.Required.DisallowNull, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
+        public double M { get; set; } = default!;
+
+        public string ToJson()
+        {
+
+            return Newtonsoft.Json.JsonConvert.SerializeObject(this, CustomJsonSerializerSettings(new Newtonsoft.Json.JsonSerializerSettings {  }));
+
+        }
+        public static Point FromJson(string data)
+        {
+
+            return Newtonsoft.Json.JsonConvert.DeserializeObject<Point>(data, CustomJsonSerializerSettings(new Newtonsoft.Json.JsonSerializerSettings {  }));
+
+        }
+
+    }
+
+    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.0.0.0 (NJsonSchema v11.0.0.0 (Newtonsoft.Json v13.0.0.0))")]
+    public abstract partial class CoordinateSequence
+    {
+        [Newtonsoft.Json.JsonProperty("dimension", Required = Newtonsoft.Json.Required.DisallowNull, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
+        public int Dimension { get; set; } = default!;
+
+        [Newtonsoft.Json.JsonProperty("measures", Required = Newtonsoft.Json.Required.DisallowNull, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
+        public int Measures { get; set; } = default!;
+
+        [Newtonsoft.Json.JsonProperty("spatial", Required = Newtonsoft.Json.Required.DisallowNull, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
+        public int Spatial { get; set; } = default!;
+
+        [Newtonsoft.Json.JsonProperty("ordinates", Required = Newtonsoft.Json.Required.DisallowNull, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
+        public Ordinates Ordinates { get; set; } = default!;
+
+        [Newtonsoft.Json.JsonProperty("hasZ", Required = Newtonsoft.Json.Required.DisallowNull, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
+        public bool HasZ { get; set; } = default!;
+
+        [Newtonsoft.Json.JsonProperty("hasM", Required = Newtonsoft.Json.Required.DisallowNull, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
+        public bool HasM { get; set; } = default!;
+
+        [Newtonsoft.Json.JsonProperty("zOrdinateIndex", Required = Newtonsoft.Json.Required.DisallowNull, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
+        public int ZOrdinateIndex { get; set; } = default!;
+
+        [Newtonsoft.Json.JsonProperty("mOrdinateIndex", Required = Newtonsoft.Json.Required.DisallowNull, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
+        public int MOrdinateIndex { get; set; } = default!;
+
+        [Newtonsoft.Json.JsonProperty("first", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
+        public Coordinate? First { get; set; } = default!;
+
+        [Newtonsoft.Json.JsonProperty("last", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
+        public Coordinate? Last { get; set; } = default!;
+
+        [Newtonsoft.Json.JsonProperty("count", Required = Newtonsoft.Json.Required.DisallowNull, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
+        public int Count { get; set; } = default!;
+
+        private System.Collections.Generic.IDictionary<string, object>? _additionalProperties;
+
+        [Newtonsoft.Json.JsonExtensionData]
+        public System.Collections.Generic.IDictionary<string, object> AdditionalProperties
+        {
+            get { return _additionalProperties ?? (_additionalProperties = new System.Collections.Generic.Dictionary<string, object>()); }
+            set { _additionalProperties = value; }
+        }
+
+        public string ToJson()
+        {
+
+            return Newtonsoft.Json.JsonConvert.SerializeObject(this, CustomJsonSerializerSettings(new Newtonsoft.Json.JsonSerializerSettings {  }));
+
+        }
+        public static CoordinateSequence FromJson(string data)
+        {
+
+            return Newtonsoft.Json.JsonConvert.DeserializeObject<CoordinateSequence>(data, CustomJsonSerializerSettings(new Newtonsoft.Json.JsonSerializerSettings {  }));
+
+        }
+
+    }
+
+    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.0.0.0 (NJsonSchema v11.0.0.0 (Newtonsoft.Json v13.0.0.0))")]
+    public enum Dimension
+    {
+
+        Point = 0,
+
+        P = 0,
+
+        Curve = 1,
+
+        L = 1,
+
+        Surface = 2,
+
+        A = 2,
+
+        Collapse = 3,
+
+        Dontcare = -3,
+
+        True = -2,
+
+        False = -1,
+
+        Unknown = -1,
+
+    }
+
+    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.0.0.0 (NJsonSchema v11.0.0.0 (Newtonsoft.Json v13.0.0.0))")]
+    public enum OgcGeometryType
+    {
+
+        Point = 1,
+
+        LineString = 2,
+
+        Polygon = 3,
+
+        MultiPoint = 4,
+
+        MultiLineString = 5,
+
+        MultiPolygon = 6,
+
+        GeometryCollection = 7,
+
+        CircularString = 8,
+
+        CompoundCurve = 9,
+
+        CurvePolygon = 10,
+
+        MultiCurve = 11,
+
+        MultiSurface = 12,
+
+        Curve = 13,
+
+        Surface = 14,
+
+        PolyhedralSurface = 15,
+
+        TIN = 16,
+
+    }
+
+    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.0.0.0 (NJsonSchema v11.0.0.0 (Newtonsoft.Json v13.0.0.0))")]
+    public abstract partial class IAttributesTable
+    {
+        [Newtonsoft.Json.JsonProperty("count", Required = Newtonsoft.Json.Required.DisallowNull, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
+        public int Count { get; set; } = default!;
+
+        private System.Collections.Generic.IDictionary<string, object>? _additionalProperties;
+
+        [Newtonsoft.Json.JsonExtensionData]
+        public System.Collections.Generic.IDictionary<string, object> AdditionalProperties
+        {
+            get { return _additionalProperties ?? (_additionalProperties = new System.Collections.Generic.Dictionary<string, object>()); }
+            set { _additionalProperties = value; }
+        }
+
+        public string ToJson()
+        {
+
+            return Newtonsoft.Json.JsonConvert.SerializeObject(this, CustomJsonSerializerSettings(new Newtonsoft.Json.JsonSerializerSettings {  }));
+
+        }
+        public static IAttributesTable FromJson(string data)
+        {
+
+            return Newtonsoft.Json.JsonConvert.DeserializeObject<IAttributesTable>(data, CustomJsonSerializerSettings(new Newtonsoft.Json.JsonSerializerSettings {  }));
 
         }
 
@@ -2873,14 +3205,14 @@ namespace SOH.Process.Server.Generated
     {
         /// <summary>
         /// Gets or Sets Format.
-        /// <br/>
+        /// <br/>            
         /// </summary>
         [Newtonsoft.Json.JsonProperty("format", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
         public Format? Format { get; set; } = default!;
 
         /// <summary>
         /// Gets or Sets TransmissionMode.
-        /// <br/>
+        /// <br/>            
         /// </summary>
         [Newtonsoft.Json.JsonProperty("transmissionMode", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
         [Newtonsoft.Json.JsonConverter(typeof(Newtonsoft.Json.Converters.StringEnumConverter))]
@@ -2910,57 +3242,9 @@ namespace SOH.Process.Server.Generated
 
     }
 
-    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.0.0.0 (NJsonSchema v11.0.0.0 (Newtonsoft.Json v13.0.0.0))")]
-    public partial class Format
-    {
-        /// <summary>
-        /// Gets or Sets MediaType.
-        /// <br/>
-        /// </summary>
-        [Newtonsoft.Json.JsonProperty("mediaType", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
-        public string? MediaType { get; set; } = default!;
-
-        /// <summary>
-        /// Gets or Sets Encoding.
-        /// <br/>
-        /// </summary>
-        [Newtonsoft.Json.JsonProperty("encoding", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
-        public string? Encoding { get; set; } = default!;
-
-        /// <summary>
-        /// Gets or Sets Schema.
-        /// <br/>
-        /// </summary>
-        [Newtonsoft.Json.JsonProperty("schema", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
-        public object? Schema { get; set; } = default!;
-
-        private System.Collections.Generic.IDictionary<string, object>? _additionalProperties;
-
-        [Newtonsoft.Json.JsonExtensionData]
-        public System.Collections.Generic.IDictionary<string, object> AdditionalProperties
-        {
-            get { return _additionalProperties ?? (_additionalProperties = new System.Collections.Generic.Dictionary<string, object>()); }
-            set { _additionalProperties = value; }
-        }
-
-        public string ToJson()
-        {
-
-            return Newtonsoft.Json.JsonConvert.SerializeObject(this, CustomJsonSerializerSettings(new Newtonsoft.Json.JsonSerializerSettings {  }));
-
-        }
-        public static Format FromJson(string data)
-        {
-
-            return Newtonsoft.Json.JsonConvert.DeserializeObject<Format>(data, CustomJsonSerializerSettings(new Newtonsoft.Json.JsonSerializerSettings {  }));
-
-        }
-
-    }
-
     /// <summary>
     /// Gets or Sets Response.
-    /// <br/>
+    /// <br/>            
     /// </summary>
     [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.0.0.0 (NJsonSchema v11.0.0.0 (Newtonsoft.Json v13.0.0.0))")]
     public enum ResponseKind
@@ -2974,35 +3258,11 @@ namespace SOH.Process.Server.Generated
 
     }
 
-    /// <summary>
-    /// Optional URIs for callbacks for this job.  Support for this parameter is not required and the parameter may be
-    /// <br/>removed from the API definition, if conformance class **'callback'** is not listed in the conformance
-    /// <br/>declaration under `/conformance`.
-    /// <br/>
-    /// </summary>
     [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.0.0.0 (NJsonSchema v11.0.0.0 (Newtonsoft.Json v13.0.0.0))")]
-    public partial class Subscriber
+    public partial class Anonymous
     {
-        /// <summary>
-        /// Callback uri when process is finished.
-        /// <br/>
-        /// </summary>
-        [Newtonsoft.Json.JsonProperty("successUri", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
-        public string? SuccessUri { get; set; } = default!;
-
-        /// <summary>
-        /// Callback uri when starting process.
-        /// <br/>
-        /// </summary>
-        [Newtonsoft.Json.JsonProperty("inProgressUri", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
-        public string? InProgressUri { get; set; } = default!;
-
-        /// <summary>
-        /// Callback uri when process failed.
-        /// <br/>
-        /// </summary>
-        [Newtonsoft.Json.JsonProperty("failedUri", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
-        public string? FailedUri { get; set; } = default!;
+        [Newtonsoft.Json.JsonProperty("BoundingBox", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
+        public Envelope? BoundingBox { get; set; } = default!;
 
         private System.Collections.Generic.IDictionary<string, object>? _additionalProperties;
 
@@ -3019,10 +3279,10 @@ namespace SOH.Process.Server.Generated
             return Newtonsoft.Json.JsonConvert.SerializeObject(this, CustomJsonSerializerSettings(new Newtonsoft.Json.JsonSerializerSettings {  }));
 
         }
-        public static Subscriber FromJson(string data)
+        public static Anonymous FromJson(string data)
         {
 
-            return Newtonsoft.Json.JsonConvert.DeserializeObject<Subscriber>(data, CustomJsonSerializerSettings(new Newtonsoft.Json.JsonSerializerSettings {  }));
+            return Newtonsoft.Json.JsonConvert.DeserializeObject<Anonymous>(data, CustomJsonSerializerSettings(new Newtonsoft.Json.JsonSerializerSettings {  }));
 
         }
 

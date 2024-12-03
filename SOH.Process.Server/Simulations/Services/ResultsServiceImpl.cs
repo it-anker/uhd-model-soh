@@ -13,7 +13,7 @@ public class ResultsServiceImpl(
 {
     public async Task<string> CreateAsync(Result results, CancellationToken token = default)
     {
-        ArgumentException.ThrowIfNullOrEmpty(results.SimulationId);
+        ArgumentException.ThrowIfNullOrEmpty(results.ProcessId);
         ArgumentException.ThrowIfNullOrEmpty(results.JobId);
         results.Id = "result:" + Guid.NewGuid();
         await persistence.UpsertAsync(results.Id, results, token);
@@ -22,7 +22,7 @@ public class ResultsServiceImpl(
 
     public async Task UpdateAsync(string resultId, Result request, CancellationToken token = default)
     {
-        ArgumentException.ThrowIfNullOrEmpty(request.SimulationId);
+        ArgumentException.ThrowIfNullOrEmpty(request.ProcessId);
         ArgumentException.ThrowIfNullOrEmpty(request.JobId);
 
         await persistence.UpsertAsync(resultId, request, token);

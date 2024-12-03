@@ -15,18 +15,28 @@ public static class Startup
         var databaseSettings = configuration.GetSection("Redis").Get<RedisDatabaseSettings>();
         ArgumentNullException.ThrowIfNull(databaseSettings);
 
-        var SerializerSettings = new JsonSerializerSettings();
+        var serializerSettings = new JsonSerializerSettings();
 
-        SerializerSettings.ReferenceLoopHandling = ReferenceLoopHandling.Ignore;
-        SerializerSettings.NullValueHandling = NullValueHandling.Ignore;
-        SerializerSettings.DefaultValueHandling = DefaultValueHandling.Include;
-        SerializerSettings.DateFormatHandling = DateFormatHandling.IsoDateFormat;
-        SerializerSettings.Converters.Add(new FeatureCollectionConverter());
-        SerializerSettings.Converters.Add(new FeatureConverter());
-        SerializerSettings.Converters.Add(new GeometryConverter());
+        serializerSettings.ReferenceLoopHandling = ReferenceLoopHandling.Ignore;
+        serializerSettings.NullValueHandling = NullValueHandling.Ignore;
+        serializerSettings.DefaultValueHandling = DefaultValueHandling.Include;
+        serializerSettings.DateFormatHandling = DateFormatHandling.IsoDateFormat;
+        serializerSettings.Converters.Add(new FeatureCollectionConverter());
+        serializerSettings.Converters.Add(new FeatureConverter());
+        serializerSettings.Converters.Add(new AttributesTableConverter());
+        serializerSettings.Converters.Add(new GeometryConverter());
+
+        var options = new JsonSerializerOptions
+        {
+            ReferenceHandler = ReferenceHandler.IgnoreCycles,
+            DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull,
+            NumberHandling = JsonNumberHandling.AllowNamedFloatingPointLiterals
+        };
+
+        options.Converters.Add(new GeoJsonConverterFactory());
 
         return services
-            .AddSingleton(SerializerSettings)
+            .AddSingleton(options)
             .AddSingleton<IConnectionMultiplexer>(_ =>
                 ConnectionMultiplexer.Connect(databaseSettings.ConnectionString))
             .AddBackgroundJobs(configuration, environment)

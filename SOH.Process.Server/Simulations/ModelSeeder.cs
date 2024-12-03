@@ -1,6 +1,9 @@
 using Mapster;
 using Microsoft.Extensions.Localization;
+using NetTopologySuite.Features;
+using NetTopologySuite.Geometries;
 using SOH.Process.Server.Models.Ogc;
+using SOH.Process.Server.Models.Parameters;
 using SOH.Process.Server.Resources;
 
 namespace SOH.Process.Server.Simulations;
@@ -8,11 +11,37 @@ namespace SOH.Process.Server.Simulations;
 internal class ModelSeeder(
     ISimulationService simulationService,
     IConfiguration configuration,
-    IStringLocalizer<SharedResource> localizer) : ICustomSeeder
+    IStringLocalizer<SharedResource> localization) : ICustomSeeder
 {
     public async Task InitializeAsync(CancellationToken cancellationToken)
     {
         await SeedFerrySimulationProcess(cancellationToken);
+        #if DEBUG
+
+        var testModel = new CreateSimulationProcessDescriptionRequest
+        {
+            ExecutionKind = ProcessExecutionKind.Direct,
+            Title = "TestModel",
+            Description = "TestDesc",
+            Version = "0.0.1",
+            Keywords = ["test"],
+            JobControlOptions =
+            [
+                JobControlOptions.SynchronousExecution
+            ],
+            OutputTransmission =
+            [
+                TransmissionMode.Value
+            ]
+        };
+
+        const string testId = "simulation:testProcessId";
+        var testProcess = await simulationService.FindSimulationAsync(testId, cancellationToken);
+        if (testProcess == null)
+        {
+            await simulationService.CreateAsync(testId, testModel, cancellationToken);
+        }
+        #endif
     }
 
     private async Task SeedFerrySimulationProcess(CancellationToken cancellationToken)
@@ -20,11 +49,11 @@ internal class ModelSeeder(
         string host = configuration["ApiBaseUrl"] !;
         if (!host.EndsWith('/')) host += "/";
 
-        var ferryModel = new CreateSimulationProcessRequest
+        var ferryModel = new CreateSimulationProcessDescriptionRequest
         {
             ExecutionKind = ProcessExecutionKind.Direct,
-            Title = localizer["ferry_transfer_model_title"],
-            Description = localizer["ferry_transfer_model_description"],
+            Title = localization["ferry_transfer_model_title"],
+            Description = localization["ferry_transfer_model_description"],
             Version = "1.0.0",
             Keywords = ["ferry", "transfer", "simulation"],
             JobControlOptions =
@@ -34,24 +63,44 @@ internal class ModelSeeder(
             ],
             OutputTransmission =
             [
-                TransmissionMode.ValueEnum
+                TransmissionMode.Value
             ],
             Outputs = new Dictionary<string, OutputDescription>
             {
                 {
                     "agentsOutput", new OutputDescription
                     {
-                        Description = localizer["ferry_transfer_output_agents"],
-                        Keywords = ["point", "result", "agent"],
-                        Title = localizer["ferry_transfer_output_agents_title"]
+                        Format = new Format
+                        {
+                            MediaType = "application/geo+json",
+                        },
+                        Schema = new Schema
+                        {
+                            Title = localization["ferry_transfer_output_agents"],
+                            ContentMediaType = "application/geo+json",
+                            Default = new FeatureCollection(),
+                            Example = new FeatureCollection
+                            {
+                                new Feature(new Point(9.978667786160287, 53.54407542750305),
+                                    new AttributesTable
+                                    {
+                                        { "ActiveCapability", "Walking" },
+                                        { "RouteLength", 8838 },
+                                        { "DistanceStartGoal", 6281.220268477454 },
+                                        { "tick", 12 },
+                                        { "dateTime", "2024-12-01T07:20:01" }
+                                    })
+                            }
+                        }
                     }
                 }
             },
-            Links = [
+            Links =
+            [
                 new Link
                 {
                     Href = new Uri(host + $"/processes/{GlobalConstants.FerryTransferId}").ToString(),
-                    Title = localizer["model_self_description"],
+                    Title = localization["model_self_description"],
                     Rel = "self",
                     Type = "application/json"
                 }
@@ -68,7 +117,7 @@ internal class ModelSeeder(
         }
         else
         {
-            var update = ferryModel.Adapt<UpdateSimulationProcessRequest>();
+            var update = ferryModel.Adapt<UpdateSimulationProcessDescriptionRequest>();
             await simulationService.UpdateAsync(GlobalConstants.FerryTransferId,
                 update, cancellationToken);
         }

@@ -7,11 +7,11 @@ namespace SOH.Process.Server.Tests;
 
 public class ProcessManagementTests : AbstractManagementTests
 {
-    private IRequestHandler<CreateSimulationProcessRequest, SimulationProcess> _createProcessHandler;
+    private IRequestHandler<CreateSimulationProcessDescriptionRequest, SimulationProcessDescription> _createProcessHandler;
 
     public ProcessManagementTests(OgcIntegration services) : base(services)
     {
         _createProcessHandler = Services.GetRequiredService<
-            IRequestHandler<CreateSimulationProcessRequest, SimulationProcess>>();
+            IRequestHandler<CreateSimulationProcessDescriptionRequest, SimulationProcessDescription>>();
     }
 }

@@ -16,6 +16,7 @@ public static class OgcProcessesApiExtensions
         options.Converters.Add(new FeatureCollectionConverter());
         options.Converters.Add(new FeatureConverter());
         options.Converters.Add(new GeometryConverter());
+        options.Converters.Add(new AttributesTableConverter());
         return options;
     }
 }

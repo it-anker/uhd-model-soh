@@ -14,24 +14,16 @@ public sealed class ExceptionResult : Dictionary<string, object>
     [Required]
     public string ErrorId { get; set; } = default!;
 
-    [DataMember(Name = "source")]
-    public string? Source { get; set; }
+    [Required, DataMember(Name = "type")]
+    public string Type { get; set; } = default!;
+
+    [DataMember(Name = "title")]
+    public string? Title { get; set; }
 
     [Required]
     [DataMember(Name = "statusCode")]
     public HttpStatusCode StatusCode { get; set; } = HttpStatusCode.InternalServerError;
 
-    [DataMember(Name = "stackTrace")]
-    public string? StackTrace { get; set; }
-
-    [DataMember(Name = "exception")]
-    [Required]
-    public string Exception { get; set; } = default!;
-
-    [DataMember(Name = "messages")]
-    [Required]
-    public List<string> Messages { get; set; } = [];
-
-    [DataMember(Name = "supportMessage")]
-    public string? SupportMessage { get; set; }
+    [DataMember(Name = "details")]
+    public string? Exception { get; set; }
 }

@@ -1,15 +1,25 @@
 using Hangfire.Common;
 using Hangfire.States;
 using Mapster;
+using Mars.Common.Core;
 using MediatR;
 using Microsoft.Extensions.DependencyInjection;
 using Moq;
+using ServiceStack;
 using SOH.Process.Server.Models.Common.Exceptions;
-using SOH.Process.Server.Models.Ogc;
 using SOH.Process.Server.Models.Processes;
 using SOH.Process.Server.Simulations;
 using SOH.Process.Server.Simulations.Jobs;
 using SOH.Process.Server.Tests.Base;
+using ZstdSharp.Unsafe;
+using Execute = SOH.Process.Server.Models.Ogc.Execute;
+using Format = SOH.Process.Server.Models.Parameters.Format;
+using InputDescription = SOH.Process.Server.Models.Parameters.InputDescription;
+using JobControlOptions = SOH.Process.Server.Models.Ogc.JobControlOptions;
+using OutputDescription = SOH.Process.Server.Models.Ogc.OutputDescription;
+using Schema = SOH.Process.Server.Models.Ogc.Schema;
+using StatusCode = SOH.Process.Server.Models.Processes.StatusCode;
+using TransmissionMode = SOH.Process.Server.Models.Ogc.TransmissionMode;
 
 namespace SOH.Process.Server.Tests;
 
@@ -27,12 +37,41 @@ public class SimulationManagementTests : AbstractManagementTests
     [Fact]
     public async Task TestCreateSimulation()
     {
-        var create = new CreateSimulationProcessRequest
+        var create = new CreateSimulationProcessDescriptionRequest
         {
             Title = "SOH Test",
             Description = "my sim desc",
             Keywords = ["planning", "ferry"],
-            Version = "1.0.0"
+            Version = "1.0.0",
+            JobControlOptions = [JobControlOptions.SynchronousExecution],
+            OutputTransmission = [TransmissionMode.Value],
+            Inputs = new Dictionary<string, InputDescription>
+            {
+                {
+                    "myInput", new InputDescription
+                    {
+
+                        Description = "my input desc", Keywords = ["input", "param"],
+                        Title = "MyInput", MaxOccurs = 2, Schema = new Schema
+                        {
+                            Description = "my schema desc"
+                        }
+                    }
+                }
+            },
+            Outputs = new Dictionary<string, OutputDescription>
+            {
+                {
+                    "myGeoJsonOutput", new OutputDescription
+                    {
+                        TransmissionMode = TransmissionMode.Value,
+                        Format = new Format
+                        {
+                            MediaType = "application/geo+json"
+                        }
+                    }
+                }
+            }
         };
 
         string simulationId = await _simulationService.CreateAsync(create);
@@ -45,6 +84,24 @@ public class SimulationManagementTests : AbstractManagementTests
         Assert.Contains("planning", simulation.Keywords);
         Assert.DoesNotContain("soh", simulation.Keywords);
         Assert.Contains("ferry", simulation.Keywords);
+        Assert.Single(simulation.Inputs);
+        Assert.Single(simulation.OutputTransmission);
+        Assert.Equal(TransmissionMode.Value, simulation.OutputTransmission[0]);
+        Assert.Equal(JobControlOptions.SynchronousExecution, simulation.JobControlOptions[0]);
+        Assert.Contains("myInput", simulation.Inputs);
+
+        var input = simulation.Inputs.Values.First();
+        Assert.Equal("my input desc", input.Description);
+        Assert.Equal(1, input.MinOccurs);
+        Assert.Equal(2, input.MaxOccurs.Value<int>());
+        Assert.Equal("MyInput", input.Title);
+        Assert.Contains("param", input.Keywords);
+
+        Assert.Single(simulation.Outputs);
+        var output = simulation.Outputs.Values.First();
+        Assert.Equal(TransmissionMode.Value, output.TransmissionMode);
+        Assert.NotNull(output.Format);
+        Assert.Equal("application/geo+json", output.Format.MediaType);
 
         await Assert.ThrowsAsync<NotFoundException>(() =>
             _simulationService.GetSimulationAsync(Guid.NewGuid().ToString()));
@@ -61,7 +118,7 @@ public class SimulationManagementTests : AbstractManagementTests
     {
         for (int i = 0; i < 10; i++)
         {
-            var create = new CreateSimulationProcessRequest
+            var create = new CreateSimulationProcessDescriptionRequest
             {
                 Title = "TestUpdateSimulation" + i,
                 Version = "1.0.0",
@@ -83,7 +140,7 @@ public class SimulationManagementTests : AbstractManagementTests
     [Fact]
     public async Task TestUpdateSimulation()
     {
-        var create = new CreateSimulationProcessRequest
+        var create = new CreateSimulationProcessDescriptionRequest
         {
             Title = "TestUpdateSimulation",
             Description = "my sim desc"
@@ -95,7 +152,7 @@ public class SimulationManagementTests : AbstractManagementTests
 
         var simulation = await _simulationService.GetSimulationAsync(simulationId);
         Assert.Equal("TestUpdateSimulation", simulation.Title);
-        var update = simulation.Adapt<UpdateSimulationProcessRequest>();
+        var update = simulation.Adapt<UpdateSimulationProcessDescriptionRequest>();
         Assert.Equal("my sim desc", simulation.Description);
         update.Description = "my updated desc";
         update.Version = "1.0.1";
@@ -122,7 +179,7 @@ public class SimulationManagementTests : AbstractManagementTests
     [Fact]
     public async Task TestRunSimulationSync()
     {
-        var create = new CreateSimulationProcessRequest
+        var create = new CreateSimulationProcessDescriptionRequest
         {
             Title = "TestRunSimulation",
             Version = "1.0.0",
@@ -169,9 +226,9 @@ public class SimulationManagementTests : AbstractManagementTests
         Assert.Equal("SOH - Ferry Transfer Model", ferryTransferProcess.Title);
         Assert.Single(ferryTransferProcess.Outputs);
         var singleOutput = ferryTransferProcess.Outputs.Values.First();
+        Assert.NotNull(singleOutput.Schema);
         Assert.Equal("Point-based output of each agent and their values with different simulation times.",
-            singleOutput.Description);
-        Assert.Equal("Ferry transfer agents result", singleOutput.Title);
+            singleOutput.Schema.Title);
 
         Assert.Contains(GlobalConstants.FerryTransfer, ferryTransferProcess.Id);
         Assert.Equal(ProcessExecutionKind.Direct, ferryTransferProcess.ExecutionKind);
@@ -218,9 +275,9 @@ public class SimulationManagementTests : AbstractManagementTests
         Assert.Equal("SOH - Ferry Transfer Model", ferryTransferProcess.Title);
         Assert.Single(ferryTransferProcess.Outputs);
         var singleOutput = ferryTransferProcess.Outputs.Values.First();
+        Assert.NotNull(singleOutput.Schema);
         Assert.Equal("Point-based output of each agent and their values with different simulation times.",
-            singleOutput.Description);
-        Assert.Equal("Ferry transfer agents result", singleOutput.Title);
+            singleOutput.Schema.Title);
 
         Assert.Contains(GlobalConstants.FerryTransfer, ferryTransferProcess.Id);
         Assert.Equal(ProcessExecutionKind.Direct, ferryTransferProcess.ExecutionKind);
@@ -282,7 +339,7 @@ public class SimulationManagementTests : AbstractManagementTests
     [Fact]
     public async Task TestFailedSimulation()
     {
-        var create = new CreateSimulationProcessRequest
+        var create = new CreateSimulationProcessDescriptionRequest
         {
             Title = "TestFailedSimulationAsync",
             Version = "1.0.0",
@@ -303,7 +360,7 @@ public class SimulationManagementTests : AbstractManagementTests
                 Inputs = new Dictionary<string, object>
                 {
                     {
-                        "func", new Action(() =>
+                        "func", new Action<int, SimulationJob>((i, job) =>
                             throw new InvalidOperationException("any error during sim run"))
                     }
                 }
@@ -317,7 +374,7 @@ public class SimulationManagementTests : AbstractManagementTests
     [Fact]
     public async Task TestRunSimulationAsync()
     {
-        var create = new CreateSimulationProcessRequest
+        var create = new CreateSimulationProcessDescriptionRequest
         {
             Title = "TestRunSimulationAsync",
             Version = "1.0.0",
@@ -355,7 +412,7 @@ public class SimulationManagementTests : AbstractManagementTests
     [Fact]
     public async Task TestDeleteSimulation()
     {
-        var create = new CreateSimulationProcessRequest
+        var create = new CreateSimulationProcessDescriptionRequest
         {
             Title = "test process",
             Description = "my deleted desc",

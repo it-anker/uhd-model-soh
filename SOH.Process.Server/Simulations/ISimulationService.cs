@@ -5,13 +5,13 @@ namespace SOH.Process.Server.Simulations;
 
 public interface ISimulationService
 {
-    Task<string> CreateAsync(CreateSimulationProcessRequest request, CancellationToken token = default);
+    Task<string> CreateAsync(CreateSimulationProcessDescriptionRequest descriptionRequest, CancellationToken token = default);
 
-    Task<string> CreateAsync(string id, CreateSimulationProcessRequest request, CancellationToken token = default);
+    Task<string> CreateAsync(string id, CreateSimulationProcessDescriptionRequest descriptionRequest, CancellationToken token = default);
 
     Task<string> CreateAsync(SimulationJob request, CancellationToken token = default);
 
-    Task UpdateAsync(string simulationId, UpdateSimulationProcessRequest request, CancellationToken token = default);
+    Task UpdateAsync(string simulationId, UpdateSimulationProcessDescriptionRequest descriptionRequest, CancellationToken token = default);
 
     Task UpdateAsync(string jobId, SimulationJob request, CancellationToken token = default);
 
@@ -21,11 +21,11 @@ public interface ISimulationService
 
     Task DeleteAsync(string id, CancellationToken token = default);
 
-    Task<SimulationProcess> GetSimulationAsync(string simulationId, CancellationToken token = default);
+    Task<SimulationProcessDescription> GetSimulationAsync(string simulationId, CancellationToken token = default);
 
     Task<SimulationJob> GetSimulationJobAsync(string jobId, CancellationToken token = default);
 
-    Task<SimulationProcess?> FindSimulationAsync(string simulationId, CancellationToken token = default);
+    Task<SimulationProcessDescription?> FindSimulationAsync(string simulationId, CancellationToken token = default);
 
     Task<SimulationJob?> FindJobAsync(string jobId, CancellationToken token = default);
 
@@ -33,9 +33,9 @@ public interface ISimulationService
 
     Task<ProcessList> ListProcessesAsync(ParameterLimit simulation, CancellationToken token = default);
 
-    Task<ParameterLimitResponse<SimulationProcess>> ListProcessesPaginatedAsync(
+    Task<ParameterLimitResponse<SimulationProcessDescription>> ListProcessesPaginatedAsync(
         ParameterLimit simulation, CancellationToken token = default);
 
-    Task<ParameterLimitResponse<SimulationProcess>> ListProcessesPaginatedAsync(
+    Task<ParameterLimitResponse<SimulationProcessDescription>> ListProcessesPaginatedAsync(
         string query, ParameterLimit simulation, CancellationToken token = default);
 }

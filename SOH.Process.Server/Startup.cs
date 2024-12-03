@@ -7,6 +7,7 @@ using SOH.Process.Server.Middlewares;
 using SOH.Process.Server.Persistence;
 using SOH.Process.Server.Simulations;
 using SOH.Process.Server.Simulations.Services;
+using SOH.Process.Server.Simulations.Workflows;
 using SOH.Process.Server.Validation;
 
 namespace SOH.Process.Server;
@@ -72,6 +73,7 @@ public static class Startup
             .AddScoped<ISimulationService, SimulationServiceImpl>()
             .AddScoped<IResultService, ResultsServiceImpl>()
             .AddScoped<ICustomSeeder, ModelSeeder>()
+            .AddScoped<JobSubscribeWorkflow>()
             .AddMediatR(config =>
                 config.RegisterServicesFromAssemblies(assemblies)
                     .AddBehavior(typeof(IPipelineBehavior<,>), typeof(LoggingBehavior<,>))

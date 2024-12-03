@@ -35,7 +35,7 @@ public class ConformanceController : BaseApiRouteController
     [SwaggerResponse(200, type: typeof(ConfClasses),
         description:
         "The URIs of all conformance classes supported by the server.  To support generic clients that want to access multiple OGC API - Processes implementations - and not just a specific API / server, the server declares the conformance classes it implements and conforms to.")]
-    [SwaggerResponse(500, type: typeof(ExceptionResult), description: "A server error occurred.")]
+    [SwaggerResponse(500, type: typeof(ProblemDetails), description: "A server error occurred.")]
     public virtual IActionResult GetConformanceClasses()
     {
         var classes = new ConfClasses

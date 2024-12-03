@@ -8,19 +8,19 @@ namespace SOH.Process.Server.Models.Parameters;
 public sealed class InputDescription : DescriptionType
 {
     /// <summary>
-    ///     Gets or Sets MinOccurs.
+    ///     Gets or sets the minimum required elements.
     /// </summary>
     [DataMember(Name = "minOccurs")]
-    public int? MinOccurs { get; set; }
+    public int MinOccurs { get; set; } = 1;
 
     /// <summary>
-    ///     Gets or Sets MaxOccurs.
+    ///     Gets or sets the maximum required elements.
     /// </summary>
     [DataMember(Name = "maxOccurs")]
     public object? MaxOccurs { get; set; }
 
     /// <summary>
-    ///     Gets or Sets Schema.
+    ///     Gets or sets the underlying schema used to describe this input.
     /// </summary>
     [Required]
     [DataMember(Name = "schema")]

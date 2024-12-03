@@ -31,7 +31,7 @@ public class CapabilitiesController(IOptions<OgcSettings> configuration) : BaseA
     [SwaggerResponse(200, type: typeof(LandingPage),
         description:
         "The landing page provides links to the API definition (link relations &#x60;service-desc&#x60; and &#x60;service-doc&#x60;), the Conformance declaration (path &#x60;/conformance&#x60;, link relation &#x60;http://www.opengis.net/def/rel/ogc/1.0/conformance&#x60;), and to other resources.")]
-    [SwaggerResponse(500, type: typeof(ExceptionResult), description: "A server error occurred.")]
+    [SwaggerResponse(500, type: typeof(ProblemDetails), description: "A server error occurred.")]
     public ActionResult<LandingPage> GetLandingPage()
     {
         return Ok(configuration.Value.Capabilities);

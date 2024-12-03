@@ -49,7 +49,9 @@
       "operationGenerationMode": "MultipleClientsFromOperationId",
       "additionalNamespaceUsages": [
         "FluentValidation.Results",
+        "NetTopologySuite.Features",
         "System.Net",
+        "Microsoft.AspNetCore.Mvc",
         "SOH.Process.Server.Models.Common",
         "SOH.Process.Server.Models.Common.Exceptions",
         "SOH.Process.Server.Models.Ogc",
@@ -87,7 +89,10 @@
       "generateDefaultValues": true,
       "generateDataAnnotations": true,
       "excludedTypeNames": [
-        "HttpStatusCode"
+        "HttpStatusCode", "ProblemDetails", "FeatureCollection", "Result", "Results",
+        "Feature", "SimulationJob","StatusInfo", "Process", "SimulationProcess",
+        "ProcessList","Execute", "InputDescription", "OutputDescription", "TransmissionMode", "Schema", "Format",
+        "Subscriber"
       ],
       "excludedParameterNames": [],
       "handleReferences": false,

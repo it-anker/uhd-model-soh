@@ -4,11 +4,11 @@ using NetTopologySuite.Features;
 
 namespace SOH.Process.Server.Models.Ogc;
 
-public class Result : AbstractEntity
+public class Result
 {
     [Required]
     [DataMember(Name = "processID")]
-    public string SimulationId { get; set; } = default!;
+    public string ProcessId { get; set; } = default!;
 
     [Required] [DataMember(Name = "jobID")]
     public string JobId { get; set; } = default!;
@@ -21,7 +21,7 @@ public class Result : AbstractEntity
 
     [Required]
     [DataMember(Name = "resultID")]
-    public override string Id { get; set; } = default!;
+    public string Id { get; set; } = default!;
 }
 
 [DataContract]

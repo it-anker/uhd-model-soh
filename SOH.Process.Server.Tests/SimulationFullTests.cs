@@ -21,7 +21,7 @@ public class SimulationFullTests : AbstractFullManagementTests
     [Fact]
     public async Task TestRunSimulationAsync()
     {
-        var create = new CreateSimulationProcessRequest
+        var create = new CreateSimulationProcessDescriptionRequest
         {
             Title = "TestRunSimulationAsync",
             Version = "1.0.0",

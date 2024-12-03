@@ -33,6 +33,7 @@ public static class Startup
             .AddDistributedMemoryCache()
             .AddMiddlewares(config)
             .AddCorsPolicy(config)
+            .AddHttpClient()
             .AddHttpContextAccessor()
             .AddIdempotentAPIUsingDistributedCache()
             .AddRouting(options => options.LowercaseUrls = true)
@@ -67,6 +68,7 @@ public static class Startup
                 options.SerializerSettings.Converters.Add(new FeatureCollectionConverter());
                 options.SerializerSettings.Converters.Add(new FeatureConverter());
                 options.SerializerSettings.Converters.Add(new GeometryConverter());
+                options.SerializerSettings.Converters.Add(new AttributesTableConverter());
 
             })
             .Services

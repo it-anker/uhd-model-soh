@@ -2,8 +2,8 @@ using System.Net;
 using System.Text.Json;
 using FluentValidation;
 using Mapster;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Localization;
-using Serilog;
 using Serilog.Context;
 using SOH.Process.Server.Models.Common;
 using SOH.Process.Server.Models.Common.Exceptions;
@@ -22,10 +22,6 @@ public class ExceptionMiddleware(IStringLocalizer<SharedResource> localizer) : I
         {
             await next(context);
         }
-        catch (ValidationException exception)
-        {
-            await HandleValidationException(context, exception);
-        }
         catch (Exception exception)
         {
             await HandleDefaultException(context, exception);
@@ -39,68 +35,68 @@ public class ExceptionMiddleware(IStringLocalizer<SharedResource> localizer) : I
         LogContext.PushProperty("ErrorId", errorId);
         LogContext.PushProperty("StackTrace", exception.StackTrace);
 
-        var errorResult = new ExceptionResult
+        var errorResult = new ProblemDetails
         {
-            ErrorId = errorId,
-            SupportMessage = localizer["Provide the ErrorId to the support team for further analysis"]
+            Extensions = { { "errorId", errorId } },
+            Detail = exception.Message,
+            Instance = context.Request.Path
         };
 
-#if DEBUG
-        errorResult.Source = exception.TargetSite?.DeclaringType?.FullName;
-        errorResult.Exception = exception.Message.Trim();
-        errorResult.Messages.Add(exception.Message);
-
-        Log.Logger.Error("{ExceptionMessage}", exception.Message);
-        Log.Logger.Error("{StackTrace}", exception.StackTrace);
-#endif
         var response = context.Response;
         response.ContentType = "application/json";
         if (exception is not CustomException && exception.InnerException != null)
             exception = exception.InnerException;
 
         GetStatusCodeAndMessage(exception, response, errorResult);
+        errorResult.Title = GetTitleFromException(exception);
+        if (errorResult.Status != null)
+            response.StatusCode = errorResult.Status.GetValueOrDefault();
 
-        if (response.StatusCode == (int)HttpStatusCode.InternalServerError)
-            errorResult.StackTrace = exception.StackTrace;
+        if (exception is ValidationException validationException)
+        {
+            var validations = validationException.Errors.Adapt<List<CustomValidationFailure>>();
+            errorResult.Extensions.Add("validation", validations);
+            errorResult.Status = (int?)HttpStatusCode.BadRequest;
+        }
 
         await response.WriteAsync(JsonSerializer.Serialize(errorResult));
     }
 
-    private static async Task HandleValidationException(HttpContext context, ValidationException exception)
+    private string GetTitleFromException(Exception exception)
     {
-        var validationResult = new CustomValidationResult
+        return exception switch
         {
-            Errors = exception.Errors.Select(validationFailure => 
-                    validationFailure.Adapt<CustomValidationFailure>())
-                .ToList()
+            BadRequestException => localizer["Invalid request."],
+            NotFoundException => localizer["Data not found."],
+            ConflictException => localizer["Request with resource already created."],
+            UnauthorizedException => localizer["You are not authorized to access this resource."],
+            ForbiddenException => localizer["Accessing this resource is not allowed."],
+            _ => localizer["Something wrong happened."]
         };
-
-        context.Response.StatusCode = StatusCodes.Status400BadRequest;
-        await context.Response.WriteAsJsonAsync(validationResult);
     }
 
-    private static void GetStatusCodeAndMessage(Exception exception, HttpResponse response, ExceptionResult errorResult)
+    private static void GetStatusCodeAndMessage(Exception exception,
+        HttpResponse response, ProblemDetails errorResult)
     {
         switch (exception)
         {
             case CustomException customException:
-                errorResult.StatusCode = customException.StatusCode;
-                response.StatusCode = (int)errorResult.StatusCode;
+                errorResult.Status = (int)customException.StatusCode;
 
                 if (customException.ErrorMessages is not null)
                 {
-                    errorResult.Messages = customException.ErrorMessages;
+                    errorResult.Extensions.Add("errorMessages", customException.ErrorMessages);
                 }
 
                 break;
 
             case KeyNotFoundException:
-                errorResult.StatusCode = HttpStatusCode.NotFound;
+                errorResult.Status = (int)HttpStatusCode.NotFound;
                 response.StatusCode = (int)HttpStatusCode.NotFound;
                 break;
 
             default:
-                errorResult.StatusCode = HttpStatusCode.InternalServerError;
+                errorResult.Status = (int)HttpStatusCode.InternalServerError;
                 response.StatusCode = (int)HttpStatusCode.InternalServerError;
                 break;
         }

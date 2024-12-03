@@ -6,10 +6,16 @@ using SOH.Process.Server.Models.Parameters;
 namespace SOH.Process.Server.Models.Processes;
 
 [DataContract]
-public class ProcessSummary : AbstractEntity
+public class ProcessSummary
 {
     /// <summary>
-    ///     A title to display.
+    ///     The unique identifier of this process.
+    /// </summary>
+    [Required] [DataMember(Name = "id")]
+    public string Id { get; set; } = default!;
+
+    /// <summary>
+    ///     Gets or sets the title to display.
     /// </summary>
     [DataMember(Name = "title")]
     public string? Title { get; set; }
@@ -62,4 +68,23 @@ public class ProcessSummary : AbstractEntity
     /// </summary>
     [DataMember(Name = "links")]
     public List<Link> Links { get; set; } = [];
+
+    private bool Equals(ProcessSummary? other)
+    {
+        if (other is null) return false;
+        if (ReferenceEquals(this, other)) return true;
+        return Id == other.Id;
+    }
+
+    public override bool Equals(object? obj)
+    {
+        if (obj is null) return false;
+        if (ReferenceEquals(this, obj)) return true;
+        return obj.GetType() == GetType() && Equals((ProcessSummary)obj);
+    }
+
+    public override int GetHashCode()
+    {
+        return Id.GetHashCode();
+    }
 }

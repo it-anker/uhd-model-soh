@@ -14,6 +14,9 @@ public class SimulationJob : StatusInfo
     [DataMember(Name = "cancelRequested")]
     public bool IsCancellationRequested { get; set; }
 
+    [DataMember(Name = "failedMessage")]
+    public string? ExceptionMessage { get; set; }
+
     public void Update(SimulationJob job)
     {
         ResultId = job.ResultId;

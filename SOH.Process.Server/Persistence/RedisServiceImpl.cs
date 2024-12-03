@@ -1,6 +1,5 @@
 using System.Runtime.CompilerServices;
 using System.Text.Json;
-using Newtonsoft.Json;
 using SOH.Process.Server.Models.Processes;
 using StackExchange.Redis;
 using static System.ArgumentNullException;
@@ -10,7 +9,7 @@ namespace SOH.Process.Server.Persistence;
 
 public class RedisServiceImpl(
     IConnectionMultiplexer redis,
-    JsonSerializerSettings jsonOptions) : IPersistence
+    JsonSerializerOptions jsonOptions) : IPersistence
 {
     private readonly IDatabaseAsync _database = redis.GetDatabase();
 
@@ -19,20 +18,15 @@ public class RedisServiceImpl(
         ThrowIfNull(entity);
         ArgumentException.ThrowIfNullOrEmpty(key);
 
-        string json = JsonConvert.SerializeObject(entity);
+        string json = JsonSerializer.Serialize(entity, jsonOptions);
         await _database.StringSetAsync(key, json);
-    }
-
-    public Task UploadFileAsync(string key, Stream stream, CancellationToken token = default)
-    {
-        throw new NotImplementedException();
     }
 
     public async Task<TEntity?> FindAsync<TEntity>(string key, CancellationToken token = default)
     {
         var value = await _database.StringGetAsync(key);
 
-        return value.IsNullOrEmpty ? default : JsonConvert.DeserializeObject<TEntity>(value!, jsonOptions);
+        return value.IsNullOrEmpty ? default : JsonSerializer.Deserialize<TEntity>(value!, jsonOptions);
     }
 
     public async IAsyncEnumerable<TEntity> ListAsync<TEntity>(string query,
@@ -49,7 +43,7 @@ public class RedisServiceImpl(
                 continue;
             }
 
-            var entity = JsonConvert.DeserializeObject<TEntity>(value!, jsonOptions);
+            var entity = JsonSerializer.Deserialize<TEntity>(value!, jsonOptions);
 
             if (!Equals(entity, default(TEntity)))
             {
@@ -101,7 +95,7 @@ public class RedisServiceImpl(
 
         var data = values
             .Where(v => v.HasValue)
-            .Select(v => JsonConvert.DeserializeObject<TEntity>(v.ToString())!)
+            .Select(v => JsonSerializer.Deserialize<TEntity>(v.ToString(), jsonOptions)!)
             .ToList();
 
         return new ParameterLimitResponse<TEntity>(data, totalKeysCount, parameterLimit.PageSize,
@@ -111,6 +105,6 @@ public class RedisServiceImpl(
     public async Task<TEntity?> DeleteAsync<TEntity>(string key, CancellationToken token = default)
     {
         var value = await _database.StringGetDeleteAsync(key);
-        return value.IsNullOrEmpty ? default : JsonConvert.DeserializeObject<TEntity>(value!);
+        return value.IsNullOrEmpty ? default : JsonSerializer.Deserialize<TEntity>(value!, jsonOptions);
     }
 }

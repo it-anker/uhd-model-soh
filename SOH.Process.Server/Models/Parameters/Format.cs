@@ -6,19 +6,19 @@ namespace SOH.Process.Server.Models.Parameters;
 public class Format
 {
     /// <summary>
-    ///     Gets or Sets MediaType.
+    ///     Gets or sets the media type.
     /// </summary>
     [DataMember(Name = "mediaType")]
     public string? MediaType { get; set; }
 
     /// <summary>
-    ///     Gets or Sets Encoding.
+    ///     Gets or sets the encoding to read.
     /// </summary>
     [DataMember(Name = "encoding")]
     public string? Encoding { get; set; }
 
     /// <summary>
-    ///     Gets or Sets Schema.
+    ///     Gets or sets the schema.
     /// </summary>
     [DataMember(Name = "schema")]
     public object? Schema { get; set; }

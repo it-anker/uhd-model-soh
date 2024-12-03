@@ -5,18 +5,18 @@ using Newtonsoft.Json.Converters;
 namespace SOH.Process.Server.Models.Ogc;
 
 /// <summary>
-///     The kind, how result shall be transmitted - as providing only the referecne or the concrete value.
+///     The kind, how result shall be transmitted - as providing only the reference or the concrete value.
 /// </summary>
 [JsonConverter(typeof(StringEnumConverter))]
 public enum TransmissionMode
 {
     /// <summary>
-    ///     Enum ValueEnum for value
+    ///     The concrete value is transmitted.
     /// </summary>
-    [EnumMember(Value = "value")] ValueEnum = 0,
+    [EnumMember(Value = "value")] Value = 0,
 
     /// <summary>
-    ///     Enum ReferenceEnum for reference
+    ///     The reference to get the value is transmitted.
     /// </summary>
-    [EnumMember(Value = "reference")] ReferenceEnum = 1
+    [EnumMember(Value = "reference")] Reference = 1
 }

@@ -30,7 +30,7 @@ public class JobsController(
     [ValidateModelState]
     [SwaggerOperation("GetJobs")]
     [SwaggerResponse(200, type: typeof(JobList), description: "A list of jobs for this process.")]
-    [SwaggerResponse(404, type: typeof(ExceptionResult), description: "The requested URI was not found.")]
+    [SwaggerResponse(404, type: typeof(ProblemDetails), description: "The requested URI was not found.")]
     public async Task<ActionResult<JobList>> GetJobs(CancellationToken token = default)
     {
         return Ok(await simulationService.ListJobsAsync(token));
@@ -51,8 +51,8 @@ public class JobsController(
     [ValidateModelState]
     [SwaggerOperation("GetStatus")]
     [SwaggerResponse(200, type: typeof(StatusInfo), description: "The status of a job.")]
-    [SwaggerResponse(404, type: typeof(ExceptionResult), description: "The requested URI was not found.")]
-    [SwaggerResponse(500, type: typeof(ExceptionResult), description: "A server error occurred.")]
+    [SwaggerResponse(404, type: typeof(ProblemDetails), description: "The requested URI was not found.")]
+    [SwaggerResponse(500, type: typeof(ProblemDetails), description: "A server error occurred.")]
     public virtual async Task<ActionResult<StatusInfo>> GetStatus([FromRoute] [Required] string jobId)
     {
         var status = (await simulationService.GetSimulationJobAsync(jobId)).Adapt<StatusInfo>();
@@ -75,8 +75,8 @@ public class JobsController(
     [ValidateModelState]
     [SwaggerOperation("GetResult")]
     [SwaggerResponse(200, type: typeof(Results), description: "The results of a job.")]
-    [SwaggerResponse(404, type: typeof(ExceptionResult), description: "The requested URI was not found.")]
-    [SwaggerResponse(500, type: typeof(ExceptionResult), description: "A server error occurred.")]
+    [SwaggerResponse(404, type: typeof(ProblemDetails), description: "The requested URI was not found.")]
+    [SwaggerResponse(500, type: typeof(ProblemDetails), description: "A server error occurred.")]
     public async Task<ActionResult<Results>> GetResult([FromRoute] [Required] string jobId,
         CancellationToken token = default)
     {
@@ -108,8 +108,8 @@ public class JobsController(
     [ValidateModelState]
     [SwaggerOperation("Dismiss")]
     [SwaggerResponse(200, type: typeof(StatusInfo), description: "The status of a job.")]
-    [SwaggerResponse(404, type: typeof(ExceptionResult), description: "The requested URI was not found.")]
-    [SwaggerResponse(500, type: typeof(ExceptionResult), description: "A server error occurred.")]
+    [SwaggerResponse(404, type: typeof(ProblemDetails), description: "The requested URI was not found.")]
+    [SwaggerResponse(500, type: typeof(ProblemDetails), description: "A server error occurred.")]
     public virtual async Task<IActionResult> Dismiss([FromRoute] [Required] string jobId, CancellationToken token)
     {
         return Ok((await simulationService.CancelJobAsync(jobId, token)).Adapt<StatusInfo>());

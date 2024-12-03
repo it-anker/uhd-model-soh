@@ -43,8 +43,6 @@ public class FerryDriver : AbstractAgent, IFerrySteeringCapable
 
     public FerryRouteEntry CurrentFerryRouteEntry => FerryRouteEnumerator.Current;
 
-    public int StationStops => FerryRoute.Entries.IndexOf(FerryRouteEnumerator.Current);
-
     [PropertyDescription(Name = "line")] public int Line { get; set; }
 
     [PropertyDescription(Name = "waitingInSeconds")]

@@ -1,8 +1,13 @@
 using System.Runtime.Serialization;
+using Mars.Common.Core;
+using Microsoft.AspNetCore.Http.Features;
 using Microsoft.Extensions.DependencyInjection;
+using NetTopologySuite.Features;
+using NetTopologySuite.Geometries;
 using SOH.Process.Server.Models.Processes;
 using SOH.Process.Server.Persistence;
 using SOH.Process.Server.Tests.Base;
+using FeatureCollection = NetTopologySuite.Features.FeatureCollection;
 
 namespace SOH.Process.Server.Tests;
 
@@ -54,6 +59,35 @@ public class RedisManagementTests : AbstractManagementTests
         Assert.NotNull(deletedEntity2);
         deletedEntity2 = await _persistence.DeleteAsync<TestEntity>(entity2.Id);
         Assert.Null(deletedEntity2);
+    }
+
+    [Fact]
+    public async Task TestManageGeoJson()
+    {
+        var collection = new FeatureCollection
+        {
+            new Feature(new Point(0, 0), new AttributesTable
+            {
+                { "field", 1 }
+            })
+        };
+
+        string id = Guid.NewGuid().ToString();
+        var entity = new TestEntity
+        {
+            Description = "my geoJson entity", FeatureCollection = collection, Id = id
+        };
+        await _persistence.UpsertAsync(entity.Id, entity);
+
+        var loadedEntity = await _persistence.FindAsync<TestEntity>(entity.Id);
+
+        Assert.NotNull(loadedEntity);
+        Assert.NotNull(loadedEntity.FeatureCollection);
+        Assert.Single(loadedEntity.FeatureCollection);
+        var feature = loadedEntity.FeatureCollection[0];
+        Assert.Equal(new Point(0, 0), feature.Geometry);
+        Assert.Contains("field", feature.Attributes.GetNames());
+        Assert.Equal(1, feature.Attributes["field"].Value<int>());
     }
 
     [Fact]
@@ -147,6 +181,9 @@ public class RedisManagementTests : AbstractManagementTests
 
         [DataMember(Name = "sub")]
         public SubType? Sub { get; set; }
+
+        [DataMember(Name = "featureCollection")]
+        public FeatureCollection? FeatureCollection { get; set; }
     }
 
     public class SubType

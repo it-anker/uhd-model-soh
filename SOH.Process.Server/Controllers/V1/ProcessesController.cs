@@ -49,13 +49,13 @@ public class ProcessesController(ISimulationService simulationService, IResultSe
     [HttpGet("{processId}")]
     [ValidateModelState]
     [SwaggerOperation("GetProcessDescription")]
-    [SwaggerResponse(200, type: typeof(Models.Processes.Process), description: "A process description.")]
-    [SwaggerResponse(404, type: typeof(ExceptionResult), description: "The requested URI was not found.")]
-    public virtual async Task<ActionResult<Models.Processes.Process>> GetProcessDescription(
+    [SwaggerResponse(200, type: typeof(Models.Processes.ProcessDescription), description: "A process description.")]
+    [SwaggerResponse(404, type: typeof(ProblemDetails), description: "The requested URI was not found.")]
+    public virtual async Task<ActionResult<Models.Processes.ProcessDescription>> GetProcessDescription(
         [FromRoute] [Required] string processId, CancellationToken token)
     {
         var process = await simulationService.GetSimulationAsync(processId, token);
-        return Ok(process.Adapt<Models.Processes.Process>());
+        return Ok(process.Adapt<Models.Processes.ProcessDescription>());
     }
 
     /// <summary>
@@ -75,19 +75,20 @@ public class ProcessesController(ISimulationService simulationService, IResultSe
     [HttpPost("{processId}/execution")]
     [ValidateModelState]
     [SwaggerOperation("Execute")]
-    [SwaggerResponse(200, type: typeof(IInlineResponse200), description: "Result of synchronous execution")]
+    [SwaggerResponse(200, type: typeof(Result), description: "Result of synchronous execution")]
     [SwaggerResponse(201, type: typeof(StatusInfo), description: "Started asynchronous execution. Created job.")]
-    [SwaggerResponse(404, type: typeof(ExceptionResult), description: "The requested URI was not found.")]
-    [SwaggerResponse(500, type: typeof(ExceptionResult), description: "A server error occurred.")]
-    public async Task<IActionResult> Execute([FromBody] Execute request,
-        [FromRoute] [Required] string processId, CancellationToken token = default)
+    [SwaggerResponse(404, type: typeof(ProblemDetails), description: "The requested URI was not found.")]
+    [SwaggerResponse(500, type: typeof(ProblemDetails), description: "A server error occurred.")]
+    public async Task<IActionResult> Execute(
+        [FromRoute] [Required] string processId,
+        [FromBody] Execute request, CancellationToken token = default)
     {
         var create = new CreateSimulationJobRequest
         {
             SimulationId = processId, Execute = request
         };
 
-        var response = await Mediator.Send(create);
+        var response = await Mediator.Send(create, token);
 
         if (!string.IsNullOrEmpty(response.HangfireJobKey))
         {
@@ -96,6 +97,6 @@ public class ProcessesController(ISimulationService simulationService, IResultSe
 
         ArgumentException.ThrowIfNullOrEmpty(response.ResultId);
         var result = await resultService.GetAsync(response.ResultId, token);
-        return StatusCode(200, result.FeatureCollection);
+        return StatusCode(200, result);
     }
 }

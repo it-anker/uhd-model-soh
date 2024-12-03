@@ -10,12 +10,12 @@ public class SimulationHandler(
     IJobService jobService,
     IMediator mediator)
     :
-        IRequestHandler<CreateSimulationProcessRequest, SimulationProcess>,
+        IRequestHandler<CreateSimulationProcessDescriptionRequest, SimulationProcessDescription>,
         IRequestHandler<CreateSimulationJobRequest, SimulationJob>
 {
-    public async Task<SimulationProcess> Handle(CreateSimulationProcessRequest processRequest, CancellationToken cancellationToken)
+    public async Task<SimulationProcessDescription> Handle(CreateSimulationProcessDescriptionRequest processDescriptionRequest, CancellationToken cancellationToken)
     {
-        string simulationId = await simulationService.CreateAsync(processRequest, cancellationToken);
+        string simulationId = await simulationService.CreateAsync(processDescriptionRequest, cancellationToken);
         return await simulationService.GetSimulationAsync(simulationId, cancellationToken);
     }
 
@@ -25,7 +25,7 @@ public class SimulationHandler(
         var simulation = await simulationService.GetSimulationAsync(request.SimulationId, cancellationToken);
 
         string jobId = await simulationService.CreateAsync(new SimulationJob
-            { SimulationId = simulation.Id }, cancellationToken);
+            { ProcessId = simulation.Id }, cancellationToken);
 
         var simulationRunRequest = new SimulationRunJobRequest
         {

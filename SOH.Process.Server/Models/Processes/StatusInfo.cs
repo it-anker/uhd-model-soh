@@ -32,7 +32,7 @@ public class StatusInfo
     ///     Gets or Sets ProcessID.
     /// </summary>
     [DataMember(Name = "processID")]
-    public string? SimulationId { get; set; }
+    public string? ProcessId { get; set; }
 
     /// <summary>
     ///     Gets or Sets Type.
