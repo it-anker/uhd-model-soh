@@ -1,6 +1,5 @@
 using Microsoft.AspNetCore.Mvc;
 using SOH.Process.Server.Attributes;
-using SOH.Process.Server.Models.Common;
 using SOH.Process.Server.Models.Ogc;
 using Swashbuckle.AspNetCore.Annotations;
 

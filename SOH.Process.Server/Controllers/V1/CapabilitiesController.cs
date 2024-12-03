@@ -2,7 +2,6 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Options;
 using SOH.Process.Server.Attributes;
 using SOH.Process.Server.Models;
-using SOH.Process.Server.Models.Common;
 using SOH.Process.Server.Models.Ogc;
 using Swashbuckle.AspNetCore.Annotations;
 

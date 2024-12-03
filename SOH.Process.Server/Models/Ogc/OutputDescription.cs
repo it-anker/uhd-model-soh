@@ -1,4 +1,3 @@
-using System.ComponentModel.DataAnnotations;
 using System.Runtime.Serialization;
 using SOH.Process.Server.Models.Parameters;
 
