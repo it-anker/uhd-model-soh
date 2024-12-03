@@ -1,5 +1,4 @@
 using System.Runtime.Serialization;
-using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
 
 namespace SOH.Process.Server.Models.Ogc;
@@ -9,7 +8,7 @@ namespace SOH.Process.Server.Models.Ogc;
 ///     processing completely in blocking mode
 ///     or async in background.
 /// </summary>
-[JsonConverter(typeof(StringEnumConverter))]
+[Newtonsoft.Json.JsonConverter(typeof(StringEnumConverter))]
 public enum JobControlOptions
 {
     /// <summary>

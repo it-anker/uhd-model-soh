@@ -1,6 +1,7 @@
 using System.Text.Json;
 using System.Text.Json.Serialization;
 using NetTopologySuite.IO.Converters;
+using Newtonsoft.Json;
 using SOH.Process.Server.Background;
 using StackExchange.Redis;
 
@@ -14,14 +15,18 @@ public static class Startup
         var databaseSettings = configuration.GetSection("Redis").Get<RedisDatabaseSettings>();
         ArgumentNullException.ThrowIfNull(databaseSettings);
 
-        var jsonOptions = new JsonSerializerOptions
-        {
-            DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull
-        };
-        jsonOptions.Converters.Add(new GeoJsonConverterFactory());
+        var SerializerSettings = new JsonSerializerSettings();
+
+        SerializerSettings.ReferenceLoopHandling = ReferenceLoopHandling.Ignore;
+        SerializerSettings.NullValueHandling = NullValueHandling.Ignore;
+        SerializerSettings.DefaultValueHandling = DefaultValueHandling.Include;
+        SerializerSettings.DateFormatHandling = DateFormatHandling.IsoDateFormat;
+        SerializerSettings.Converters.Add(new FeatureCollectionConverter());
+        SerializerSettings.Converters.Add(new FeatureConverter());
+        SerializerSettings.Converters.Add(new GeometryConverter());
 
         return services
-            .AddSingleton(jsonOptions)
+            .AddSingleton(SerializerSettings)
             .AddSingleton<IConnectionMultiplexer>(_ =>
                 ConnectionMultiplexer.Connect(databaseSettings.ConnectionString))
             .AddBackgroundJobs(configuration, environment)
