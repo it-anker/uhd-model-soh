@@ -1,3 +1,5 @@
+using System.Globalization;
+using Mars.Common.Core;
 using Mars.Components.Starter;
 using Mars.Core.Data;
 using Mars.Core.Simulation;
@@ -45,58 +47,19 @@ public class SimulationRunJobHandler(
             var (description, simConfig) = await ConstructModelAndConfig(request, process, job, cancellationToken);
             await ExecuteSimulationProcess(description, simConfig, request.JobId, process, cancellationToken);
         }
+#if DEBUG
         else
         {
-            await ExecuteTestProcess(request, request.JobId, process, cancellationToken);
+            var testRunner = new SimulationTestRunHandler(simulationService, resultService, localization);
+            await testRunner.ExecuteTestProcess(request, request.JobId, process, cancellationToken);
         }
-
+#endif
         var currentJob = await simulationService.GetSimulationJobAsync(request.JobId, cancellationToken);
         currentJob.FinishedUtc = DateTime.UtcNow;
         await simulationService.UpdateAsync(currentJob.JobId, currentJob, cancellationToken);
-        return Unit.Value;
-    }
-
-    private async Task ExecuteTestProcess(SimulationRunJobRequest request,
-        string jobId, SimulationProcessDescription processDescription, CancellationToken cancellationToken)
-    {
-        var currentJob = await simulationService.GetSimulationJobAsync(jobId, cancellationToken);
-        try
-        {
-            for (int i = 1; i <= 10; i++)
-            {
-#if DEBUG
-                if (request.Execute != null && request.Execute.Inputs.TryGetValue("func",
-                        out object? function) && function is Action<int, SimulationJob> action)
-                {
-                    action.Invoke(i, currentJob);
-                }
-#endif
-                await Task.Delay(100, cancellationToken);
-                currentJob.Progress = (i / 10) * 100;
-                await simulationService.UpdateAsync(currentJob.JobId, currentJob, cancellationToken);
-            }
-
-            currentJob.Status = StatusCode.Successful;
-            currentJob.ResultId = await resultService.CreateAsync(new Result
-            {
-                ProcessId = processDescription.Id,
-                JobId = currentJob.JobId,
-                FeatureCollection =
-                [
-                    new Feature(new Point(0, 0), new AttributesTable
-                    {
-                        { "field", 1 }
-                    })
-                ]
-            }, cancellationToken);
-        }
-        catch
-        {
-            currentJob.Status = StatusCode.Failed;
-        }
-        await simulationService.UpdateAsync(currentJob.JobId, currentJob, cancellationToken);
 
         await jobSubscribeWorkflow.NotifySubscriberAsync(request, currentJob.JobId, cancellationToken);
+        return Unit.Value;
     }
 
     private async Task ExecuteSimulationProcess(ModelDescription description, SimulationConfig simConfig,
@@ -111,12 +74,10 @@ public class SimulationRunJobHandler(
             var step = simulation.PrepareSimulation(description, simConfig);
 
             var serializer = application.Resolve<ISerializerManager>();
-
             var featureCollection = new FeatureCollection();
+            CollectResultForFeatureCollection(serializer, step, featureCollection);
             while (!step.IsFinished)
             {
-                CollectResultForFeatureCollection(serializer, step, featureCollection);
-
                 if (currentJob.IsCancellationRequested)
                 {
                     break;
@@ -124,14 +85,14 @@ public class SimulationRunJobHandler(
                 if (!double.IsNaN(step.ProgressInPercentage))
                 {
                     currentJob.Progress = Math.Min(Convert.ToInt32(step.ProgressInPercentage), 100);
+                    currentJob.Message = string.Format(CultureInfo.InvariantCulture,
+                        localization["simulation_progress {0}"], step.CurrentTimePoint);
                     await simulationService.UpdateAsync(currentJob.JobId, currentJob, token);
                 }
                 step = simulation.StepSimulation();
                 currentJob = await simulationService.GetSimulationJobAsync(jobId, token);
+                CollectResultForFeatureCollection(serializer, step, featureCollection);
             }
-
-            // string[] geoJsonFiles = Directory.GetFiles(
-            // $"results_{simConfig.SimulationIdentifier}", "*.geojson");
 
             var result = new Result
             {
@@ -141,6 +102,12 @@ public class SimulationRunJobHandler(
 
             currentJob.ResultId = await resultService.CreateAsync(result, token);
             currentJob.Status = currentJob.IsCancellationRequested ? StatusCode.Dismissed : StatusCode.Successful;
+
+            if (currentJob.Status == StatusCode.Successful)
+            {
+                currentJob.Message = string.Format(CultureInfo.InvariantCulture,
+                    localization["simulation_finised {0}"], step.CurrentTimePoint);
+            }
         }
         catch(Exception exception)
         {
@@ -157,7 +124,9 @@ public class SimulationRunJobHandler(
 
     }
 
-    private static void CollectResultForFeatureCollection(ISerializerManager serializer, SimulationWorkflowState step,
+    private static void CollectResultForFeatureCollection(
+        ISerializerManager serializer,
+        SimulationWorkflowState step,
         FeatureCollection featureCollection)
     {
         var typeLoggers = serializer
@@ -211,7 +180,39 @@ public class SimulationRunJobHandler(
         description.AddEntity<Ferry>();
 
         var simConfig = await GetSimulationConfigOrDefault(processDescription, job, request.Execute, cancellationToken);
+
+        if (request.Execute != null)
+        {
+            UpdateConfigFromInputs(simConfig, request.Execute);
+        }
         return (description, simConfig);
+    }
+
+    private void UpdateConfigFromInputs(SimulationConfig simConfig, Execute executionConfig)
+    {
+        if (executionConfig.Inputs.TryGetValue("startPoint", out object? start))
+        {
+            simConfig.Globals.StartPoint = start.Value<DateTime>();
+        }
+        if (executionConfig.Inputs.TryGetValue("endPoint", out object? end))
+        {
+            simConfig.Globals.EndPoint = end.Value<DateTime>();
+        }
+
+        if (executionConfig.Inputs.TryGetValue("steps", out object? steps))
+        {
+            simConfig.Globals.EndPoint = simConfig.Globals.StartPoint
+                .GetValueOrDefault().AddSeconds(steps.Value<int>());
+        }
+
+        // Ensure not exceed the default
+        var range = simConfig.Globals.EndPoint.GetValueOrDefault() - simConfig.Globals.StartPoint.GetValueOrDefault();
+        if (range.Seconds > GlobalConstants.FerryTransferDefaultRange)
+        {
+            simConfig.Globals.EndPoint = simConfig.Globals.StartPoint
+                .GetValueOrDefault()
+                .AddSeconds(GlobalConstants.FerryTransferDefaultRange);
+        }
     }
 
     private async Task<SimulationConfig> GetSimulationConfigOrDefault(

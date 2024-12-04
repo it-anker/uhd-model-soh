@@ -76,19 +76,11 @@ public class JobsController(
     [SwaggerResponse(200, type: typeof(Results), description: "The results of a job.")]
     [SwaggerResponse(404, type: typeof(ProblemDetails), description: "The requested URI was not found.")]
     [SwaggerResponse(500, type: typeof(ProblemDetails), description: "A server error occurred.")]
-    public async Task<ActionResult<Results>> GetResult([FromRoute] [Required] string jobId,
+    public async Task<ActionResult<Results>> GetResult(
+        [FromRoute] [Required] string jobId,
         CancellationToken token = default)
     {
-        var job = await simulationService.GetSimulationJobAsync(jobId, token);
-
-        var results = new Results();
-        if (!string.IsNullOrEmpty(job.ResultId))
-        {
-            var result = await resultService.GetAsync(job.ResultId, token);
-            results.Add(result.Id, result);
-        }
-
-        return Ok(results);
+        return Ok(await Mediator.Send(new GetJobResultRequest { JobId = jobId }, token));
     }
 
     /// <summary>

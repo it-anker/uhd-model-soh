@@ -74,5 +74,23 @@ namespace SOH.Process.Server.Resources {
                 return ResourceManager.GetString("model_self_description", resourceCulture);
             }
         }
+        
+        public static string simulation_progress__0_ {
+            get {
+                return ResourceManager.GetString("simulation_progress {0}", resourceCulture);
+            }
+        }
+        
+        public static string simulation_finised__0_ {
+            get {
+                return ResourceManager.GetString("simulation_finised {0}", resourceCulture);
+            }
+        }
+        
+        public static string process_finished {
+            get {
+                return ResourceManager.GetString("process_finished", resourceCulture);
+            }
+        }
     }
 }

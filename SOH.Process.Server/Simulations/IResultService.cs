@@ -1,5 +1,4 @@
 using SOH.Process.Server.Models.Ogc;
-using Results = SOH.Process.Server.Models.Ogc.Results;
 
 namespace SOH.Process.Server.Simulations;
 
@@ -15,5 +14,6 @@ public interface IResultService
 
     Task<Result?> FindAsync(string resultId, CancellationToken token = default);
 
-    Task<Results> ListAsync(CancellationToken token = default);
+    IAsyncEnumerable<Result> ListResultsAsync(string jobId, string outputName,
+        CancellationToken token = default);
 }

@@ -15,7 +15,7 @@ namespace SOH.Process.Server.Tests.Base;
 public abstract class AbstractOgcServices : WebApplicationFactory<Program.IServerMarker>, IAsyncLifetime
 {
     private readonly RedisContainer _redisContainer = new RedisBuilder()
-        .WithImage("redis/redis-stack:6.2.6-v17")
+        .WithImage("redis:7.4.1-alpine3.20")
         .Build();
 
     public HttpClient RootUserWithToken { get; private set; } = default!;

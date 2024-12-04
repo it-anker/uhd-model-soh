@@ -3,6 +3,7 @@ using SOH.Process.Server.Generated;
 using SOH.Process.Server.Models.Ogc;
 using SOH.Process.Server.Tests.Base;
 using ProblemDetails = Microsoft.AspNetCore.Mvc.ProblemDetails;
+using ProcessingKind = SOH.Process.Server.Models.Processes.ProcessingKind;
 using StatusCode = SOH.Process.Server.Models.Processes.StatusCode;
 
 namespace SOH.Process.Server.Tests;
@@ -64,6 +65,13 @@ public class SimulationControllerTests : AbstractManagementTests
         Assert.NotNull(result.JobId);
         Assert.Null(result.FileId);
         Assert.Equal(testModel.Id, result.ProcessId);
+
+        var executedJob = await _jobsClient.GetStatusAsync(result.JobId);
+        Assert.Equal(100, executedJob.Progress);
+        Assert.Equal(testModel.Id, executedJob.ProcessId);
+        Assert.Equal(StatusCode.Successful, executedJob.Status);
+        Assert.NotNull(executedJob.FinishedUtc);
+        Assert.StartsWith("Finished job execution", executedJob.Message);
     }
 
     [Fact]
@@ -77,7 +85,9 @@ public class SimulationControllerTests : AbstractManagementTests
         {
             Inputs = new Dictionary<string, object>
             {
-                { "config", configContent }
+                { "config", configContent },
+                { "startPoint", "2024-12-01T08:00:00" },
+                { "startPoint", "2024-12-01T09:00:00" }
             }
         });
 
@@ -102,5 +112,8 @@ public class SimulationControllerTests : AbstractManagementTests
         Assert.Equal(100, executedJob.Progress);
         Assert.Equal(result.JobId, executedJob.JobId);
         Assert.Equal(ferrySimulation.Id, executedJob.ProcessId);
+
+        var jobResult = await _jobsClient.GetResultAsync(executedJob.JobId);
+
     }
 }

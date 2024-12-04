@@ -1,6 +1,6 @@
 using MediatR;
 
-namespace SOH.Process.Server.Logging;
+namespace SOH.Process.Server.Middlewares;
 
 public class LoggingBehavior<TRequest, TResponse>(ILogger<LoggingBehavior<TRequest, TResponse>> logger)
     : IPipelineBehavior<TRequest, TResponse>

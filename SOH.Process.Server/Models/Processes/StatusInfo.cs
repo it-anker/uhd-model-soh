@@ -29,26 +29,27 @@ public class StatusInfo
     public string JobId { get; set; } = default!;
 
     /// <summary>
-    ///     Gets or Sets ProcessID.
+    ///     The referenced ID of the process executed by this job.
     /// </summary>
+    [Required]
     [DataMember(Name = "processID")]
-    public string? ProcessId { get; set; }
+    public string ProcessId { get; set; } = default!;
 
     /// <summary>
-    ///     Gets or Sets Type.
+    ///     The kind of processing.
     /// </summary>
     [DataMember(Name = "type")]
     public ProcessingKind Type { get; set; } = ProcessingKind.ProcessEnum;
 
     /// <summary>
-    ///     Gets or Sets Status.
+    ///     The current status of the job.
     /// </summary>
     [Required]
     [DataMember(Name = "status")]
     public StatusCode Status { get; set; }
 
     /// <summary>
-    ///     Gets or Sets Message.
+    ///     An optional message of this job.
     /// </summary>
     [DataMember(Name = "message")]
     public string? Message { get; set; }

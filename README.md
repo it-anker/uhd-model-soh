@@ -1,106 +1,85 @@
-<h1 align="center">SmartOpenHH | <a href="https://www.mars-group.org/projects/smartopenhamburg">Website</a></h1>
+# OGC Process API for MARS Simulations
 
-The SmartOpenHamburg model is an agent-based simulation model for the representation of a digital twin. It calculates multi-modal path dynamics and simulates a defined daily routine of a citizen.
+This ASP.NET Core application provides an OGC-compliant API to execute MARS simulations synchronously and asynchronously, and to retrieve the results. The application uses **Redis** to store jobs, processes, and results. Configuration data (e.g., Redis connection details) is defined in the `appsettings.json` file.
 
-## Quick Start
+## Features
 
-Start and adjusting the model requires the following steps.
+- **Synchronous and asynchronous** execution of MARS simulations.  
+- Storage of jobs and results in **Redis**.  
+- Provision of **Swagger documentation** at the local endpoint: `http://localhost:7002/swagger`.
 
-Clone the Git Repo:
+## Prerequisites
+
+- Installed **Docker** and **Docker Compose**.  
+- A **Redis** container or running instance.  
+- **.NET 9** SDK (for local development).
+
+## Running the Application
+
+The application can be started either via a Docker container or directly locally.
+
+### Docker Build
+
+Create the Docker image with the following command:
+
+```bash
+docker build -t mars-ogc-api -f ./SOH.Process.Server/Dockerfile .
+```
+
+### Starting the Docker Container
+
+Start the application with:
+
+```bash
+docker run -p 7002:7002 --env-file .env mars-ogc-api
+```
+
+> Note: Adjust the environment variables in the `.env` file or the `docker run` command as needed.
+
+### Accessing Swagger
+
+After starting the application, you can access the API documentation at the Swagger endpoint:
 
 ```
-git clone https://github.com/MARS-Group-HAW/model-soh.git
-```
-[Program.cs](SOHTravellingBox%2FProgram.cs)
-Download and install the SDK for NetCore from the official [website](https://dotnet.microsoft.com/download/dotnet-core/).  Navigate into the cloned directory and make sure that all required dependencies are installed automatically by building the model in the directory where the SOHModel.sln file is located:
-
-```
-dotnet build
+https://localhost:7002/swagger
 ```
 
-We have prepared a scenario in the project ``SOHTravellingBox`` for the entry with agents, travelling within the area of Hamburg Dammtor, which you can start immediately.
+## Configuration
 
-Navigate to the folder and start the model:
-
-```
-cd SOHTravellingBox
-dotnet run
-```
-
-This runs the simulation and creates a file call `HumanTraveler_trips.geojson`. Open [kepler.gl](https://kepler.gl/demo) and import the file via drag & drop. See the trajectories which were computed by the simulation.
-
----
-## SOH modeling introduction
-
-The SOH model provides urban mobility functionality for agents. Agents can therefore use different modalities (transportation devices) to reach their goals in the city. The movement is executed on a graph structure that represents roads, sidewalks or railways.
-
-### Agent types
-
-The model provides two main types of [agents](https://www.mars-group.org/docs/tutorial/soh/agents/) that have a mobility desire (besides pure driver agents that fulfill the role of public transport).
-
-[`Traveller` agents](https://www.mars-group.org/docs/tutorial/soh/agents/traveler) have a start and a goal and they try to reach their goal by using available transportation devices, which we call their movement `capabilities`. They can be easily spawned by an `AgentSchedulerLayer` randomly within an area and find random goals within a target area. They are the simple solution to create mobility demand.
-
-[`Citizen` agents](https://www.mars-group.org/docs/tutorial/soh/agents/citizen) have a daily schedule that cause their mobility demand. The schedule is dependent on their employment status. They can also choose between the modalities that are generally provided in the respective scenario and that are especially available or reasonable for the particular agent and its current location.
-
-![traveler_zones](https://www.mars-group.org/assets/images/harbug_green4bikes-f03fbc7cde934b63b9740a2abb247d31.png)
-
-### Modalities
-
-The model provides a variety of modalities that can be used. We call them `ModalChoice`s.
-
-`Walking` is the main modality and always available.
-
-`CarDriving` requires an own car for the agent (co-driving is not yet implemented) that has to be parked on a parking place. The agent moves to the car, drives to a parking place near by the goal, and then concludes the rest of the way by foot.
-
-`CyclingOwnBike` is quite similar to walking, because the bike can either be parked at the node or in a bike station. Because it can be parked quite everywhere, agents can move from start to goal with the bike (if the bike is available at the start node).
-
-`CyclingRentalBike` is using a rental bike. The agent walks to a near by rental station that has remaining bikes, takes a bike that needs to be returned at another rental station and then finishes the remaining route by foot.
-
-`Train` can be used to drive as a passenger. Therefore the agents searches a reasonable train station near by and exits the train station near the goal. A transfer between lines is possible at stations that provide different lines.
-
-`Ferry` is quite similar to using the train just with ships moving over water.
-
-### Environment
-
-Although there are different modal choices, some of these share the same environment, for instance bikes might also use the streets like cars. We therefore have the `SpatialModalityType` discriminator that describes which lanes can be used by which transportation devices.
-
-For movement we need a [graph](https://www.mars-group.org/docs/tutorial/development/layers#vector-layer) because all transportation devices require it. The graph is stored in the [`SpatialGraphEnvironment`](https://www.mars-group.org/docs/tutorial/development/environments/spatialgraphenv) (`SGE`) that provides route searching capabilities and supervises movement concerning validity constraints like collision detection.
-
-![railroad_graph](https://www.mars-group.org/assets/images/s-bahn-hh-9959647534f628d49aeb340d9a24d227.png)
-
-The environment is initialized by graphs that can be imported in either `graphml` or `geojson` format. For multimodal route searching, we require to integrate all relevant graphs in one SGE. So use the `inputs` configuration in the simulation config and add an import configuration to define that edges (later transformed to lanes) of this file can be used by a set of modalities (spatial modality types).
+Redis connection details and other environment variables are managed in the `appsettings.json` file. Example:
 
 ```json
 {
-      "name": "SpatialGraphMediatorLayer",
-      "inputs": [
-        {
-          "file": "resources/hamburg_rail_station_areas_drive_graph.geojson",
-          "inputConfiguration": {
-            "modalities": ["Walking"],
-            "isBidirectedGraph": true
-          }
-        },
-        {
-          "file": "resources/hamburg_u1_north_graph.geojson",
-          "inputConfiguration": {
-            "modalities": ["TrainDriving"],
-            "isBidirectedGraph": true
-          }
-        }
-      ]
+  "Redis": {
+    "ConnectionString": "localhost:6379"
+  },
+  "Logging": {
+    "LogLevel": {
+      "Default": "Information"
     }
+  }
+}
 ```
 
+## Endpoints
 
-![walk_drive_graph](https://www.mars-group.org/assets/images/walk_drive_graph-801821fd5fc0203418d889e88df06e1f.png)
+The API provides the following main endpoints according to the specification ([OGC API Processes Specification](https://docs.ogc.org/is/18-062r2/18-062r2.html#toc0)):
 
-### Handle concept
+- **/**: Retrieve the landing page.
+- **/processes**: Manage and list available processes. Execute processes.
+- **/jobs**: Create, query status, and retrieve results of asynchronous jobs.
+- **/conformances**: Retrieve the server's conformance declarations.
 
-The usage of transportation devices follows a [handle concept](https://www.mars-group.org/docs/tutorial/soh/steering) that is a contract between agent and vehicle. If the agent provides the required capabilities, then a vehicle can provide a handle for usage.
+## Development
 
-![contract](contract_schema.png)
+Run the application locally using the .NET CLI:
 
-Every vehicle type defines a steering handle that is provided by the respective vehicle on entrance. The handle takes care about the concrete movement logic and so capsulates the movement behavior by following traffic rules (like driving a car without actively thinking how to do it). The handle requires the agent to have certain capabilities that are required to use the vehicle. These are defined in the respective `ISteeringCapabable`. After leaving a vehicle the handle is invalidated and exchanged with the default `WalkingSteeringHandle`.
+```bash
+dotnet run --urls=http://localhost:7002
+```
 
-![car_steering_handle_concept](https://www.mars-group.org/assets/images/uml_car_steering-8f3a1ab6c51f2859739861a231c118c6.png)
+For testing, the system uses `testcontainers` and ad-hoc start an own redis or other required services in background.
+
+```bash
+dotnet test
+```

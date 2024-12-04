@@ -1,7 +1,23 @@
-﻿services:
-  redis:
-    container_name: ump-db-redis
-    image: redis
+﻿version: '3.8'
+
+services:
+  redis-svc:
+    container_name: ogc-service-redis
+    image: redis:7.4.1-alpine3.20
     ports:
       - "6379:6379/tcp"
     working_dir: /data
+
+  ogc-service:
+    container_name: ogc-service-simulation
+    build:
+      context: .
+      dockerfile: ./SOH.Process.Server/Dockerfile
+    ports:
+      - "7003:7003"
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - REDIS_CONNECTION=redis:6379
+    depends_on:
+      - redis-svc
+    command: ["dotnet", "SOH.Process.Server.dll"]

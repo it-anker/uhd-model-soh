@@ -1,11 +1,22 @@
 using System.ComponentModel.DataAnnotations;
 using System.Runtime.Serialization;
+using MediatR;
 using NetTopologySuite.Features;
 
 namespace SOH.Process.Server.Models.Ogc;
 
+public class GetJobResultRequest : IRequest<Results>
+{
+    [Required]
+    [DataMember(Name = "jobId")]
+    public string JobId { get; set; } = default!;
+}
+
 public class Result
 {
+    [Required] [DataMember(Name = "output")]
+    public string Output { get; set; } = default!;
+
     [Required]
     [DataMember(Name = "processID")]
     public string ProcessId { get; set; } = default!;

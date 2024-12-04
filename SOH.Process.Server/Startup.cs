@@ -2,7 +2,6 @@ using MediatR;
 using Microsoft.AspNetCore.HttpOverrides;
 using Serilog;
 using SOH.Process.Server.Controllers;
-using SOH.Process.Server.Logging;
 using SOH.Process.Server.Middlewares;
 using SOH.Process.Server.Persistence;
 using SOH.Process.Server.Simulations;
@@ -32,7 +31,8 @@ public static class Startup
     {
         var builder = WebApplication.CreateBuilder(args);
 
-        builder.UseCustomSerilog(builder.Environment);
+        builder.Host.UseSerilog((hostingContext, loggerConfiguration) => loggerConfiguration
+            .ReadFrom.Configuration(hostingContext.Configuration));
 
         var executionEnvironment = builder.Environment;
         string environmentName = string.IsNullOrEmpty(executionEnvironment.EnvironmentName)

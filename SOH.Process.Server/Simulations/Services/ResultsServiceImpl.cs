@@ -15,7 +15,8 @@ public class ResultsServiceImpl(
     {
         ArgumentException.ThrowIfNullOrEmpty(results.ProcessId);
         ArgumentException.ThrowIfNullOrEmpty(results.JobId);
-        results.Id = "result:" + Guid.NewGuid();
+        ArgumentException.ThrowIfNullOrEmpty(results.Output);
+        results.Id = $"result:{results.JobId}:{results.ProcessId}{Guid.NewGuid()}:{results.Output}";
         await persistence.UpsertAsync(results.Id, results, token);
         return results.Id;
     }
@@ -57,5 +58,11 @@ public class ResultsServiceImpl(
         }
 
         return results;
+    }
+
+    public IAsyncEnumerable<Result> ListResultsAsync(string jobId, string outputName,
+        CancellationToken token = default)
+    {
+        return persistence.ListAsync<Result>($"*{jobId}*{outputName}", token);
     }
 }

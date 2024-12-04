@@ -65,10 +65,54 @@ internal class ModelSeeder(
             [
                 TransmissionMode.Value
             ],
+            Inputs = new Dictionary<string, InputDescription>
+            {
+                { "startPoint", new InputDescription
+                    {
+                        Title = "The start time point of the simulation.",
+                        Description = "The time point when the simulation starts internally. " +
+                                      "Specified as ISO 8601 format",
+                        Schema = new Schema
+                        {
+                            Type = "string",
+                            Format = "dateTime",
+                            Nullable = true
+                        }
+                    }
+                },
+                {
+                    "endPoint", new InputDescription
+                    {
+                        Title = "The end time point of the simulation.",
+                        Description = "The time point when the simulation end internally. " +
+                                      "Specified as ISO 8601 format",
+                        Schema = new Schema
+                        {
+                            Type = "string",
+                            Format = "dateTime",
+                            Nullable = true
+                        }
+                    }
+                },
+                {
+                    "steps", new InputDescription
+                    {
+                        Title = "The amount of steps in seconds to simulate.",
+                        Description = "The amount of steps in seconds to simulate used " +
+                                      "instead of end time point, starting from start time point",
+                        Schema = new Schema
+                        {
+                            Type = "number",
+                            Maximum = 1000,
+                            Minimum = 0
+                        }
+                    }
+                }
+            },
             Outputs = new Dictionary<string, OutputDescription>
             {
                 {
-                    "agentsOutput", new OutputDescription
+                    "agents", new OutputDescription
                     {
                         Format = new Format
                         {

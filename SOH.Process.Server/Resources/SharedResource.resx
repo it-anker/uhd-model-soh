@@ -33,4 +33,13 @@
     <data name="model_self_description" xml:space="preserve">
         <value>The process description</value>
     </data>
+    <data name="simulation_progress {0}" xml:space="preserve">
+        <value>Executing simulation time point-- {0}</value>
+    </data>
+    <data name="simulation_finised {0}" xml:space="preserve">
+        <value>Finished simulation -- {0}</value>
+    </data>
+    <data name="process_finished" xml:space="preserve">
+        <value>Finished job execution</value>
+    </data>
 </root>

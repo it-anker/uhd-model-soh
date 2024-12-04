@@ -100,7 +100,6 @@ public static class Startup
             .UseSerilogRequestLogging()
             .UseExceptionMiddleware()
             .UseHsts()
-            .UseStaticFiles()
             .UseRouting()
             .UseCorsPolicy()
             .UseOpenApi()
@@ -148,7 +147,7 @@ public static class Startup
         return builder;
     }
 
-    internal static IServiceCollection AddCorsPolicy(this IServiceCollection services, IConfiguration config)
+    private static IServiceCollection AddCorsPolicy(this IServiceCollection services, IConfiguration config)
     {
         var corsSettings = config.GetSection(nameof(CorsSettings)).Get<CorsSettings>();
         var origins = new List<string>();
@@ -174,7 +173,7 @@ public static class Startup
         return services;
     }
 
-    internal static IApplicationBuilder UseCorsPolicy(this IApplicationBuilder app)
+    private static IApplicationBuilder UseCorsPolicy(this IApplicationBuilder app)
     {
         return app.UseCors(CorsPolicy);
     }

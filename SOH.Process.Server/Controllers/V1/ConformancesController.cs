@@ -8,7 +8,7 @@ namespace SOH.Process.Server.Controllers.V1;
 public class ConformanceController : BaseApiRouteController
 {
     /// <summary>
-    ///     information about standards that this API conforms to.
+    ///     Retrieve the set of OGC API conformance classes that are supported by this service.
     /// </summary>
     /// <remarks>
     ///     A list of all conformance classes, specified in a standard, that the server conforms to.  | Conformance class

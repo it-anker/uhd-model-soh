@@ -14,13 +14,15 @@ public static class Startup
     {
         var databaseSettings = configuration.GetSection("Redis").Get<RedisDatabaseSettings>();
         ArgumentNullException.ThrowIfNull(databaseSettings);
+        string connectionString = configuration["REDIS_CONNECTION"] ?? databaseSettings.ConnectionString;
+        var serializerSettings = new JsonSerializerSettings
+        {
+            ReferenceLoopHandling = ReferenceLoopHandling.Ignore,
+            NullValueHandling = NullValueHandling.Ignore,
+            DefaultValueHandling = DefaultValueHandling.Include,
+            DateFormatHandling = DateFormatHandling.IsoDateFormat
+        };
 
-        var serializerSettings = new JsonSerializerSettings();
-
-        serializerSettings.ReferenceLoopHandling = ReferenceLoopHandling.Ignore;
-        serializerSettings.NullValueHandling = NullValueHandling.Ignore;
-        serializerSettings.DefaultValueHandling = DefaultValueHandling.Include;
-        serializerSettings.DateFormatHandling = DateFormatHandling.IsoDateFormat;
         serializerSettings.Converters.Add(new FeatureCollectionConverter());
         serializerSettings.Converters.Add(new FeatureConverter());
         serializerSettings.Converters.Add(new AttributesTableConverter());
@@ -38,7 +40,7 @@ public static class Startup
         return services
             .AddSingleton(options)
             .AddSingleton<IConnectionMultiplexer>(_ =>
-                ConnectionMultiplexer.Connect(databaseSettings.ConnectionString))
+                ConnectionMultiplexer.Connect(connectionString))
             .AddBackgroundJobs(configuration, environment)
             .AddScoped<IPersistence, RedisServiceImpl>();
     }

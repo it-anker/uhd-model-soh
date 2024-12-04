@@ -11,7 +11,7 @@ namespace SOH.Process.Server.Controllers.V1;
 public class CapabilitiesController(IOptions<OgcSettings> configuration) : BaseApiController
 {
     /// <summary>
-    ///     landing page of this API.
+    ///     Retrieve the OGC API landing page for this service.
     /// </summary>
     /// <remarks>
     ///     The landing page provides links to the:   * The APIDefinition (no fixed path),   * The Conformance statements
