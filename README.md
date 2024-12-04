@@ -18,7 +18,7 @@ This ASP.NET Core application provides an OGC-compliant API to execute MARS simu
 
 The application can be started either via a Docker container or directly locally.
 
-## Docker Compose
+### Docker Compose
 
 By using the `docker-compose.yml` file, all required services are created and the service is build, if necessary:
 
@@ -26,17 +26,55 @@ By using the `docker-compose.yml` file, all required services are created and th
 docker compose up
 ```
 
+To rebuild the service using the `docker-compose.yml` file, use the following command:
+
+```bash
+docker compose build
+```
+
+### Start without Docker
+
 To start the service not in the Docker but in the host, the services are still required:
 
 ```bash
 dotnet run --environment Development --project SOH.Process.Server/SOH.Process.Server.csproj
 ```
 
-After starting the redis databse, you can run the service directly:
+After starting the redis database, you can run the service directly:
 
 ```bash
 dotnet run --environment Development --project SOH.Proces.
 ```
+
+### Access the API
+
+The OpenAPI documentation can be explored using Swagger UI: (http://localhost:8080/swagger/index.html)
+
+>> Ensure you access the UI with `http` not `https`, otherwise the server needs a trusted certificate, which is often only provided by the reverse proxy.
+
+### Running an existing simulation
+
+The OGC process API provides two execution modes and the service already provide one simulation by default. The ferry transfer model of SmartOpenHamburg. To execute the simulation direct, send a REST request as follows, e.g., with `curl`: 
+```bash
+curl -X 'POST' \
+'http://localhost:8080/processes/simulation:ferryTransfer:fc1e588a-1595-42a3-bd58-eba1382f54c0/execution' \
+-H 'accept: application/json' \
+-H 'Content-Type: application/json' \
+-d '{}'
+```
+returns the concrete result - here as GeoJson as FeatureCollection with all agents, their attribute, position by time.
+
+Process also can be executed asynchronously in which the server responds with a `201` and job description, which can be used to retrieve the status or result if already exist. Use the following command:
+
+```bash
+curl -X 'POST' \
+'http://localhost:8080/processes/simulation:ferryTransfer:fc1e588a-1595-42a3-bd58-eba1382f54c0/execution' \
+-H 'accept: application/json' \
+-H 'Content-Type: application/json' \
+-H 'Prefer: respond-async' \
+-d '{}'
+```
+returns a job with unique ``jobID`` associated to the selected simulation process and the actual execution status.
 
 ### Docker Build
 
