@@ -72,7 +72,15 @@ public static class Startup
 
             })
             .Services
-            .AddSwaggerGen()
+            .AddSwaggerGen(options =>
+            {
+                options.SwaggerDoc("v1", new Microsoft.OpenApi.Models.OpenApiInfo
+                {
+                    Title = "OGC Processes API for SmartOpenHamburg Simulation",
+                    Version = "0.1.0",
+                    Description = "Official OGC Processes API Endpoint for Simulation Execution"
+                });
+            })
             .AddEndpointsApiExplorer()
             .AddOpenApiDocument(document =>
             {
@@ -106,6 +114,7 @@ public static class Startup
             .UseSwagger()
             .UseSwaggerUi(options =>
             {
+                options.EnableTryItOut = false;
                 options.DefaultModelsExpandDepth = -1;
                 options.DocExpansion = "none";
                 options.TagsSorter = "alpha";

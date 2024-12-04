@@ -44,7 +44,8 @@ public static class Startup
 
         builder.Configuration
             .AddJsonFile("appsettings.json", false, true)
-            .AddJsonFile($"appsettings.{builder.Environment.EnvironmentName}.json", true, true)
+            .AddJsonFile($"appsettings.{builder.Environment.EnvironmentName}.json",
+                true, true)
             .AddEnvironmentVariables();
 
         builder
@@ -90,7 +91,8 @@ public static class Startup
 
     private static Task ConfigureRuntimeServer(this WebApplication app)
     {
-        Log.Information("Start system in {Development} mode...", app.Environment.EnvironmentName.ToLower());
+        Log.Information("Start system in {Development} mode...",
+            app.Environment.EnvironmentName.ToLower());
 
         if (!app.Environment.IsDevelopment())
         {

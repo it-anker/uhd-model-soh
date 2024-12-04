@@ -36,7 +36,7 @@ namespace SOH.Process.Server.Generated
     public partial interface ICapabilitiesClient : SOH.Process.Server.Generated.IApiService
     {
         /// <summary>
-        /// landing page of this API.
+        /// Retrieve the OGC API landing page for this service.
         /// </summary>
         /// <remarks>
         /// The landing page provides links to the:   * The APIDefinition (no fixed path),   * The Conformance statements
@@ -49,7 +49,7 @@ namespace SOH.Process.Server.Generated
 
         /// <param name="cancellationToken">A cancellation token that can be used by other objects or threads to receive notice of cancellation.</param>
         /// <summary>
-        /// landing page of this API.
+        /// Retrieve the OGC API landing page for this service.
         /// </summary>
         /// <remarks>
         /// The landing page provides links to the:   * The APIDefinition (no fixed path),   * The Conformance statements
@@ -89,7 +89,7 @@ namespace SOH.Process.Server.Generated
         partial void ProcessResponse(System.Net.Http.HttpClient client, System.Net.Http.HttpResponseMessage response);
 
         /// <summary>
-        /// landing page of this API.
+        /// Retrieve the OGC API landing page for this service.
         /// </summary>
         /// <remarks>
         /// The landing page provides links to the:   * The APIDefinition (no fixed path),   * The Conformance statements
@@ -105,7 +105,7 @@ namespace SOH.Process.Server.Generated
 
         /// <param name="cancellationToken">A cancellation token that can be used by other objects or threads to receive notice of cancellation.</param>
         /// <summary>
-        /// landing page of this API.
+        /// Retrieve the OGC API landing page for this service.
         /// </summary>
         /// <remarks>
         /// The landing page provides links to the:   * The APIDefinition (no fixed path),   * The Conformance statements
@@ -307,7 +307,7 @@ namespace SOH.Process.Server.Generated
     public partial interface IConformanceClient : SOH.Process.Server.Generated.IApiService
     {
         /// <summary>
-        /// information about standards that this API conforms to.
+        /// Retrieve the set of OGC API conformance classes that are supported by this service.
         /// </summary>
         /// <remarks>
         /// A list of all conformance classes, specified in a standard, that the server conforms to.  | Conformance class
@@ -327,7 +327,7 @@ namespace SOH.Process.Server.Generated
 
         /// <param name="cancellationToken">A cancellation token that can be used by other objects or threads to receive notice of cancellation.</param>
         /// <summary>
-        /// information about standards that this API conforms to.
+        /// Retrieve the set of OGC API conformance classes that are supported by this service.
         /// </summary>
         /// <remarks>
         /// A list of all conformance classes, specified in a standard, that the server conforms to.  | Conformance class
@@ -374,7 +374,7 @@ namespace SOH.Process.Server.Generated
         partial void ProcessResponse(System.Net.Http.HttpClient client, System.Net.Http.HttpResponseMessage response);
 
         /// <summary>
-        /// information about standards that this API conforms to.
+        /// Retrieve the set of OGC API conformance classes that are supported by this service.
         /// </summary>
         /// <remarks>
         /// A list of all conformance classes, specified in a standard, that the server conforms to.  | Conformance class
@@ -397,7 +397,7 @@ namespace SOH.Process.Server.Generated
 
         /// <param name="cancellationToken">A cancellation token that can be used by other objects or threads to receive notice of cancellation.</param>
         /// <summary>
-        /// information about standards that this API conforms to.
+        /// Retrieve the set of OGC API conformance classes that are supported by this service.
         /// </summary>
         /// <remarks>
         /// A list of all conformance classes, specified in a standard, that the server conforms to.  | Conformance class
@@ -1314,7 +1314,7 @@ namespace SOH.Process.Server.Generated
         /// </remarks>
         /// <returns>Information about the available processes</returns>
         /// <exception cref="ApiException">A server side error occurred.</exception>
-        System.Threading.Tasks.Task<ProcessList> GetProcessesAsync(int? limit);
+        System.Threading.Tasks.Task<ProcessList> GetProcessesAsync(int? limit, string? query);
 
         /// <param name="cancellationToken">A cancellation token that can be used by other objects or threads to receive notice of cancellation.</param>
         /// <summary>
@@ -1327,7 +1327,7 @@ namespace SOH.Process.Server.Generated
         /// </remarks>
         /// <returns>Information about the available processes</returns>
         /// <exception cref="ApiException">A server side error occurred.</exception>
-        System.Threading.Tasks.Task<ProcessList> GetProcessesAsync(int? limit, System.Threading.CancellationToken cancellationToken);
+        System.Threading.Tasks.Task<ProcessList> GetProcessesAsync(int? limit, string? query, System.Threading.CancellationToken cancellationToken);
 
         /// <summary>
         /// Retrieves a process description by ID.
@@ -1423,9 +1423,9 @@ namespace SOH.Process.Server.Generated
         /// </remarks>
         /// <returns>Information about the available processes</returns>
         /// <exception cref="ApiException">A server side error occurred.</exception>
-        public virtual System.Threading.Tasks.Task<ProcessList> GetProcessesAsync(int? limit)
+        public virtual System.Threading.Tasks.Task<ProcessList> GetProcessesAsync(int? limit, string? query)
         {
-            return GetProcessesAsync(limit, System.Threading.CancellationToken.None);
+            return GetProcessesAsync(limit, query, System.Threading.CancellationToken.None);
         }
 
         /// <param name="cancellationToken">A cancellation token that can be used by other objects or threads to receive notice of cancellation.</param>
@@ -1439,7 +1439,7 @@ namespace SOH.Process.Server.Generated
         /// </remarks>
         /// <returns>Information about the available processes</returns>
         /// <exception cref="ApiException">A server side error occurred.</exception>
-        public virtual async System.Threading.Tasks.Task<ProcessList> GetProcessesAsync(int? limit, System.Threading.CancellationToken cancellationToken)
+        public virtual async System.Threading.Tasks.Task<ProcessList> GetProcessesAsync(int? limit, string? query, System.Threading.CancellationToken cancellationToken)
         {
             var client_ = _httpClient;
             var disposeClient_ = false;
@@ -1458,6 +1458,10 @@ namespace SOH.Process.Server.Generated
             if (limit != null)
             {
                 urlBuilder_.Append(System.Uri.EscapeDataString("limit")).Append('=').Append(System.Uri.EscapeDataString(ConvertToString(limit, System.Globalization.CultureInfo.InvariantCulture))).Append('&');
+            }
+            if (query != null)
+            {
+                urlBuilder_.Append(System.Uri.EscapeDataString("searchQuery")).Append('=').Append(System.Uri.EscapeDataString(ConvertToString(query, System.Globalization.CultureInfo.InvariantCulture))).Append('&');
             }
             urlBuilder_.Length--;
 

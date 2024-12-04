@@ -12,8 +12,10 @@ internal class SimulationTestRunHandler(
     IResultService resultService,
     IStringLocalizer<SharedResource> localization)
 {
-    internal async Task ExecuteTestProcess(SimulationRunJobRequest request,
-        string jobId, SimulationProcessDescription processDescription, CancellationToken cancellationToken)
+    internal async Task ExecuteTestProcess(
+        SimulationRunJobRequest request,
+        string jobId, SimulationProcessDescription processDescription,
+        CancellationToken cancellationToken)
     {
         var currentJob = await simulationService.GetSimulationJobAsync(jobId, cancellationToken);
         try
@@ -35,6 +37,7 @@ internal class SimulationTestRunHandler(
             currentJob.ResultId = await resultService.CreateAsync(new Result
             {
                 ProcessId = processDescription.Id,
+                Output = "default",
                 JobId = currentJob.JobId,
                 FeatureCollection =
                 [

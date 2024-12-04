@@ -1,6 +1,14 @@
 using System.Runtime.Serialization;
+using MediatR;
 
 namespace SOH.Process.Server.Models.Processes;
+
+[DataContract]
+public class SearchProcessRequest : ParameterLimit
+{
+    [DataMember(Name = "searchQuery")]
+    public string? Query { get; set; }
+}
 
 [DataContract]
 public class ParameterLimit
@@ -8,7 +16,7 @@ public class ParameterLimit
     private int _pageSize = 10;
 
     [DataMember(Name = "pageNumber")]
-    public int PageNumber { get; set; }
+    public int PageNumber { get; set; } = 1;
 
     [DataMember(Name = "pageSize")]
     public int PageSize

@@ -3,7 +3,6 @@ using SOH.Process.Server.Generated;
 using SOH.Process.Server.Models.Ogc;
 using SOH.Process.Server.Tests.Base;
 using ProblemDetails = Microsoft.AspNetCore.Mvc.ProblemDetails;
-using ProcessingKind = SOH.Process.Server.Models.Processes.ProcessingKind;
 using StatusCode = SOH.Process.Server.Models.Processes.StatusCode;
 
 namespace SOH.Process.Server.Tests;
@@ -25,9 +24,28 @@ public class SimulationControllerTests : AbstractManagementTests
     }
 
     [Fact]
+    public async Task TestCapabilities()
+    {
+        var landingPage = await _capabilitiesClient.GetLandingPageAsync();
+        Assert.Equal("SmartOpenHamburg OGC Processes API", landingPage.Title);
+        Assert.Equal("Official OGC Processes API to execute the SmartOpenHamburg MARS simulation",
+            landingPage.Description);
+    }
+
+    [Fact]
+    public async Task TestConformanceClasses()
+    {
+        var classes = await _conformanceClient.GetConformanceClassesAsync();
+
+        Assert.NotEmpty(classes.ConformsTo);
+        Assert.Contains(classes.ConformsTo, conformity => conformity.EndsWith("json"));
+        Assert.Contains(classes.ConformsTo, conformity => conformity.EndsWith("job-list"));
+    }
+
+    [Fact]
     public async Task TestListProcesses()
     {
-        var processes = await _processesClient.GetProcessesAsync(100);
+        var processes = await _processesClient.GetProcessesAsync(100, null);
 
         Assert.Contains(processes.Processes, summary => summary.Title == "SOH - Ferry Transfer Model");
         Assert.Contains(processes.Processes, summary =>
@@ -52,9 +70,17 @@ public class SimulationControllerTests : AbstractManagementTests
     }
 
     [Fact]
+    public async Task TestLimitProcess()
+    {
+        var processes = await _processesClient.GetProcessesAsync(1, "testProcessId");
+        Assert.Single(processes.Processes);
+        Assert.Equal("simulation:testProcessId", processes.Processes[0].Id);
+    }
+
+    [Fact]
     public async Task TestExecuteProcess()
     {
-        var processes = await _processesClient.GetProcessesAsync(100);
+        var processes = await _processesClient.GetProcessesAsync(100, null);
 
         var testModel = processes.Processes.First(summary => summary.Title == "TestModel");
 
@@ -87,7 +113,7 @@ public class SimulationControllerTests : AbstractManagementTests
             {
                 { "config", configContent },
                 { "startPoint", "2024-12-01T08:00:00" },
-                { "startPoint", "2024-12-01T09:00:00" }
+                { "endPoint", "2024-12-01T09:00:00" }
             }
         });
 
@@ -115,5 +141,40 @@ public class SimulationControllerTests : AbstractManagementTests
 
         var jobResult = await _jobsClient.GetResultAsync(executedJob.JobId);
 
+        Assert.Single(jobResult);
+        Assert.True(jobResult.ContainsKey("agents"));
+        object agentsOutput = jobResult["agents"];
+        Assert.NotNull(agentsOutput);
+    }
+
+    [Fact]
+    public async Task TestExecuteFerryProcessDefault()
+    {
+        var ferrySimulation = await _processesClient
+            .GetProcessDescriptionAsync(GlobalConstants.FerryTransferId);
+
+        string configContent = await File.ReadAllTextAsync("ferry_transfer_test_config_2.json");
+        var result = await _processesClient.ExecuteAsync(GlobalConstants.FerryTransferId, new Execute());
+
+        Assert.NotNull(result.FeatureCollection);
+        Assert.NotEmpty(result.FeatureCollection);
+        Assert.NotNull(result.JobId);
+        Assert.Null(result.FileId);
+        Assert.Equal(ferrySimulation.Id, result.ProcessId);
+
+        var executedJob = await _jobsClient.GetStatusAsync(result.JobId);
+        Assert.Equal(StatusCode.Successful, executedJob.Status);
+        Assert.NotNull(executedJob.StartedUtc);
+        Assert.NotNull(executedJob.FinishedUtc);
+        Assert.Equal(100, executedJob.Progress);
+        Assert.Equal(result.JobId, executedJob.JobId);
+        Assert.Equal(ferrySimulation.Id, executedJob.ProcessId);
+
+        var jobResult = await _jobsClient.GetResultAsync(executedJob.JobId);
+
+        Assert.Single(jobResult);
+        Assert.True(jobResult.ContainsKey("agents"));
+        object agentsOutput = jobResult["agents"];
+        Assert.NotNull(agentsOutput);
     }
 }

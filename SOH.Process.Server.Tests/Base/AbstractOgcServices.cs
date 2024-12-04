@@ -1,5 +1,8 @@
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc.Testing;
+using Microsoft.AspNetCore.TestHost;
+using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Hosting;
 using Testcontainers.Redis;
 
 namespace SOH.Process.Server.Tests.Base;
@@ -41,8 +44,16 @@ public abstract class AbstractOgcServices : WebApplicationFactory<Program.IServe
         string? redisConnectionString = _redisContainer.GetConnectionString();
 
         builder.UseEnvironment("Test");
-        builder.UseSetting("Redis:ConnectionString", redisConnectionString);
-        builder.UseSetting("Redis:UseTestcontainers", false.ToString());
+        builder.ConfigureAppConfiguration(configurationBuilder =>
+        {
+            configurationBuilder.AddJsonFile("appsettings.Test.json", true);
+
+            // override local dev redis connection string for tests
+            configurationBuilder.AddInMemoryCollection(new[]
+            {
+                new KeyValuePair<string, string?>("Redis:ConnectionString", redisConnectionString)
+            });
+        });
     }
 
     private Task SetClients()

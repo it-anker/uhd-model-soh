@@ -10,11 +10,8 @@ namespace SOH.Process.Server.Persistence;
 public static class Startup
 {
     public static IServiceCollection AddPersistence(this IServiceCollection services,
-        IConfiguration configuration, IWebHostEnvironment environment)
+        IConfiguration config, IWebHostEnvironment environment)
     {
-        var databaseSettings = configuration.GetSection("Redis").Get<RedisDatabaseSettings>();
-        ArgumentNullException.ThrowIfNull(databaseSettings);
-        string connectionString = configuration["REDIS_CONNECTION"] ?? databaseSettings.ConnectionString;
         var serializerSettings = new JsonSerializerSettings
         {
             ReferenceLoopHandling = ReferenceLoopHandling.Ignore,
@@ -39,9 +36,15 @@ public static class Startup
 
         return services
             .AddSingleton(options)
-            .AddSingleton<IConnectionMultiplexer>(_ =>
-                ConnectionMultiplexer.Connect(connectionString))
-            .AddBackgroundJobs(configuration, environment)
+            .AddSingleton<IConnectionMultiplexer>(serviceProvider =>
+            {
+                var configuration = serviceProvider.GetRequiredService<IConfiguration>();
+                string? connectionString = configuration["REDIS_CONNECTION"] ??
+                                           configuration["Redis:ConnectionString"];
+                ArgumentException.ThrowIfNullOrEmpty(connectionString);
+                return ConnectionMultiplexer.Connect(connectionString);
+            })
+            .AddBackgroundJobs(config, environment)
             .AddScoped<IPersistence, RedisServiceImpl>();
     }
 }

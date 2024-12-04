@@ -36,7 +36,7 @@ public class SimulationServiceImpl(
         ArgumentNullException.ThrowIfNull(request.ProcessId);
 
         var simulationJob = request.Adapt<SimulationJob>();
-        simulationJob.JobId = $"job:{request.ProcessId}:{request}:{Guid.NewGuid()}";
+        simulationJob.JobId = $"job:{request.ProcessId}:{Guid.NewGuid()}";
         simulationJob.ProcessId = request.ProcessId;
         request.Message ??= localizer["simulation created"];
         simulationJob.Update(request);
@@ -123,26 +123,25 @@ public class SimulationServiceImpl(
         });
     }
 
-    public async Task<ProcessList> ListProcessesAsync(ParameterLimit simulation, CancellationToken token = default)
+    public async Task<ProcessList> ListProcessesAsync(SearchProcessRequest request, CancellationToken token = default)
     {
-        var processes = await simulationRepository
-            .ListPaginatedAsync<SimulationProcessDescription>("simulation*", simulation, token);
-
+        var processes = await ListProcessesPaginatedAsync(request, token);
         return new ProcessList
         {
             Processes = processes.Data.OfType<ProcessSummary>().ToList()
         };
     }
 
-    public Task<ParameterLimitResponse<SimulationProcessDescription>> ListProcessesPaginatedAsync(ParameterLimit simulation, CancellationToken token = default)
-    {
-        return simulationRepository
-            .ListPaginatedAsync<SimulationProcessDescription>("simulation", simulation, token);
-    }
-
     public Task<ParameterLimitResponse<SimulationProcessDescription>> ListProcessesPaginatedAsync(
         string query, ParameterLimit simulation, CancellationToken token = default)
     {
         return simulationRepository.ListPaginatedAsync<SimulationProcessDescription>(query, simulation, token);
+    }
+
+    public async Task<ParameterLimitResponse<SimulationProcessDescription>> ListProcessesPaginatedAsync(
+        SearchProcessRequest request, CancellationToken token = default)
+    {
+        return await simulationRepository
+            .ListPaginatedAsync<SimulationProcessDescription>("simulation*" + request.Query, request, token);
     }
 }

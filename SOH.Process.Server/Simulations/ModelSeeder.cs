@@ -32,7 +32,25 @@ internal class ModelSeeder(
             OutputTransmission =
             [
                 TransmissionMode.Value
-            ]
+            ],
+            Outputs = new Dictionary<string, OutputDescription>
+            {
+                {
+                    "default", new OutputDescription
+                    {
+                        Format = new Format
+                        {
+                            MediaType = "application/geo+json"
+                        },
+                        Schema = new Schema
+                        {
+                            Title = "Default test output",
+                            ContentMediaType = "application/geo+json",
+                            Default = new FeatureCollection()
+                        }
+                    }
+                }
+            }
         };
 
         const string testId = "simulation:testProcessId";

@@ -126,13 +126,33 @@ public class SimulationManagementTests : AbstractManagementTests
             Assert.StartsWith("simulation", id);
         }
 
-        var filter = new ParameterLimit
+        var filter = new SearchProcessRequest
         {
             PageSize = 1, PageNumber = 1
         };
         var response = await _simulationService.ListProcessesAsync(filter);
         Assert.NotEmpty(response.Processes);
         Assert.Single(response.Processes);
+
+        var paginatedResponse = await _simulationService.ListProcessesPaginatedAsync(new SearchProcessRequest
+        {
+            PageSize = 1, Query = ""
+        });
+
+        Assert.Single(paginatedResponse.Data);
+        Assert.True(paginatedResponse.HasNextPage);
+        Assert.True(paginatedResponse.TotalCount > 1);
+        Assert.Equal(1, paginatedResponse.PageSize);
+        Assert.Equal(1, paginatedResponse.CurrentPage);
+
+        var paginatedNext = await _simulationService.ListProcessesPaginatedAsync(new SearchProcessRequest
+        {
+            PageSize = 1, Query = "", PageNumber = 2
+        });
+
+        Assert.Single(paginatedNext.Data);
+        Assert.NotEqual(paginatedNext.Data[0].Id, paginatedResponse.Data[0].Id);
+        Assert.Equal(2, paginatedNext.CurrentPage);
     }
 
     [Fact]
@@ -167,7 +187,7 @@ public class SimulationManagementTests : AbstractManagementTests
     [Fact]
     public async Task TestDefaultSimulation()
     {
-        var existingProcess = await _simulationService.ListProcessesAsync(new ParameterLimit
+        var existingProcess = await _simulationService.ListProcessesAsync(new SearchProcessRequest
         {
             PageSize = 1000
         });
@@ -255,6 +275,7 @@ public class SimulationManagementTests : AbstractManagementTests
         var result = await _resultService.FindAsync(job.ResultId);
 
         Assert.NotNull(result);
+        Assert.Equal("agents", result.Output);
         Assert.NotNull(result.FeatureCollection);
         Assert.Empty(result.FeatureCollection);
         var loadedJob = await _simulationService.GetSimulationJobAsync(job.JobId);

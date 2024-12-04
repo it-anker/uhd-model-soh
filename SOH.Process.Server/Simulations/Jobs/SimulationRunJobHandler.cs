@@ -97,7 +97,7 @@ public class SimulationRunJobHandler(
             var result = new Result
             {
                 ProcessId = processDescription.Id, JobId = currentJob.JobId,
-                FeatureCollection = featureCollection
+                FeatureCollection = featureCollection, Output = "agents"
             };
 
             currentJob.ResultId = await resultService.CreateAsync(result, token);
