@@ -18,9 +18,29 @@ This ASP.NET Core application provides an OGC-compliant API to execute MARS simu
 
 The application can be started either via a Docker container or directly locally.
 
+## Docker Compose
+
+By using the `docker-compose.yml` file, all required services are created and the service is build, if necessary:
+
+```bash
+docker compose up
+```
+
+To start the service not in the Docker but in the host, the services are still required:
+
+```bash
+dotnet run --environment Development --project SOH.Process.Server/SOH.Process.Server.csproj
+```
+
+After starting the redis databse, you can run the service directly:
+
+```bash
+dotnet run --environment Development --project SOH.Proces.
+```
+
 ### Docker Build
 
-Create the Docker image with the following command:
+Create the single Docker image for the service, use the following command:
 
 ```bash
 docker build -t mars-ogc-api -f ./SOH.Process.Server/Dockerfile .
