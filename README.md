@@ -54,15 +54,41 @@ The OpenAPI documentation can be explored using Swagger UI: (http://localhost:80
 
 ### Running an existing simulation
 
-The OGC process API provides two execution modes and the service already provide one simulation by default. The ferry transfer model of SmartOpenHamburg. To execute the simulation direct, send a REST request as follows, e.g., with `curl`: 
+The OGC process API provides two execution modes and the service already provide one simulation by default. The ferry transfer model of SmartOpenHamburg. To execute the simulation directly and returning all agents and ther intermediate states of each tick, send a REST request as follows, e.g., with `curl`: 
 ```bash
 curl -X 'POST' \
 'http://localhost:8080/processes/simulation:ferryTransfer:fc1e588a-1595-42a3-bd58-eba1382f54c0/execution' \
 -H 'accept: application/json' \
 -H 'Content-Type: application/json' \
--d '{}'
+-d '{
+    "outputs": {
+        "agents": {}
+    }
+}'
 ```
+
 returns the concrete result - here as GeoJson as FeatureCollection with all agents, their attribute, position by time.
+
+You can combine or select other outputs for a single e.g., to return a time series of average road occupation.  
+
+```bash
+curl -X 'POST' \
+'http://localhost:8080/processes/simulation:ferryTransfer:fc1e588a-1595-42a3-bd58-eba1382f54c0/execution' \
+-H 'accept: application/json' \
+-H 'Content-Type: application/json' \
+-d '{
+    "outputs": {
+        "agents": {}
+    }
+}'
+```
+
+Use the `visualize_time_series.py` script to show the increase and decrease of road usages over time:
+
+```bash
+pip3 install matplotlib
+python3 visualize_time_series.py result.json
+```
 
 Process also can be executed asynchronously in which the server responds with a `201` and job description, which can be used to retrieve the status or result if already exist. Use the following command:
 
@@ -72,7 +98,11 @@ curl -X 'POST' \
 -H 'accept: application/json' \
 -H 'Content-Type: application/json' \
 -H 'Prefer: respond-async' \
--d '{}'
+-d '{
+    "outputs": {
+        "agents": {}
+    }
+}'
 ```
 returns a job with unique ``jobID`` associated to the selected simulation process and the actual execution status.
 
