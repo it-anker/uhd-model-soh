@@ -8,15 +8,15 @@ using Results = SOH.Process.Server.Models.Ogc.Results;
 namespace SOH.Process.Server.Simulations.Services;
 
 public class ResultsServiceImpl(
-    IStringLocalizer<SharedResource> localizer,
+    IStringLocalizer<SharedResource> localization,
     IPersistence persistence) : IResultService
 {
     public async Task<string> CreateAsync(Result results, CancellationToken token = default)
     {
         ArgumentException.ThrowIfNullOrEmpty(results.ProcessId);
         ArgumentException.ThrowIfNullOrEmpty(results.JobId);
-        ArgumentException.ThrowIfNullOrEmpty(results.Output);
-        results.Id = $"result:{results.JobId}:{results.ProcessId}{Guid.NewGuid()}:{results.Output}";
+        string outputKeys = string.Join(":", results.Results.Keys);
+        results.Id = $"result:{results.JobId}:{results.ProcessId}{Guid.NewGuid()}:{outputKeys}".Trim(':');
         await persistence.UpsertAsync(results.Id, results, token);
         return results.Id;
     }
@@ -37,7 +37,7 @@ public class ResultsServiceImpl(
     public async Task<Result> GetAsync(string resultId, CancellationToken token = default)
     {
         return await persistence.FindAsync<Result>(resultId, token) ?? throw new NotFoundException(
-            localizer[$"result with id {persistence} could not be found"]);
+            localization[$"result with id {persistence} could not be found"]);
     }
 
     public async Task<Result?> FindAsync(string resultId, CancellationToken token = default)
@@ -48,7 +48,7 @@ public class ResultsServiceImpl(
     public async Task<Results> ListAsync(CancellationToken token = default)
     {
         var response = persistence
-            .ListAsync<Result>("result", token);
+            .ListAsync<Result>("result*", token);
 
         var results = new Results();
 
@@ -63,6 +63,6 @@ public class ResultsServiceImpl(
     public IAsyncEnumerable<Result> ListResultsAsync(string jobId, string outputName,
         CancellationToken token = default)
     {
-        return persistence.ListAsync<Result>($"*{jobId}*{outputName}", token);
+        return persistence.ListAsync<Result>($"*{jobId}*{outputName}*", token);
     }
 }

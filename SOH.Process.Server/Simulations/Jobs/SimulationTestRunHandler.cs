@@ -22,10 +22,9 @@ internal class SimulationTestRunHandler(
         {
             for (int i = 1; i <= 10; i++)
             {
-                if (request.Execute != null && request.Execute.Inputs.TryGetValue("func",
-                        out object? function) && function is Action<int, SimulationJob> action)
+                if (currentJob.ExecutionConfig != null && currentJob.ExecutionConfig.Inputs.ContainsKey("errorInSim"))
                 {
-                    action.Invoke(i, currentJob);
+                    throw new InvalidOperationException("error during sim");
                 }
                 await Task.Delay(100, cancellationToken);
                 currentJob.Progress = (i / 10) * 100;
@@ -34,22 +33,28 @@ internal class SimulationTestRunHandler(
 
             currentJob.Message = localization["process_finished"];
             currentJob.Status = StatusCode.Successful;
+            FeatureCollection featureCollection =
+            [
+                new Feature(new Point(0, 0), new AttributesTable
+                {
+                    { "field", 1 }
+                })
+            ];
             currentJob.ResultId = await resultService.CreateAsync(new Result
             {
                 ProcessId = processDescription.Id,
-                Output = "default",
                 JobId = currentJob.JobId,
-                FeatureCollection =
-                [
-                    new Feature(new Point(0, 0), new AttributesTable
+                Results = new Dictionary<string, ResultEntry>
+                {
                     {
-                        { "field", 1 }
-                    })
-                ]
+                        "default", new ResultEntry{FeatureCollection = featureCollection}
+                    }
+                }
             }, cancellationToken);
         }
-        catch
+        catch (Exception exception)
         {
+            currentJob.ExceptionMessage = exception.Message;
             currentJob.Status = StatusCode.Failed;
         }
         await simulationService.UpdateAsync(currentJob.JobId, currentJob, cancellationToken);

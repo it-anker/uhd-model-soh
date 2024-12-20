@@ -36,7 +36,8 @@ public class SimulationServiceImpl(
         ArgumentNullException.ThrowIfNull(request.ProcessId);
 
         var simulationJob = request.Adapt<SimulationJob>();
-        simulationJob.JobId = $"job:{request.ProcessId}:{Guid.NewGuid()}";
+        simulationJob.JobId = $"job:{request.ProcessId}:{Guid.NewGuid()}:" +
+                              $"{request.ExecutionConfig.JobIdentifier}".Trim(':');
         simulationJob.ProcessId = request.ProcessId;
         request.Message ??= localizer["simulation created"];
         simulationJob.Update(request);
@@ -114,13 +115,24 @@ public class SimulationServiceImpl(
     public Task<JobList> ListJobsAsync(CancellationToken token = default)
     {
         var jobs = simulationRepository
-            .ListAsync<SimulationJob>("job", token)
-            .ToBlockingEnumerable(token);
+            .ListAsync<SimulationJob>("job*", token)
+            .ToBlockingEnumerable(token)
+            .OfType<StatusInfo>()
+            .ToList();
 
         return Task.FromResult(new JobList
         {
-            Jobs = jobs.OfType<StatusInfo>().ToList()
+            Jobs = jobs
         });
+    }
+
+    public async Task<JobList> ListJobsAsync(SearchJobProcessRequest request, CancellationToken token = default)
+    {
+        var jobs = await ListJobsPaginatedAsync(request, token);
+        return new JobList
+        {
+            Jobs = jobs.Data.OfType<StatusInfo>().ToList()
+        };
     }
 
     public async Task<ProcessList> ListProcessesAsync(SearchProcessRequest request, CancellationToken token = default)
@@ -138,10 +150,19 @@ public class SimulationServiceImpl(
         return simulationRepository.ListPaginatedAsync<SimulationProcessDescription>(query, simulation, token);
     }
 
+    public async Task<ParameterLimitResponse<SimulationJob>> ListJobsPaginatedAsync(
+        SearchJobProcessRequest request, CancellationToken token = default)
+    {
+        string term = request.Query != null ? request.Query.Trim('*') + "*" : string.Empty;
+        return await simulationRepository.ListPaginatedAsync<SimulationJob>(
+            "job*" + term, request, token);
+    }
+
     public async Task<ParameterLimitResponse<SimulationProcessDescription>> ListProcessesPaginatedAsync(
         SearchProcessRequest request, CancellationToken token = default)
     {
-        return await simulationRepository
-            .ListPaginatedAsync<SimulationProcessDescription>("simulation*" + request.Query, request, token);
+        string term = request.Query != null ? request.Query.Trim('*') + "*" : string.Empty;
+        return await simulationRepository.ListPaginatedAsync<SimulationProcessDescription>(
+            "simulation*" + term, request, token);
     }
 }

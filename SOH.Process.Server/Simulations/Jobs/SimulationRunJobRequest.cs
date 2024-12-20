@@ -10,6 +10,5 @@ public class SimulationRunJobRequest : IRequest<Unit>
     [Required, DataMember(Name = "jobId")]
     public string JobId { get; set; } = default!;
 
-    [DataMember(Name = "execute")]
-    public Execute? Execute { get; set; }
+    public bool IsTest { get; set; }
 }

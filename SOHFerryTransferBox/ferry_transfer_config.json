@@ -1,4 +1,5 @@
 {
+  "id": "ferryTransfer",
   "globals": {
     "deltaT": 1,
     "startPoint": "2020-09-01T06:30:00",

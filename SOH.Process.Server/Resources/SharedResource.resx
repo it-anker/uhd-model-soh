@@ -42,4 +42,19 @@
     <data name="process_finished" xml:space="preserve">
         <value>Finished job execution</value>
     </data>
+    <data name="green_4_bikes_model_description" xml:space="preserve">
+        <value>Travelling model to simulate the mobility behavior of people walking and cycling from selected starts and stops in the area of Hamburg Harburg.</value>
+    </data>
+    <data name="green_4_bikes_model_title" xml:space="preserve">
+        <value>SOH - Green4Bikes Model</value>
+    </data>
+    <data name="green_4_bikes_output_agents" xml:space="preserve">
+        <value>Merged agents output of Traveller walking and cycling from their source to their destination.</value>
+    </data>
+    <data name="soh_output_statistics_avg_travel_time" xml:space="preserve">
+        <value>Average traveltime of each agent of the simulation run.</value>
+    </data>
+    <data name="soh_output_agents" xml:space="preserve">
+        <value>Point-based output of each agent and their values with different simulation times.</value>
+    </data>
 </root>

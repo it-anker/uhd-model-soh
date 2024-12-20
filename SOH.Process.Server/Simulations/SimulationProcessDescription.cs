@@ -26,6 +26,9 @@ public class SimulationProcessDescription : Models.Processes.ProcessDescription
     [DataMember(Name = "updated")]
     public DateTime UpdatedUtc { get; set; } = DateTime.UtcNow;
 
+    [DataMember(Name = "isTest")]
+    public bool IsTest { get; set; }
+
     public void Update(SimulationProcessDescription request)
     {
         ArgumentException.ThrowIfNullOrEmpty(request.Title);
@@ -37,6 +40,7 @@ public class SimulationProcessDescription : Models.Processes.ProcessDescription
             .Where(s => !string.IsNullOrEmpty(s)).Distinct().ToList();
         Description = request.Description?.Trim();
         Inputs = request.Inputs;
+        IsTest = request.IsTest;
         Outputs = request.Outputs;
         Metadata = request.Metadata;
         AdditionalParameters = request.AdditionalParameters;

@@ -27,8 +27,8 @@ namespace SOHModel.Multimodal.Model;
 /// <summary>
 ///     This <see cref="MultiCapableAgent{TLayer}" /> implements different capabilities for instance: WALK, DRIVE and CYCLE
 /// </summary>
-public abstract class MultiCapableAgent<TLayer> : MultimodalAgent<TLayer>, 
-    IWalkingCapable, ICarSteeringCapable, IBicycleSteeringAndRentalCapable, 
+public abstract class MultiCapableAgent<TLayer> : MultimodalAgent<TLayer>,
+    IWalkingCapable, ICarSteeringCapable, IBicycleSteeringAndRentalCapable,
     ICarRentalCapable, IBusPassenger, IFerryPassenger, ITrainPassenger
     where TLayer : IMultimodalLayer
 {
@@ -38,38 +38,6 @@ public abstract class MultiCapableAgent<TLayer> : MultimodalAgent<TLayer>,
     private bool _resultOutputStored;
     private Position _startPosition;
     private WalkingShoes _walkingShoes;
-
-    public override void Init(TLayer layer)
-    {
-        base.Init(layer);
-
-        Mass = 80;
-        EnableCapability(ModalChoice.Walking);
-
-        if (CapabilityDrivingOwnCar)
-        {
-            if (CarParkingLayer != null)
-            {
-                var radius = CarRadiusToStartPosition > 0 ? CarRadiusToStartPosition : 1000;
-                Car ??= CarParkingLayer.CreateOwnCarNear(StartPosition, radius);
-                Car ??= CarParkingLayer.CreateOwnCarNear(StartPosition);
-            }
-            else
-            {
-                throw new ApplicationException($"{nameof(CarParkingLayer)} is not initialized.");
-            }
-        }
-    }
-
-    public void SetWalking()
-    {
-        WalkingShoes.SetWalking();
-    }
-
-    public void SetRunning()
-    {
-        WalkingShoes.SetRunning();
-    }
 
     #region input_params
 
@@ -116,9 +84,149 @@ public abstract class MultiCapableAgent<TLayer> : MultimodalAgent<TLayer>,
     }
 
     public double PerceptionInMeter { get; set; }
+
     public double Bearing { get; set; }
 
+    public int ExpectedTravelTime { get; protected set; }
+
+    public bool StoreTickResult { get; set; }
+
+    public int ActualTravelTime { get; private set; }
+
+    public int RouteMainModalActualTravelTime
+    {
+        get => RouteMainModalChoice.Equals(ModalChoice.Walking) ? ActualTravelTime : _mainModalActualTravelTime;
+        protected set => _mainModalActualTravelTime = value;
+    }
+
+    public string RouteMainModality => RouteMainModalChoice.ToString();
+
+
+    public string RouteModalities =>
+        MultimodalRoute?.Stops.Select(s => s.ModalChoice.ToString())
+            .Aggregate((i, j) => i + "_" + j) ?? "";
+
+    public int RouteModalityCount => MultimodalRoute?.Stops.Count ?? 0;
+
+    private DateTime RouteMainModalActualTravelTimeStartTick { get; set; }
+
+    public int RouteMainModalRouteLength
+    {
+        get
+        {
+            if (MultimodalRoute == null) return 0;
+            if (!MultimodalRoute.Stops.Any()) return 0;
+            if (MultimodalRoute.Stops.All(stop => stop.ModalChoice == ModalChoice.Walking))
+                return (int)MultimodalRoute.RouteLength;
+
+            var routeStop = MultimodalRoute.Stops.FirstOrDefault(stop => stop.ModalChoice != ModalChoice.Walking);
+            if (routeStop != null) return (int)routeStop.Route.RouteLength;
+            return 0;
+        }
+    }
+
     #endregion
+
+    #region capability properties
+
+    /// <summary>
+    ///     Holds a personal <see cref="Bicycle" /> if the agent possesses one.
+    /// </summary>
+    public Bicycle.Model.Bicycle Bicycle { get; protected set; }
+
+    /// <summary>
+    ///     Holds a <see cref="RentalBicycle" /> if one is leased.
+    /// </summary>
+    public RentalBicycle RentalBicycle { get; private set; }
+
+    public Car.Model.Car Car { get; set; }
+
+    [PropertyDescription] public IFerryStationLayer FerryStationLayer { get; set; }
+
+    [PropertyDescription] public ITrainStationLayer TrainStationLayer { get; set; }
+
+    [PropertyDescription] public IBicycleRentalLayer BicycleRentalLayer { get; set; }
+
+    [PropertyDescription] public ICarRentalLayer CarRentalLayer { get; set; }
+
+    [PropertyDescription] public ICarParkingLayer CarParkingLayer { get; set; }
+
+    [PropertyDescription] public IBusStationLayer BusStationLayer { get; }
+
+    /// <summary>
+    ///     The currently active modal type.
+    /// </summary>
+    [PropertyDescription]
+    public ModalChoice ActiveCapability => MultimodalRoute?.CurrentModalChoice ?? ModalChoice.Walking;
+
+    private bool OnCarParkingLayer => Car?.CarParkingSpace != null;
+
+
+    [PropertyDescription(Ignore = true)] public bool OvertakingActivated { get; set; }
+    public bool BrakingActivated { get; set; }
+
+    [PropertyDescription] public bool CurrentlyCarDriving => Car?.Driver?.Equals(this) ?? false;
+
+    [PropertyDescription(Ignore = true)] public double DriverRandom => HandleDriverType.DetermineDriverRand(DriverType);
+
+    [PropertyDescription(Ignore = true)] public DriverType DriverType => DriverType.Normal;
+
+    [PropertyDescription(Ignore = true)]
+    public double CyclingPower { get; } =
+        new FastGaussianDistribution(75, 3).Next(RandomHelper.Random);
+
+    [PropertyDescription] public double Mass { get; set; }
+
+    [PropertyDescription(Ignore = true)] public double Gradient { get; } = 0;
+
+    /// <summary>
+    ///     The shoes are the physical representation of the multimodal agent within the environment.
+    /// </summary>
+    public WalkingShoes WalkingShoes
+    {
+        get
+        {
+            if (_walkingShoes != null) return _walkingShoes;
+            double walkingSpeed = PedestrianAverageSpeedGenerator.CalculateWalkingSpeed(Gender);
+            double runningSpeed = PedestrianAverageSpeedGenerator.CalculateRunningSpeed(Gender);
+            return _walkingShoes = new WalkingShoes(EnvironmentLayer, walkingSpeed, runningSpeed);
+        }
+        private set => _walkingShoes = value;
+    }
+
+    #endregion
+
+    public override void Init(TLayer layer)
+    {
+        base.Init(layer);
+
+        Mass = 80;
+        EnableCapability(ModalChoice.Walking);
+
+        if (CapabilityDrivingOwnCar)
+        {
+            if (CarParkingLayer != null)
+            {
+                double radius = CarRadiusToStartPosition > 0 ? CarRadiusToStartPosition : 1000;
+                Car ??= CarParkingLayer.CreateOwnCarNear(StartPosition, radius);
+                Car ??= CarParkingLayer.CreateOwnCarNear(StartPosition);
+            }
+            else
+            {
+                throw new ApplicationException($"{nameof(CarParkingLayer)} is not initialized.");
+            }
+        }
+    }
+
+    public void SetWalking()
+    {
+        WalkingShoes.SetWalking();
+    }
+
+    public void SetRunning()
+    {
+        WalkingShoes.SetRunning();
+    }
 
     #region Capabilities
 
@@ -186,45 +294,6 @@ public abstract class MultiCapableAgent<TLayer> : MultimodalAgent<TLayer>,
 
     #endregion
 
-    #region travel_time_output
-
-    public int ExpectedTravelTime { get; protected set; }
-
-    public bool StoreTickResult { get; set; }
-
-    public int ActualTravelTime { get; private set; }
-
-    public int RouteMainModalActualTravelTime
-    {
-        get => RouteMainModalChoice.Equals(ModalChoice.Walking) ? ActualTravelTime : _mainModalActualTravelTime;
-        protected set => _mainModalActualTravelTime = value;
-    }
-
-    public string RouteMainModality => RouteMainModalChoice.ToString();
-
-
-    public string RouteModalities =>
-        MultimodalRoute?.Stops.Select(s => s.ModalChoice.ToString())
-            .Aggregate((i, j) => i + "_" + j) ?? "";
-
-    public int RouteModalityCount => MultimodalRoute?.Stops.Count ?? 0;
-
-    private DateTime RouteMainModalActualTravelTimeStartTick { get; set; }
-
-    public int RouteMainModalRouteLength
-    {
-        get
-        {
-            if (MultimodalRoute == null) return 0;
-            if (!MultimodalRoute.Stops.Any()) return 0;
-            if (MultimodalRoute.Stops.All(stop => stop.ModalChoice == ModalChoice.Walking))
-                return (int)MultimodalRoute.RouteLength;
-
-            var routeStop = MultimodalRoute.Stops.FirstOrDefault(stop => stop.ModalChoice != ModalChoice.Walking);
-            if (routeStop != null) return (int)routeStop.Route.RouteLength;
-            return 0;
-        }
-    }
 
     public override void Move()
     {
@@ -249,8 +318,6 @@ public abstract class MultiCapableAgent<TLayer> : MultimodalAgent<TLayer>,
         RouteMainModalActualTravelTime = 0;
         _resultOutputStored = false;
     }
-
-    #endregion
 
     #region switch modal type
 
@@ -354,13 +421,12 @@ public abstract class MultiCapableAgent<TLayer> : MultimodalAgent<TLayer>,
             }
             case PassengerMessage.GoalReached:
             {
-                if (Position.DistanceInMTo(MultimodalRoute.CurrentRoute.Goal) < DeltaDistanceEqualsInM)
-                    if (LeaveModalType(MultimodalRoute.CurrentModalChoice))
-                    {
-                        MultimodalRoute.CurrentRoute.JumpToGoal();
-                        MultimodalRoute.Next();
-                    }
-
+                if (Position.DistanceInMTo(MultimodalRoute.CurrentRoute.Goal) < DeltaDistanceEqualsInM &&
+                    LeaveModalType(MultimodalRoute.CurrentModalChoice))
+                {
+                    MultimodalRoute.CurrentRoute.JumpToGoal();
+                    MultimodalRoute.Next();
+                }
                 break;
             }
             case PassengerMessage.NoDriver:
@@ -381,11 +447,11 @@ public abstract class MultiCapableAgent<TLayer> : MultimodalAgent<TLayer>,
         // var nearestNodePos = EnvironmentLayer.StreetEnvironment.NearestNode(Position);
         // var arrived = nearestNodeParkingSpace
         //     .Equals(nearestNodePos);
-        // if (!arrived) 
+        // if (!arrived)
         //     return false;
         //TODO should be eliminated by improvements on the graph
 
-        var enteredSuccessfully = carParkingSpace.Enter(Car);
+        bool enteredSuccessfully = carParkingSpace.Enter(Car);
         if (!enteredSuccessfully) return false;
         return EnvironmentLayer.Environment.Entities.ContainsKey(Car)
                && EnvironmentLayer.Environment.Remove(Car);
@@ -397,9 +463,9 @@ public abstract class MultiCapableAgent<TLayer> : MultimodalAgent<TLayer>,
             return true;
         var carParkingSpace = Car.CarParkingSpace;
 
-        var insertedInEvn = EnvironmentLayer.Environment.Entities.ContainsKey(Car) ||
-                            EnvironmentLayer.Environment
-                                .Insert(Car, EnvironmentLayer.Environment.NearestNode(carParkingSpace.Position));
+        bool insertedInEvn = EnvironmentLayer.Environment.Entities.ContainsKey(Car) ||
+                             EnvironmentLayer.Environment
+                                 .Insert(Car, EnvironmentLayer.Environment.NearestNode(carParkingSpace.Position));
         return insertedInEvn && carParkingSpace.Leave(Car);
     }
 
@@ -413,8 +479,8 @@ public abstract class MultiCapableAgent<TLayer> : MultimodalAgent<TLayer>,
         var rentalStation = BicycleRentalLayer.Nearest(Position, false);
         if (rentalStation == null) throw new ApplicationException("Should always find a Bicycle rental station.");
 
-        var success = rentalStation.Enter(RentalBicycle) &&
-                      EnvironmentLayer.Environment.Remove(RentalBicycle);
+        bool success = rentalStation.Enter(RentalBicycle) &&
+                       EnvironmentLayer.Environment.Remove(RentalBicycle);
         if (success) RentalBicycle = null;
         return success;
     }
@@ -456,13 +522,13 @@ public abstract class MultiCapableAgent<TLayer> : MultimodalAgent<TLayer>,
                   throw new InvalidOperationException(
                       "No street or cycle path environment is provided for bicycle rental action");
 
-        var insertedInEvn = env.Entities.ContainsKey(RentalBicycle) ||
-                            env.Insert(RentalBicycle,
-                                env.NearestNode(rentalStation.Position));
+        bool insertedInEvn = env.Entities.ContainsKey(RentalBicycle) ||
+                             env.Insert(RentalBicycle,
+                                 env.NearestNode(rentalStation.Position));
         return insertedInEvn && rentalStation.Leave(RentalBicycle);
     }
 
-    protected RentalBicycle RentBicycle(Position position)
+    protected RentalBicycle? RentBicycle(Position position)
     {
         var station = BicycleRentalLayer.Nearest(position, true);
 
@@ -481,76 +547,4 @@ public abstract class MultiCapableAgent<TLayer> : MultimodalAgent<TLayer>,
     }
 
     #endregion
-
-    #region capability properties
-
-    /// <summary>
-    ///     Holds a personal <see cref="Bicycle" /> if the agent possesses one.
-    /// </summary>
-    public Bicycle.Model.Bicycle Bicycle { get; protected set; }
-
-    /// <summary>
-    ///     Holds a <see cref="RentalBicycle" /> if one is leased.
-    /// </summary>
-    public RentalBicycle RentalBicycle { get; private set; }
-
-
-    public Car.Model.Car Car { get; set; }
-
-    [PropertyDescription] public IFerryStationLayer FerryStationLayer { get; set; }
-
-    [PropertyDescription] public ITrainStationLayer TrainStationLayer { get; set; }
-
-    [PropertyDescription] public IBicycleRentalLayer BicycleRentalLayer { get; set; }
-
-    [PropertyDescription] public ICarRentalLayer CarRentalLayer { get; set; }
-    
-    [PropertyDescription] public ICarParkingLayer CarParkingLayer { get; set; }
-
-    [PropertyDescription] public IBusStationLayer BusStationLayer { get; }
-
-    /// <summary>
-    ///     The currently active modal type.
-    /// </summary>
-    [PropertyDescription]
-    public ModalChoice ActiveCapability => MultimodalRoute?.CurrentModalChoice ?? ModalChoice.Walking;
-
-    private bool OnCarParkingLayer => Car?.CarParkingSpace != null;
-
-
-    [PropertyDescription(Ignore = true)] public bool OvertakingActivated { get; set; }
-    public bool BrakingActivated { get; set; }
-
-    [PropertyDescription] public bool CurrentlyCarDriving => Car?.Driver?.Equals(this) ?? false;
-
-    [PropertyDescription(Ignore = true)] public double DriverRandom => HandleDriverType.DetermineDriverRand(DriverType);
-
-    [PropertyDescription(Ignore = true)] public DriverType DriverType => DriverType.Normal;
-
-    [PropertyDescription(Ignore = true)]
-    public double CyclingPower { get; } =
-        new FastGaussianDistribution(75, 3).Next(RandomHelper.Random);
-
-    [PropertyDescription] public double Mass { get; set; }
-
-    [PropertyDescription(Ignore = true)] public double Gradient { get; } = 0;
-
-    /// <summary>
-    ///     The shoes are the physical representation of the multimodal agent within the environment.
-    /// </summary>
-    public WalkingShoes WalkingShoes
-    {
-        get
-        {
-            if (_walkingShoes != null) return _walkingShoes;
-            var walkingSpeed = PedestrianAverageSpeedGenerator.CalculateWalkingSpeed(Gender);
-            var runningSpeed = PedestrianAverageSpeedGenerator.CalculateRunningSpeed(Gender);
-            return _walkingShoes = new WalkingShoes(EnvironmentLayer, walkingSpeed, runningSpeed);
-        }
-        private set => _walkingShoes = value;
-    }
-
-    #endregion
-
-    
 }

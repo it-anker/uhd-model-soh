@@ -31,6 +31,11 @@ public interface ISimulationService
 
     Task<JobList> ListJobsAsync(CancellationToken token = default);
 
+    Task<JobList> ListJobsAsync(SearchJobProcessRequest request, CancellationToken token = default);
+
+    Task<ParameterLimitResponse<SimulationJob>> ListJobsPaginatedAsync(
+        SearchJobProcessRequest request, CancellationToken token = default);
+
     Task<ProcessList> ListProcessesAsync(SearchProcessRequest request, CancellationToken token = default);
 
     Task<ParameterLimitResponse<SimulationProcessDescription>> ListProcessesPaginatedAsync(

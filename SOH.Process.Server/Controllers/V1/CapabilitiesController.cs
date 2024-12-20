@@ -33,6 +33,10 @@ public class CapabilitiesController(IOptions<OgcSettings> configuration) : BaseA
     [SwaggerResponse(500, type: typeof(ProblemDetails), description: "A server error occurred.")]
     public ActionResult<LandingPage> GetLandingPage()
     {
-        return Ok(configuration.Value.Capabilities);
+        return Ok(new LandingPage
+        {
+            Title = configuration.Value.Capabilities.Title,
+            Description = configuration.Value.Capabilities.Description
+        });
     }
 }

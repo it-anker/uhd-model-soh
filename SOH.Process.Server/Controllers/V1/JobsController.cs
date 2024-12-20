@@ -1,6 +1,8 @@
 using System.ComponentModel.DataAnnotations;
 using Mapster;
+using Mars.Common.Core.Collections;
 using Microsoft.AspNetCore.Mvc;
+using Newtonsoft.Json;
 using SOH.Process.Server.Attributes;
 using SOH.Process.Server.Models.Ogc;
 using SOH.Process.Server.Models.Processes;
@@ -10,18 +12,17 @@ using Results = SOH.Process.Server.Models.Ogc.Results;
 
 namespace SOH.Process.Server.Controllers.V1;
 
-[ApiController]
-[Route("[controller]")]
 public class JobsController(
     ISimulationService simulationService,
-    IResultService resultService) : BaseApiRouteController
+    LinkGenerator linkGenerator,
+    JsonSerializerSettings serializerSettings) : BaseApiRouteController
 {
     /// <summary>
     ///     retrieve the list of jobs.
     /// </summary>
     /// <remarks>
-    ///     Lists available jobs.  For more information, see [Section
-    ///     11](https://docs.ogc.org/is/18-062/18-062.html#sc_job_list).
+    ///     Lists available jobs.  For more information, see
+    ///     [Section 11](https://docs.ogc.org/is/18-062/18-062.html#sc_job_list).
     /// </remarks>
     /// <response code="200">A list of jobs for this process.</response>
     /// <response code="404">The requested URI was not found.</response>
@@ -30,9 +31,16 @@ public class JobsController(
     [SwaggerOperation("GetJobs")]
     [SwaggerResponse(200, type: typeof(JobList), description: "A list of jobs for this process.")]
     [SwaggerResponse(404, type: typeof(ProblemDetails), description: "The requested URI was not found.")]
-    public async Task<ActionResult<JobList>> GetJobs(CancellationToken token = default)
+    public async Task<ActionResult<JobList>> GetJobsAsync(
+        [FromQuery(Name = "limit")] int? limit,
+        [FromQuery(Name = "page")] int? page,
+        [FromQuery(Name = "searchQuery")] string? query,
+        CancellationToken token = default)
     {
-        return Ok(await simulationService.ListJobsAsync(token));
+        var request = new SearchJobProcessRequest { Query = query };
+        if (limit.HasValue) request.PageSize = limit.GetValueOrDefault();
+        if (page.HasValue) request.PageNumber = page.GetValueOrDefault();
+        return Ok(await simulationService.ListJobsAsync(request, token));
     }
 
     /// <summary>
@@ -52,7 +60,7 @@ public class JobsController(
     [SwaggerResponse(200, type: typeof(StatusInfo), description: "The status of a job.")]
     [SwaggerResponse(404, type: typeof(ProblemDetails), description: "The requested URI was not found.")]
     [SwaggerResponse(500, type: typeof(ProblemDetails), description: "A server error occurred.")]
-    public virtual async Task<ActionResult<StatusInfo>> GetStatus([FromRoute] [Required] string jobId)
+    public virtual async Task<ActionResult<StatusInfo>> GetStatusAsync([FromRoute] [Required] string jobId)
     {
         var status = (await simulationService.GetSimulationJobAsync(jobId)).Adapt<StatusInfo>();
         return Ok(status);
@@ -73,14 +81,17 @@ public class JobsController(
     [HttpGet("{jobId}/results")]
     [ValidateModelState]
     [SwaggerOperation("GetResult")]
-    [SwaggerResponse(200, type: typeof(Results), description: "The results of a job.")]
+    [Produces("application/json", "multipart/related")]
+    [SwaggerResponse(200, type: typeof(Results), description: "The document results of a job.")]
+    [SwaggerResponse(200, type: typeof(MultipartContent),
+        description: "The collection of results for multiple selected outputs.")]
+    [SwaggerResponse(204, description: "The results with links to the references.")]
     [SwaggerResponse(404, type: typeof(ProblemDetails), description: "The requested URI was not found.")]
     [SwaggerResponse(500, type: typeof(ProblemDetails), description: "A server error occurred.")]
-    public async Task<ActionResult<Results>> GetResult(
-        [FromRoute] [Required] string jobId,
-        CancellationToken token = default)
+    public async Task<IActionResult> GetResultAsync([FromRoute] [Required] string jobId, CancellationToken token = default)
     {
-        return Ok(await Mediator.Send(new GetJobResultRequest { JobId = jobId }, token));
+        var response = await Mediator.Send(new GetJobResultRequest { JobId = jobId }, token);
+        return this.GetActionResult(linkGenerator, HttpContext, response, serializerSettings);
     }
 
     /// <summary>
@@ -101,7 +112,7 @@ public class JobsController(
     [SwaggerResponse(200, type: typeof(StatusInfo), description: "The status of a job.")]
     [SwaggerResponse(404, type: typeof(ProblemDetails), description: "The requested URI was not found.")]
     [SwaggerResponse(500, type: typeof(ProblemDetails), description: "A server error occurred.")]
-    public virtual async Task<IActionResult> Dismiss([FromRoute] [Required] string jobId, CancellationToken token)
+    public virtual async Task<IActionResult> DismissAsync([FromRoute] [Required] string jobId, CancellationToken token)
     {
         return Ok((await simulationService.CancelJobAsync(jobId, token)).Adapt<StatusInfo>());
     }

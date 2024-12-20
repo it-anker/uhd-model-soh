@@ -16,10 +16,6 @@ using SOH.Process.Server.Models.Processes;
 using SOH.Process.Server.Resources;
 using SOH.Process.Server.Simulations.Workflows;
 using SOHModel.Domain.Graph;
-using SOHModel.Ferry.Model;
-using SOHModel.Ferry.Route;
-using SOHModel.Ferry.Station;
-using SOHModel.Multimodal.Model;
 
 namespace SOH.Process.Server.Simulations.Jobs;
 
@@ -42,23 +38,23 @@ public class SimulationRunJobHandler(
         job.Status = StatusCode.Running;
         await simulationService.UpdateAsync(job.JobId, job, cancellationToken);
 
-        if (process is { ExecutionKind: ProcessExecutionKind.Direct, Id: GlobalConstants.FerryTransferId })
-        {
-            var (description, simConfig) = await ConstructModelAndConfig(request, process, job, cancellationToken);
-            await ExecuteSimulationProcess(description, simConfig, request.JobId, process, cancellationToken);
-        }
-#if DEBUG
-        else
+        if (request.IsTest)
         {
             var testRunner = new SimulationTestRunHandler(simulationService, resultService, localization);
             await testRunner.ExecuteTestProcess(request, request.JobId, process, cancellationToken);
         }
-#endif
+        else if (GlobalConstants.AvailableModelIds.Contains(process.Id))
+        {
+            var (description, simConfig) =
+                await ConstructModelAndConfig(job.ExecutionConfig, process, job, cancellationToken);
+            await ExecuteSimulationProcess(description, simConfig, request.JobId, process, cancellationToken);
+        }
+
         var currentJob = await simulationService.GetSimulationJobAsync(request.JobId, cancellationToken);
         currentJob.FinishedUtc = DateTime.UtcNow;
         await simulationService.UpdateAsync(currentJob.JobId, currentJob, cancellationToken);
 
-        await jobSubscribeWorkflow.NotifySubscriberAsync(request, currentJob.JobId, cancellationToken);
+        await jobSubscribeWorkflow.NotifySubscriberAsync(currentJob.JobId, cancellationToken);
         return Unit.Value;
     }
 
@@ -68,37 +64,57 @@ public class SimulationRunJobHandler(
         var currentJob = await simulationService.GetSimulationJobAsync(jobId, token);
         try
         {
-            var application = SimulationStarter
-                .BuildApplication(description, simConfig);
+            var application = SimulationStarter.BuildApplication(description, simConfig);
             var simulation = application.Resolve<ISimulation>();
             var step = simulation.PrepareSimulation(description, simConfig);
 
             var serializer = application.Resolve<ISerializerManager>();
-            var featureCollection = new FeatureCollection();
-            CollectResultForFeatureCollection(serializer, step, featureCollection);
+
+            var featureCollection = currentJob.ExecutionConfig.Outputs.ContainsKey("agents")
+                ? new FeatureCollection()
+                : null;
+            var timeSeries = currentJob.ExecutionConfig.Outputs.ContainsKey("avg_road_count")
+                ? new List<TimeSeriesStep>()
+                : null;
+
+            CollectAgentResultForFeatureCollection(serializer, step, featureCollection);
+            CollectAgentRoadOccupationResult(serializer, step, timeSeries);
             while (!step.IsFinished)
             {
                 if (currentJob.IsCancellationRequested)
                 {
                     break;
                 }
+
                 if (!double.IsNaN(step.ProgressInPercentage))
                 {
                     currentJob.Progress = Math.Min(Convert.ToInt32(step.ProgressInPercentage), 100);
                     currentJob.Message = string.Format(CultureInfo.InvariantCulture,
                         localization["simulation_progress {0}"], step.CurrentTimePoint);
                     await simulationService.UpdateAsync(currentJob.JobId, currentJob, token);
+                    await jobSubscribeWorkflow.NotifySubscribersForJobAsync(currentJob, token);
                 }
+
                 step = simulation.StepSimulation();
                 currentJob = await simulationService.GetSimulationJobAsync(jobId, token);
-                CollectResultForFeatureCollection(serializer, step, featureCollection);
+                CollectAgentResultForFeatureCollection(serializer, step, featureCollection);
+                CollectAgentRoadOccupationResult(serializer, step, timeSeries);
             }
 
             var result = new Result
             {
-                ProcessId = processDescription.Id, JobId = currentJob.JobId,
-                FeatureCollection = featureCollection, Output = "agents"
+                ProcessId = processDescription.Id, JobId = currentJob.JobId
             };
+
+            if (featureCollection != null)
+            {
+                result.Results.Add("agents", new ResultEntry { FeatureCollection = featureCollection });
+            }
+
+            if (timeSeries != null)
+            {
+                result.Results.Add("avg_road_count", new ResultEntry { TimeSeries = timeSeries });
+            }
 
             currentJob.ResultId = await resultService.CreateAsync(result, token);
             currentJob.Status = currentJob.IsCancellationRequested ? StatusCode.Dismissed : StatusCode.Successful;
@@ -109,26 +125,24 @@ public class SimulationRunJobHandler(
                     localization["simulation_finised {0}"], step.CurrentTimePoint);
             }
         }
-        catch(Exception exception)
+        catch (Exception exception)
         {
             currentJob.ExceptionMessage = exception.Message;
             currentJob.Status = StatusCode.Failed;
         }
 
         await simulationService.UpdateAsync(currentJob.JobId, currentJob, token);
-
         if (Directory.Exists($"results_{simConfig.SimulationIdentifier}"))
         {
             Directory.Delete($"results_{simConfig.SimulationIdentifier}", true);
         }
-
     }
 
-    private static void CollectResultForFeatureCollection(
-        ISerializerManager serializer,
-        SimulationWorkflowState step,
-        FeatureCollection featureCollection)
+    private static void CollectAgentResultForFeatureCollection(ISerializerManager serializer,
+        SimulationWorkflowState step, FeatureCollection? featureCollection)
     {
+        if (featureCollection == null) return;
+
         var typeLoggers = serializer
             .GetTypeLoggers()
             .Where(logger => logger.Mapping is AgentMapping);
@@ -162,29 +176,40 @@ public class SimulationRunJobHandler(
         }
     }
 
+    private static void CollectAgentRoadOccupationResult(
+        ISerializerManager serializer,
+        SimulationWorkflowState step,
+        List<TimeSeriesStep>? timeSeries)
+    {
+        if (timeSeries == null) return;
+
+        var graphLayer = serializer.LayerLoggers
+            .Values.FirstOrDefault(pair =>
+                pair.LayerType.MetaType == typeof(SpatialGraphMediatorLayer));
+
+        if (graphLayer?.Entity is ISpatialGraphLayer spatialGraphLayer)
+        {
+            double averageCount = spatialGraphLayer.Environment.Entities.Count > 0
+                ? spatialGraphLayer.Environment.Edges.Values
+                    .Average(edge => edge.Entities.Count)
+                : 0;
+            timeSeries.Add(new TimeSeriesStep
+            {
+                DateTime = step.CurrentTimePoint,
+                Tick = step.CurrentTick,
+                Value = averageCount
+            });
+        }
+    }
+
     private async Task<(ModelDescription description, SimulationConfig simConfig)> ConstructModelAndConfig(
-        SimulationRunJobRequest request, SimulationProcessDescription processDescription,
+        Execute executionConfig, SimulationProcessDescription processDescription,
         SimulationJob job, CancellationToken cancellationToken)
     {
-        var description = new ModelDescription();
-        description.AddLayer<FerryLayer>();
-        description.AddLayer<FerrySchedulerLayer>();
-        description.AddLayer<FerryStationLayer>([typeof(IFerryStationLayer)]);
-        description.AddLayer<FerryRouteLayer>();
-        description.AddLayer<DockWorkerLayer>();
-        description.AddLayer<DockWorkerSchedulerLayer>();
-        description.AddLayer<SpatialGraphMediatorLayer>([typeof(ISpatialGraphLayer)]);
+        var description = SOHModel.Startup.CreateModelDescription();
+        var simConfig = await GetSimulationConfigOrDefault(processDescription, job, executionConfig, cancellationToken);
 
-        description.AddAgent<FerryDriver, FerryLayer>();
-        description.AddAgent<DockWorker, DockWorkerLayer>();
-        description.AddEntity<Ferry>();
-
-        var simConfig = await GetSimulationConfigOrDefault(processDescription, job, request.Execute, cancellationToken);
-
-        if (request.Execute != null)
-        {
-            UpdateConfigFromInputs(simConfig, request.Execute);
-        }
+        UpdateConfigFromInputs(simConfig, executionConfig);
         return (description, simConfig);
     }
 
@@ -194,6 +219,7 @@ public class SimulationRunJobHandler(
         {
             simConfig.Globals.StartPoint = start.Value<DateTime>();
         }
+
         if (executionConfig.Inputs.TryGetValue("endPoint", out object? end))
         {
             simConfig.Globals.EndPoint = end.Value<DateTime>();
@@ -230,14 +256,26 @@ public class SimulationRunJobHandler(
             catch (Exception ex)
             {
                 await simulationService.DeleteAsync(job.JobId, token);
-                throw new BadRequestException(
-                    localization[$"Invalid 'config' input for selected process '{processDescription.Title}'"], [ex.Message]);
+                throw new BadRequestException(string.Format(CultureInfo.InvariantCulture,
+                    localization["Invalid 'config' input for selected process '{0}'"],
+                    processDescription.Title), [ex.Message]);
             }
         }
-        else
+        else if (processDescription.Id == GlobalConstants.FerryTransferId)
         {
             string file = await File.ReadAllTextAsync(GlobalConstants.FerryTransferDefaultConfig, token);
             config = SimulationConfig.Deserialize(file);
+        }
+        else if (processDescription.Id == GlobalConstants.Green4BikesId)
+        {
+            string file = await File.ReadAllTextAsync(GlobalConstants.Green4BikesId, token);
+            config = SimulationConfig.Deserialize(file);
+        }
+        else
+        {
+            throw new InvalidOperationException(string.Format(CultureInfo.InvariantCulture,
+                localization["Missing simulation config for smart open hamburg process '{0}'"],
+                processDescription.Title));
         }
 
         config.SimulationIdentifier = Guid.NewGuid().ToString();

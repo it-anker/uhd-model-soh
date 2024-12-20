@@ -60,6 +60,7 @@
 
     <ItemGroup>
       <ProjectReference Include="..\SOHFerryTransferBox\SOHFerryTransferBox.csproj" />
+      <ProjectReference Include="..\SOHGreen4BikesBox\SOHGreen4BikesBox.csproj" />
     </ItemGroup>
 
 </Project>

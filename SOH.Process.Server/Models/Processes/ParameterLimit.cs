@@ -4,6 +4,13 @@ using MediatR;
 namespace SOH.Process.Server.Models.Processes;
 
 [DataContract]
+public class SearchJobProcessRequest : ParameterLimit
+{
+    [DataMember(Name = "searchQuery")]
+    public string? Query { get; set; }
+}
+
+[DataContract]
 public class SearchProcessRequest : ParameterLimit
 {
     [DataMember(Name = "searchQuery")]

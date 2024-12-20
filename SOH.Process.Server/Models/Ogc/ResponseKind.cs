@@ -18,5 +18,5 @@ public enum ResponseKind
     /// <summary>
     ///     Enum DocumentEnum for document
     /// </summary>
-    [EnumMember(Value = "document")] DocumentEnum = 1
+    [EnumMember(Value = "document")] Document = 1
 }

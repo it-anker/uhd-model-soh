@@ -33,6 +33,7 @@ public static class Startup
         };
 
         options.Converters.Add(new GeoJsonConverterFactory());
+        options.Converters.Add(new ObjectJsonConverter());
 
         return services
             .AddSingleton(options)

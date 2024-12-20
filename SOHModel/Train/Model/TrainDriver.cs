@@ -12,7 +12,13 @@ public class TrainDriver : AbstractAgent, ITrainSteeringCapable
 {
     private static int _stableId;
 
+    private readonly UnregisterAgent _unregister;
+
     private long _startTickForCurrentStation;
+    private TrainSteeringHandle _steeringHandle;
+    private long _departureTick;
+    private ISpatialGraphEnvironment Environment => Layer.GraphEnvironment;
+    private IEnumerator<TrainRouteEntry> _trainRouteEnumerator;
 
     private TrainDriver(UnregisterAgent unregister, TrainLayer layer)
     {
@@ -137,7 +143,7 @@ public class TrainDriver : AbstractAgent, ITrainSteeringCapable
         if (Layer.TrainRouteLayer.TryGetRoute(Line, out var schedule))
             TrainRoute = schedule;
         else
-            throw new ArgumentException($"No train route provided by {nameof(TrainRouteLayer)}");
+            throw new ArgumentException($"No train route provided by {nameof(ITrainRouteLayer)}");
 
         if (TrainRoute.Count() < 2)
             throw new ArgumentException("Train route requires at least two stops");
@@ -173,16 +179,4 @@ public class TrainDriver : AbstractAgent, ITrainSteeringCapable
         Environment.Insert(Train, Route.First().Edge.From);
         return true;
     }
-
-
-    #region fields
-
-    private TrainSteeringHandle _steeringHandle;
-    private readonly UnregisterAgent _unregister;
-    private long _departureTick;
-    private ISpatialGraphEnvironment Environment => Layer.GraphEnvironment;
-
-    private IEnumerator<TrainRouteEntry> _trainRouteEnumerator;
-
-    #endregion
 }

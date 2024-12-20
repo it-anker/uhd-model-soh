@@ -32,4 +32,10 @@ public class Execute
     /// </summary>
     [DataMember(Name = "subscriber")]
     public Subscriber? Subscriber { get; set; }
+
+    /// <summary>
+    ///     Gets or an optional identifier.
+    /// </summary>
+    [DataMember(Name = "jobIdentifier")]
+    public string? JobIdentifier { get; set; }
 }

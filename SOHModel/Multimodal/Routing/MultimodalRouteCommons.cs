@@ -15,19 +15,21 @@ public static class MultimodalRouteCommons
     /// <param name="multimodalRoute">Holds the full route with its different modalities.</param>
     /// <param name="agent">Provides information about the walking velocity.</param>
     /// <returns>The calculated travel time (rounded).</returns>
-    public static int ExpectedTravelTime(this MultimodalRoute multimodalRoute, IModalCapabilitiesAgent agent = null)
+    public static int ExpectedTravelTime(this MultimodalRoute multimodalRoute,
+        IModalCapabilitiesAgent? agent = null)
     {
-        var travelTime = 0d;
+        double travelTime = 0d;
 
         var stops = multimodalRoute?.Stops;
         if (stops == null || !stops.Any() || !stops.First().Route.Any()) return int.MaxValue;
 
         foreach (var routeStop in stops)
+        {
             switch (routeStop.ModalChoice)
             {
                 case ModalChoice.Walking:
                     var pedestrian = agent as IWalkingCapable;
-                    var walkingSpeed = pedestrian?.PreferredSpeed > 0 ? pedestrian.PreferredSpeed : 5 / 3.6;
+                    double walkingSpeed = pedestrian?.PreferredSpeed > 0 ? pedestrian.PreferredSpeed : 5 / 3.6;
                     travelTime += routeStop.Route.RouteLength / walkingSpeed;
                     break;
                 case ModalChoice.CarDriving:
@@ -45,6 +47,7 @@ public static class MultimodalRouteCommons
                     travelTime += routeStop.Route.RouteLength / (20 / 3.6);
                     break;
             }
+        }
 
         return (int)Math.Ceiling(travelTime);
     }
@@ -57,19 +60,20 @@ public static class MultimodalRouteCommons
     public static List<double> GiveDistanceOfSwitchPoints(MultimodalRoute multimodalRoute)
     {
         var distances = new List<double>();
-        if (multimodalRoute.Stops.Count() < 2) return distances;
+        if (multimodalRoute.Stops.Count < 2) return distances;
 
-        Position endPointOfPrevious = null;
-        foreach (var stop in multimodalRoute.Stops)
+        Position? endPointOfPrevious = null;
+
+        foreach (var route in multimodalRoute.Stops.Select(stop => stop.Route))
         {
             if (endPointOfPrevious != null)
             {
-                var startPointOfNext = stop.Route.Stops.First().Edge.From.Position;
+                var startPointOfNext = route.Stops.First().Edge.From.Position;
                 var distance = startPointOfNext.DistanceInMTo(endPointOfPrevious);
                 distances.Add(distance);
             }
 
-            endPointOfPrevious = stop.Route.Stops.Last().Edge.To.Position;
+            endPointOfPrevious = route.Stops.Last().Edge.To.Position;
         }
 
         return distances;

@@ -18,6 +18,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SOHModel", "SOHModel\SOHMod
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SOHFerryTransferBox", "SOHFerryTransferBox\SOHFerryTransferBox.csproj", "{2F20969F-B500-462E-8F65-86F4DE281AFF}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SOHGreen4BikesBox", "SOHGreen4BikesBox\SOHGreen4BikesBox.csproj", "{0FC55E56-01E9-4081-A258-2202828C8576}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -49,6 +51,12 @@ Global
 		{2F20969F-B500-462E-8F65-86F4DE281AFF}.Full|Any CPU.Build.0 = Debug|Any CPU
 		{2F20969F-B500-462E-8F65-86F4DE281AFF}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{2F20969F-B500-462E-8F65-86F4DE281AFF}.Release|Any CPU.Build.0 = Release|Any CPU
+		{0FC55E56-01E9-4081-A258-2202828C8576}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{0FC55E56-01E9-4081-A258-2202828C8576}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{0FC55E56-01E9-4081-A258-2202828C8576}.Full|Any CPU.ActiveCfg = Debug|Any CPU
+		{0FC55E56-01E9-4081-A258-2202828C8576}.Full|Any CPU.Build.0 = Debug|Any CPU
+		{0FC55E56-01E9-4081-A258-2202828C8576}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{0FC55E56-01E9-4081-A258-2202828C8576}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

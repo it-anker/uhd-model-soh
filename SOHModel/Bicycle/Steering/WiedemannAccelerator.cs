@@ -15,7 +15,6 @@ public class WiedemannAccelerator : IVehicleAccelerator
     private const double StandstillDistance = 0.2; // m, CC0
     private const double NegativeFollowingThreshold = -0.25; // CC4
     private const double PositiveFollowingThreshold = 0.25; // CC5
-
     private const double OscillationSpeedDependency = 1; // CC6
 
 /*
@@ -44,10 +43,10 @@ public class WiedemannAccelerator : IVehicleAccelerator
         _driver = driver;
 
         var driverType = driver.DriverType;
-        var driverSpecificFollowingVariation = HandleDriverType.DetermineFollowingVariation(driverType);
-        var driverSpecificHeadwayTime = HandleDriverType.DetermineHeadwayTime(driverType);
-        var driverSpecificEnterFollowingThreshold = HandleDriverType.DetermineEnterFolowingThreshold(driverType);
-        var driverSpecificOscillationAcceleration =
+        double driverSpecificFollowingVariation = HandleDriverType.DetermineFollowingVariation(driverType);
+        double driverSpecificHeadwayTime = HandleDriverType.DetermineHeadwayTime(driverType);
+        double driverSpecificEnterFollowingThreshold = HandleDriverType.DetermineEnterFolowingThreshold(driverType);
+        double driverSpecificOscillationAcceleration =
             HandleDriverType.DetermineOscillationAcceleration(driverType);
         SetDriverSpecificParams(driverSpecificFollowingVariation, driverSpecificHeadwayTime,
             driverSpecificEnterFollowingThreshold, driverSpecificOscillationAcceleration, _driverRand);
@@ -75,15 +74,15 @@ public class WiedemannAccelerator : IVehicleAccelerator
             throw new ArgumentException(
                 $"{nameof(IBicycleSteeringCapable.Mass)} of {nameof(IBicycleSteeringCapable)} cannot be 0");
 
-        var speed = Math.Abs(velocity);
-        var currentMaxAccelerationFactor =
+        double speed = Math.Abs(velocity);
+        double currentMaxAccelerationFactor =
             new FastGaussianDistribution(MaxAccelerationFactor, 0.3D).Next(RandomHelper.Random);
-        var adjustedPower = power * Efficiency;
-        var epsilon = adjustedPower / (_driver.Mass * currentMaxAccelerationFactor);
-        var t1 = adjustedPower / _driver.Mass;
-        var t2 = 1 / (speed + epsilon);
-        var t3 = Math.Pow(speed, 2) / Math.Pow(maxSpeed, 3);
-        var t4 = 0.0;
+        double adjustedPower = power * Efficiency;
+        double epsilon = adjustedPower / (_driver.Mass * currentMaxAccelerationFactor);
+        double t1 = adjustedPower / _driver.Mass;
+        double t2 = 1 / (speed + epsilon);
+        double t3 = Math.Pow(speed, 2) / Math.Pow(maxSpeed, 3);
+        double t4 = 0.0;
         if (_driver.Gradient > 0.0)
             t4 = BicycleConstants.G * (_driver.Gradient / 100);
 
@@ -93,23 +92,23 @@ public class WiedemannAccelerator : IVehicleAccelerator
     public double CalculateSpeedChange(double currentSpeed, double speedAhead, double distanceAhead,
         double accelerationAhead, double currentAcceleration, double maxSpeed)
     {
-        var dx = distanceAhead + StandstillDistance;
-        var dv = speedAhead - currentSpeed;
+        double dx = distanceAhead + StandstillDistance;
+        double dv = speedAhead - currentSpeed;
         double sdxc;
         if (speedAhead <= 0)
             sdxc = StandstillDistance;
         else
-            // TODO Sumo: sdxc = StandstillDistance
+            // TODO: sdxc = StandstillDistance
             sdxc = StandstillDistance + _headwayTime * currentSpeed;
 
-        var sdxo = _followingVariation + sdxc;
-        // TODO Sumo: / 1000
-        var sdv = OscillationSpeedDependency * dx * dx;
+        double sdxo = _followingVariation + sdxc;
+        // TODO: / 1000
+        double sdv = OscillationSpeedDependency * dx * dx;
 
-        var sdvo = sdv;
-        // TODO Sumo: speed > 0
+        double sdvo = sdv;
+        // TODO: speed > 0
 
-        var sdvc = speedAhead > 0 ? NegativeFollowingThreshold - sdv : 0;
+        double sdvc = speedAhead > 0 ? NegativeFollowingThreshold - sdv : 0;
 
         // TODO Sumo: predspeed > PositiveFollowingThreshold
         if (currentSpeed > PositiveFollowingThreshold) sdvo += PositiveFollowingThreshold;
@@ -118,23 +117,22 @@ public class WiedemannAccelerator : IVehicleAccelerator
         if (dx <= sdxc && dv <= sdvo)
         {
             // TODO Sumo: predSpeed > 0
-            if (currentSpeed > 0)
-                if (dv < 0)
-                {
-                    acceleration = dx > StandstillDistance
-                        ? Math.Min(accelerationAhead + dv * dv / (StandstillDistance - dx), currentAcceleration)
-                        : Math.Min(accelerationAhead + 0.5 * (dv - sdvo), currentAcceleration);
+            if (currentSpeed > 0 && dv < 0)
+            {
+                acceleration = dx > StandstillDistance
+                    ? Math.Min(accelerationAhead + dv * dv / (StandstillDistance - dx), currentAcceleration)
+                    : Math.Min(accelerationAhead + 0.5 * (dv - sdvo), currentAcceleration);
 
-                    if (acceleration > -_oscillationAcceleration)
-                        acceleration = -_oscillationAcceleration;
-                    else
-                        acceleration = Math.Max(acceleration, MaxDecelFactor + 0.5 * Math.Sqrt(currentSpeed));
+                if (acceleration > -_oscillationAcceleration)
+                    acceleration = -_oscillationAcceleration;
+                else
+                    acceleration = Math.Max(acceleration, MaxDecelFactor + 0.5 * Math.Sqrt(currentSpeed));
 
 
-                    // TODO added because otherwise, there are cases where the new speed would get really
-                    // small because the previous acceleration is used again
-                    if (currentSpeed + acceleration < speedAhead) acceleration = dv - _driverRand;
-                }
+                // TODO added because otherwise, there are cases where the new speed would get really
+                // small because the previous acceleration is used again
+                if (currentSpeed + acceleration < speedAhead) acceleration = dv - _driverRand;
+            }
         }
         else if (dv < sdvc && dx < sdxo + _enteringFollowingThreshold * (dv - NegativeFollowingThreshold))
         {
@@ -157,7 +155,7 @@ public class WiedemannAccelerator : IVehicleAccelerator
         }
         else if (dx > sdxc)
         {
-            var maxAcceleration = CalcMaxAcceleration(_driver.CyclingPower, currentSpeed, maxSpeed);
+            double maxAcceleration = CalcMaxAcceleration(_driver.CyclingPower, currentSpeed, maxSpeed);
             acceleration = dx < sdxo ? Math.Min(dv * dv / (sdxo - dx), maxAcceleration) : maxAcceleration;
         }
 

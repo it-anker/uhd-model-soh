@@ -26,6 +26,21 @@ public static class Startup
 
         services.AddHealthChecks();
 
+        var jsonSerializerSettings = new JsonSerializerSettings
+        {
+            DefaultValueHandling = DefaultValueHandling.Ignore,
+            NullValueHandling = NullValueHandling.Ignore,
+            ReferenceLoopHandling = ReferenceLoopHandling.Ignore,
+            ObjectCreationHandling = ObjectCreationHandling.Replace,
+            DateFormatHandling = DateFormatHandling.IsoDateFormat,
+            Converters =
+            [
+                new FeatureCollectionConverter(),
+                new FeatureConverter(),
+                new GeometryConverter()
+            ]
+        };
+
         return services
             .Configure<OgcSettings>(config.GetSection(nameof(OgcSettings)))
             .AddLocalization()
@@ -34,26 +49,16 @@ public static class Startup
             .AddMiddlewares(config)
             .AddCorsPolicy(config)
             .AddHttpClient()
+
             .AddHttpContextAccessor()
             .AddIdempotentAPIUsingDistributedCache()
             .AddRouting(options => options.LowercaseUrls = true)
             .AddValidatorsFromAssemblyContaining<ServerSimulationValidator>()
+            .AddSingleton(jsonSerializerSettings)
             .AddIdempotentAPI(new IdempotencyOptions
             {
                 IsIdempotencyOptional = true, ExpireHours = 1,
-                SerializerSettings = new JsonSerializerSettings
-                {
-                    DefaultValueHandling = DefaultValueHandling.Ignore,
-                    NullValueHandling = NullValueHandling.Ignore,
-                    ReferenceLoopHandling = ReferenceLoopHandling.Ignore,
-                    ObjectCreationHandling = ObjectCreationHandling.Replace,
-                    DateFormatHandling = DateFormatHandling.IsoDateFormat,
-                    Converters = [
-                        new FeatureCollectionConverter(),
-                        new FeatureConverter(),
-                        new GeometryConverter()
-                    ]
-                }
+                SerializerSettings = jsonSerializerSettings
             })
             .AddControllers(options =>
             {
@@ -71,6 +76,8 @@ public static class Startup
                 options.SerializerSettings.Converters.Add(new AttributesTableConverter());
 
             })
+            .Services
+            .AddMvc()
             .Services
             .AddSwaggerGen(options =>
             {
@@ -114,7 +121,7 @@ public static class Startup
             .UseSwagger()
             .UseSwaggerUi(options =>
             {
-                options.EnableTryItOut = false;
+                options.EnableTryItOut = true;
                 options.DefaultModelsExpandDepth = -1;
                 options.DocExpansion = "none";
                 options.TagsSorter = "alpha";

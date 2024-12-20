@@ -75,6 +75,7 @@ public static class Startup
             .AddScoped<IResultService, ResultsServiceImpl>()
             .AddScoped<ICustomSeeder, ModelSeeder>()
             .AddScoped<JobSubscribeWorkflow>()
+            .AddScoped<SimulationResultWorkflow>()
             .AddMediatR(config =>
                 config.RegisterServicesFromAssemblies(assemblies)
                     .AddBehavior(typeof(IPipelineBehavior<,>), typeof(LoggingBehavior<,>))

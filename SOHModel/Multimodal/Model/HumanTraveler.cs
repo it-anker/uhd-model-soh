@@ -10,34 +10,7 @@ namespace SOHModel.Multimodal.Model;
 /// </summary>
 public class HumanTraveler : Traveler<HumanTravelerLayer>
 {
-    private ISet<ModalChoice> _choices;
-
-    [PropertyDescription] public IBicycleParkingLayer BicycleParkingLayer { get; set; }
-
-    public override void Init(HumanTravelerLayer layer)
-    {
-        base.Init(layer);
-
-        Gender = (GenderType)RandomHelper.Random.Next(0, 2);
-        OvertakingActivated = false;
-
-        _choices = new ModalityChooser().Evaluate(this);
-        _choices.Add(ModalChoice.Walking);
-
-        const int radiusInM = 100;
-        if (_choices.Contains(ModalChoice.CyclingOwnBike) && BicycleParkingLayer != null)
-            Bicycle = BicycleParkingLayer.CreateOwnBicycleNear(StartPosition, radiusInM, UsesBikeAndRide);
-
-        if (_choices.Contains(ModalChoice.CarDriving) && CarParkingLayer != null)
-            Car = CarParkingLayer.CreateOwnCarNear(StartPosition, radiusInM);
-    }
-
-    protected override IEnumerable<ModalChoice> ModalChoices()
-    {
-        return _choices;
-    }
-
-    #region input
+    private ISet<ModalChoice> _choices = new HashSet<ModalChoice>();
 
     [PropertyDescription(Name = "hasBike")]
     public double HasBike { get; set; }
@@ -59,25 +32,29 @@ public class HumanTraveler : Traveler<HumanTravelerLayer>
     [PropertyDescription(Name = "usesOwnCar")]
     public double UsesOwnCar { get; set; }
 
-    #endregion
-}
+    [PropertyDescription]
+    public IBicycleParkingLayer BicycleParkingLayer { get; set; } = default!;
 
-public class ModalityChooser
-{
-    public ISet<ModalChoice> Evaluate(HumanTraveler attributes)
+    public override void Init(HumanTravelerLayer layer)
     {
-        if (RandomHelper.Random.NextDouble() < attributes.HasCar)
-            return new HashSet<ModalChoice> { ModalChoice.CarDriving };
+        base.Init(layer);
 
-        if (RandomHelper.Random.NextDouble() < attributes.HasBike)
-            return new HashSet<ModalChoice> { ModalChoice.CyclingOwnBike };
+        Gender = (GenderType)RandomHelper.Random.Next(0, 2);
+        OvertakingActivated = false;
 
-        if (RandomHelper.Random.NextDouble() < attributes.PrefersCar)
-            return new HashSet<ModalChoice> { ModalChoice.CarRentalDriving };
+        _choices = new ModalityChooser().Evaluate(this);
+        _choices.Add(ModalChoice.Walking);
 
-        if (RandomHelper.Random.NextDouble() < attributes.PrefersBike)
-            return new HashSet<ModalChoice> { ModalChoice.CyclingRentalBike };
+        const int radiusInM = 100;
+        if (_choices.Contains(ModalChoice.CyclingOwnBike))
+            Bicycle = BicycleParkingLayer.CreateOwnBicycleNear(StartPosition, radiusInM, UsesBikeAndRide);
 
-        return new HashSet<ModalChoice> { ModalChoice.Walking };
+        if (_choices.Contains(ModalChoice.CarDriving))
+            Car = CarParkingLayer.CreateOwnCarNear(StartPosition, radiusInM);
+    }
+
+    protected override IEnumerable<ModalChoice> ModalChoices()
+    {
+        return _choices;
     }
 }

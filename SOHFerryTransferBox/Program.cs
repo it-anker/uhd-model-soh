@@ -4,30 +4,18 @@ using Mars.Components.Starter;
 using Mars.Core.Simulation;
 using Mars.Interfaces;
 using Mars.Interfaces.Model;
-using SOHModel.Domain.Graph;
-using SOHModel.Ferry.Model;
-using SOHModel.Ferry.Route;
-using SOHModel.Ferry.Station;
-using SOHModel.Multimodal.Model;
+using SOHModel;
 
 namespace SOHFerryTransferBox;
 
 internal static class Program
 {
+    /// <summary>
+    ///     The entry point when executing the ferry transfer model without any orchestrating service.
+    /// </summary>
     private static void Main(string[] args)
     {
-        LoggerFactory.SetLogLevel(LogLevel.Info);
-        var description = new ModelDescription();
-        description.AddLayer<SpatialGraphMediatorLayer>([typeof(ISpatialGraphLayer)]);
-        description.AddLayer<FerryLayer>();
-        description.AddLayer<FerryRouteLayer>();
-        description.AddLayer<FerrySchedulerLayer>();
-        description.AddLayer<FerryStationLayer>([typeof(IFerryStationLayer)]);
-        description.AddLayer<DockWorkerLayer>();
-        description.AddLayer<DockWorkerSchedulerLayer>();
-        description.AddAgent<FerryDriver, FerryLayer>();
-        description.AddAgent<DockWorker, DockWorkerLayer>();
-        description.AddEntity<Ferry>();
+        var description = Startup.CreateModelDescription();
 
         ISimulationContainer application;
         if (args.Length != 0)

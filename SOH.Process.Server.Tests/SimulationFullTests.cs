@@ -24,16 +24,16 @@ public class SimulationFullTests : AbstractFullManagementTests
         var create = new CreateSimulationProcessDescriptionRequest
         {
             Title = "TestRunSimulationAsync",
-            Version = "1.0.0",
+            Version = "1.0.0", IsTest = true,
             Description = "my async sim desc",
             JobControlOptions = [JobControlOptions.AsyncExecution]
         };
 
         string simulationId = await _simulationService.CreateAsync(create);
-        Assert.NotNull(simulationId);
+        NotNull(simulationId);
 
         var simulation = await _simulationService.GetSimulationAsync(simulationId);
-        Assert.Equal("TestRunSimulationAsync", simulation.Title);
+        Equal("TestRunSimulationAsync", simulation.Title);
 
         var createJobHandler = Services.GetRequiredService
             <IRequestHandler<CreateSimulationJobRequest, SimulationJob>>();
@@ -52,9 +52,10 @@ public class SimulationFullTests : AbstractFullManagementTests
         }
 
         var loadedJob = await _simulationService.GetSimulationJobAsync(job.JobId);
-        Assert.NotNull(loadedJob.HangfireJobKey);
-        Assert.NotNull(loadedJob.ResultId);
+        NotNull(loadedJob.HangfireJobKey);
+        NotNull(loadedJob.ResultId);
         var result = await _resultService.GetAsync(loadedJob.ResultId);
-        Assert.NotNull(result.FeatureCollection);
+        Assert.NotEmpty(result.Results);
+        Assert.Contains(result.Results, pair => pair.Value.FeatureCollection != null);
     }
 }

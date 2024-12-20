@@ -1,4 +1,6 @@
-﻿namespace SOHModel;
+﻿using Microsoft.Extensions.DependencyInjection;
+
+namespace SOHModel;
 
 class Program
 {

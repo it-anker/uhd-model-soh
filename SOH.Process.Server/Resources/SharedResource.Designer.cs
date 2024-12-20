@@ -92,5 +92,35 @@ namespace SOH.Process.Server.Resources {
                 return ResourceManager.GetString("process_finished", resourceCulture);
             }
         }
+        
+        public static string green_4_bikes_model_description {
+            get {
+                return ResourceManager.GetString("green_4_bikes_model_description", resourceCulture);
+            }
+        }
+        
+        public static string green_4_bikes_model_title {
+            get {
+                return ResourceManager.GetString("green_4_bikes_model_title", resourceCulture);
+            }
+        }
+        
+        public static string green_4_bikes_output_agents {
+            get {
+                return ResourceManager.GetString("green_4_bikes_output_agents", resourceCulture);
+            }
+        }
+        
+        public static string soh_output_statistics_avg_travel_time {
+            get {
+                return ResourceManager.GetString("soh_output_statistics_avg_travel_time", resourceCulture);
+            }
+        }
+        
+        public static string soh_output_agents {
+            get {
+                return ResourceManager.GetString("soh_output_agents", resourceCulture);
+            }
+        }
     }
 }

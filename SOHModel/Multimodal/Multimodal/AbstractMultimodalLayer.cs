@@ -73,7 +73,7 @@ public abstract class AbstractMultimodalLayer : AbstractLayer, IMultimodalLayer,
     ///     where the <see cref="ModalChoice.CyclingRentalBike" /> is available.
     /// </summary>
     [PropertyDescription]
-    public BicycleRentalLayer? BicycleRentalLayer { get; set; }
+    public BicycleRentalLayer BicycleRentalLayer { get; set; } = default!;
 
     /// <summary>
     ///     Gets the <see cref="CarParkingLayer" /> holding all parking spaces
@@ -129,8 +129,6 @@ public abstract class AbstractMultimodalLayer : AbstractLayer, IMultimodalLayer,
                 case ModalChoice.Train:
                     result = result.Concat(ResolveModalChoice(source, modalChoice, TrainStationLayer));
                     break;
-                default:
-                    throw new ArgumentOutOfRangeException();
             }
         }
 
@@ -147,7 +145,7 @@ public abstract class AbstractMultimodalLayer : AbstractLayer, IMultimodalLayer,
             ModalChoice.CarDriving => ConsumeModalChoice(source, CarParkingLayer),
             ModalChoice.Ferry => ConsumeModalChoice(source, FerryStationLayer),
             ModalChoice.Train => ConsumeModalChoice(source, TrainStationLayer),
-            _ => throw new ArgumentOutOfRangeException()
+            _ => false
         };
     }
 
@@ -164,10 +162,9 @@ public abstract class AbstractMultimodalLayer : AbstractLayer, IMultimodalLayer,
         return RouteFinder.Search(agent, start, goal, capabilities);
     }
 
-    private IEnumerable<ModalChoice> ResolveModalChoice<T>(
-        ISpatialNode source, 
-        ModalChoice modalChoice, 
-        IVectorLayer<T>? vectorLayer) where T : IVectorFeature
+    private IEnumerable<ModalChoice> ResolveModalChoice<T>(ISpatialNode source,
+        ModalChoice modalChoice, IVectorLayer<T>? vectorLayer)
+        where T : IVectorFeature
     {
         if (vectorLayer == null) yield break;
 
@@ -182,14 +179,13 @@ public abstract class AbstractMultimodalLayer : AbstractLayer, IMultimodalLayer,
             yield return modalChoice;
     }
 
-    private bool ConsumeModalChoice<T>(
-        ISpatialNode source, 
-        IVectorLayer<T>? vectorLayer) where T : IVectorFeature
+    private bool ConsumeModalChoice<T>(ISpatialNode source, IVectorLayer<T>? vectorLayer)
+        where T : IVectorFeature
     {
         if (vectorLayer == null) return false;
 
         var feature = vectorLayer.Nearest(source.Position.PositionArray);
-        if (feature == null) return false;
+        if (feature == null!) return false;
 
         var centroid = feature.VectorStructured.Geometry.Centroid;
         var featurePosition = Position.CreateGeoPosition(centroid.X, centroid.Y);

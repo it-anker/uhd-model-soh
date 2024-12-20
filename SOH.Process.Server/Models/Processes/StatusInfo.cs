@@ -15,7 +15,7 @@ public enum ProcessingKind
     /// <summary>
     ///     Enum ProcessEnum for process
     /// </summary>
-    [EnumMember(Value = "process")] ProcessEnum = 0
+    [EnumMember(Value = "process")] Process = 0
 }
 
 [DataContract]
@@ -39,7 +39,7 @@ public class StatusInfo
     ///     The kind of processing.
     /// </summary>
     [DataMember(Name = "type")]
-    public ProcessingKind Type { get; set; } = ProcessingKind.ProcessEnum;
+    public ProcessingKind Type { get; set; } = ProcessingKind.Process;
 
     /// <summary>
     ///     The current status of the job.

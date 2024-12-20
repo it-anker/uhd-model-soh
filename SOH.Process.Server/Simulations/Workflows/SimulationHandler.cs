@@ -25,11 +25,15 @@ public class SimulationHandler(
         var simulation = await simulationService.GetSimulationAsync(request.SimulationId, cancellationToken);
 
         string jobId = await simulationService.CreateAsync(new SimulationJob
-            { ProcessId = simulation.Id }, cancellationToken);
+        {
+            ProcessId = simulation.Id,
+            ExecutionConfig = request.Execute
+        }, cancellationToken);
 
         var simulationRunRequest = new SimulationRunJobRequest
         {
-            JobId = jobId, Execute = request.Execute
+            JobId = jobId,
+            IsTest = simulation.IsTest
         };
 
         var executionMode = JobControlOptions.SynchronousExecution;

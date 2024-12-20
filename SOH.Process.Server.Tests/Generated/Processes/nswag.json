@@ -50,6 +50,7 @@
       "additionalNamespaceUsages": [
         "FluentValidation.Results",
         "NetTopologySuite.Features",
+        "NetTopologySuite.Geometries",
         "System.Net",
         "Microsoft.AspNetCore.Mvc",
         "SOH.Process.Server.Models.Common",
@@ -92,7 +93,8 @@
         "HttpStatusCode", "ProblemDetails", "FeatureCollection", "Result", "Results",
         "Feature", "SimulationJob","StatusInfo", "Process", "SimulationProcess",
         "ProcessList","Execute", "InputDescription", "OutputDescription", "TransmissionMode", "Schema", "Format",
-        "Subscriber"
+        "Subscriber", "TimeSeriesStep", "OgcGeometryType", "Dimension", "CoordinateSequence", "Point",
+        "Geometry", "LineString", "MultiLineString", "MultiPolygon", "Coordinate", "ResultEntry"
       ],
       "excludedParameterNames": [],
       "handleReferences": false,

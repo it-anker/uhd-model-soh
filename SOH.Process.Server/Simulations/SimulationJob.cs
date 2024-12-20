@@ -1,4 +1,5 @@
 using System.Runtime.Serialization;
+using SOH.Process.Server.Models.Ogc;
 using SOH.Process.Server.Models.Processes;
 
 namespace SOH.Process.Server.Simulations;
@@ -17,6 +18,9 @@ public class SimulationJob : StatusInfo
     [DataMember(Name = "failedMessage")]
     public string? ExceptionMessage { get; set; }
 
+    [DataMember(Name = "executionConfig")]
+    public Execute ExecutionConfig { get; set; } = default!;
+
     public void Update(SimulationJob job)
     {
         ResultId = job.ResultId;
@@ -25,6 +29,7 @@ public class SimulationJob : StatusInfo
         StartedUtc = job.StartedUtc;
         FinishedUtc = job.FinishedUtc;
         Progress = job.Progress;
+        ExceptionMessage = job.ExceptionMessage;
         Type = job.Type;
         Status = job.Status;
 

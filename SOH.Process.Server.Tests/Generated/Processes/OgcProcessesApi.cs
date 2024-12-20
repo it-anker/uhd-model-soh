@@ -8,6 +8,7 @@
 
 using FluentValidation.Results;
 using NetTopologySuite.Features;
+using NetTopologySuite.Geometries;
 using System.Net;
 using Microsoft.AspNetCore.Mvc;
 using SOH.Process.Server.Models.Common;
@@ -610,24 +611,24 @@ namespace SOH.Process.Server.Generated
         /// retrieve the list of jobs.
         /// </summary>
         /// <remarks>
-        /// Lists available jobs.  For more information, see [Section
-        /// <br/>11](https://docs.ogc.org/is/18-062/18-062.html#sc_job_list).
+        /// Lists available jobs.  For more information, see
+        /// <br/>[Section 11](https://docs.ogc.org/is/18-062/18-062.html#sc_job_list).
         /// </remarks>
         /// <returns>A list of jobs for this process.</returns>
         /// <exception cref="ApiException">A server side error occurred.</exception>
-        System.Threading.Tasks.Task<JobList> GetJobsAsync();
+        System.Threading.Tasks.Task<JobList> GetJobsAsync(int? limit, int? page, string? query);
 
         /// <param name="cancellationToken">A cancellation token that can be used by other objects or threads to receive notice of cancellation.</param>
         /// <summary>
         /// retrieve the list of jobs.
         /// </summary>
         /// <remarks>
-        /// Lists available jobs.  For more information, see [Section
-        /// <br/>11](https://docs.ogc.org/is/18-062/18-062.html#sc_job_list).
+        /// Lists available jobs.  For more information, see
+        /// <br/>[Section 11](https://docs.ogc.org/is/18-062/18-062.html#sc_job_list).
         /// </remarks>
         /// <returns>A list of jobs for this process.</returns>
         /// <exception cref="ApiException">A server side error occurred.</exception>
-        System.Threading.Tasks.Task<JobList> GetJobsAsync(System.Threading.CancellationToken cancellationToken);
+        System.Threading.Tasks.Task<JobList> GetJobsAsync(int? limit, int? page, string? query, System.Threading.CancellationToken cancellationToken);
 
         /// <summary>
         /// retrieve the status of a job.
@@ -687,9 +688,11 @@ namespace SOH.Process.Server.Generated
         /// <br/>[Section 7.13](https://docs.ogc.org/is/18-062/18-062.html#sc_retrieve_job_results).
         /// </remarks>
         /// <param name="jobId">local identifier of a job.</param>
-        /// <returns>The results of a job.</returns>
+        /// <returns>The document results of a job.
+        /// <br/>or
+        /// <br/>The collection of results for multiple selected outputs.</returns>
         /// <exception cref="ApiException">A server side error occurred.</exception>
-        System.Threading.Tasks.Task<System.Collections.Generic.IDictionary<string, object>> GetResultAsync(string jobId);
+        System.Threading.Tasks.Task<object> GetResultAsync(string jobId);
 
         /// <param name="cancellationToken">A cancellation token that can be used by other objects or threads to receive notice of cancellation.</param>
         /// <summary>
@@ -700,9 +703,11 @@ namespace SOH.Process.Server.Generated
         /// <br/>[Section 7.13](https://docs.ogc.org/is/18-062/18-062.html#sc_retrieve_job_results).
         /// </remarks>
         /// <param name="jobId">local identifier of a job.</param>
-        /// <returns>The results of a job.</returns>
+        /// <returns>The document results of a job.
+        /// <br/>or
+        /// <br/>The collection of results for multiple selected outputs.</returns>
         /// <exception cref="ApiException">A server side error occurred.</exception>
-        System.Threading.Tasks.Task<System.Collections.Generic.IDictionary<string, object>> GetResultAsync(string jobId, System.Threading.CancellationToken cancellationToken);
+        System.Threading.Tasks.Task<object> GetResultAsync(string jobId, System.Threading.CancellationToken cancellationToken);
 
     }
 
@@ -736,14 +741,14 @@ namespace SOH.Process.Server.Generated
         /// retrieve the list of jobs.
         /// </summary>
         /// <remarks>
-        /// Lists available jobs.  For more information, see [Section
-        /// <br/>11](https://docs.ogc.org/is/18-062/18-062.html#sc_job_list).
+        /// Lists available jobs.  For more information, see
+        /// <br/>[Section 11](https://docs.ogc.org/is/18-062/18-062.html#sc_job_list).
         /// </remarks>
         /// <returns>A list of jobs for this process.</returns>
         /// <exception cref="ApiException">A server side error occurred.</exception>
-        public virtual System.Threading.Tasks.Task<JobList> GetJobsAsync()
+        public virtual System.Threading.Tasks.Task<JobList> GetJobsAsync(int? limit, int? page, string? query)
         {
-            return GetJobsAsync(System.Threading.CancellationToken.None);
+            return GetJobsAsync(limit, page, query, System.Threading.CancellationToken.None);
         }
 
         /// <param name="cancellationToken">A cancellation token that can be used by other objects or threads to receive notice of cancellation.</param>
@@ -751,12 +756,12 @@ namespace SOH.Process.Server.Generated
         /// retrieve the list of jobs.
         /// </summary>
         /// <remarks>
-        /// Lists available jobs.  For more information, see [Section
-        /// <br/>11](https://docs.ogc.org/is/18-062/18-062.html#sc_job_list).
+        /// Lists available jobs.  For more information, see
+        /// <br/>[Section 11](https://docs.ogc.org/is/18-062/18-062.html#sc_job_list).
         /// </remarks>
         /// <returns>A list of jobs for this process.</returns>
         /// <exception cref="ApiException">A server side error occurred.</exception>
-        public virtual async System.Threading.Tasks.Task<JobList> GetJobsAsync(System.Threading.CancellationToken cancellationToken)
+        public virtual async System.Threading.Tasks.Task<JobList> GetJobsAsync(int? limit, int? page, string? query, System.Threading.CancellationToken cancellationToken)
         {
             var client_ = _httpClient;
             var disposeClient_ = false;
@@ -771,6 +776,20 @@ namespace SOH.Process.Server.Generated
                 
                     // Operation Path: "jobs"
                     urlBuilder_.Append("jobs");
+            urlBuilder_.Append('?');
+            if (limit != null)
+            {
+                urlBuilder_.Append(System.Uri.EscapeDataString("limit")).Append('=').Append(System.Uri.EscapeDataString(ConvertToString(limit, System.Globalization.CultureInfo.InvariantCulture))).Append('&');
+            }
+            if (page != null)
+            {
+                urlBuilder_.Append(System.Uri.EscapeDataString("page")).Append('=').Append(System.Uri.EscapeDataString(ConvertToString(page, System.Globalization.CultureInfo.InvariantCulture))).Append('&');
+            }
+            if (query != null)
+            {
+                urlBuilder_.Append(System.Uri.EscapeDataString("searchQuery")).Append('=').Append(System.Uri.EscapeDataString(ConvertToString(query, System.Globalization.CultureInfo.InvariantCulture))).Append('&');
+            }
+            urlBuilder_.Length--;
 
                     PrepareRequest(client_, request_, urlBuilder_);
 
@@ -1078,9 +1097,11 @@ namespace SOH.Process.Server.Generated
         /// <br/>[Section 7.13](https://docs.ogc.org/is/18-062/18-062.html#sc_retrieve_job_results).
         /// </remarks>
         /// <param name="jobId">local identifier of a job.</param>
-        /// <returns>The results of a job.</returns>
+        /// <returns>The document results of a job.
+        /// <br/>or
+        /// <br/>The collection of results for multiple selected outputs.</returns>
         /// <exception cref="ApiException">A server side error occurred.</exception>
-        public virtual System.Threading.Tasks.Task<System.Collections.Generic.IDictionary<string, object>> GetResultAsync(string jobId)
+        public virtual System.Threading.Tasks.Task<object> GetResultAsync(string jobId)
         {
             return GetResultAsync(jobId, System.Threading.CancellationToken.None);
         }
@@ -1094,9 +1115,11 @@ namespace SOH.Process.Server.Generated
         /// <br/>[Section 7.13](https://docs.ogc.org/is/18-062/18-062.html#sc_retrieve_job_results).
         /// </remarks>
         /// <param name="jobId">local identifier of a job.</param>
-        /// <returns>The results of a job.</returns>
+        /// <returns>The document results of a job.
+        /// <br/>or
+        /// <br/>The collection of results for multiple selected outputs.</returns>
         /// <exception cref="ApiException">A server side error occurred.</exception>
-        public virtual async System.Threading.Tasks.Task<System.Collections.Generic.IDictionary<string, object>> GetResultAsync(string jobId, System.Threading.CancellationToken cancellationToken)
+        public virtual async System.Threading.Tasks.Task<object> GetResultAsync(string jobId, System.Threading.CancellationToken cancellationToken)
         {
             if (jobId == null)
                 throw new System.ArgumentNullException("jobId");
@@ -1142,12 +1165,18 @@ namespace SOH.Process.Server.Generated
                         var status_ = (int)response_.StatusCode;
                         if (status_ == 200)
                         {
-                            var objectResponse_ = await ReadObjectResponseAsync<System.Collections.Generic.IDictionary<string, object>>(response_, headers_, cancellationToken).ConfigureAwait(false);
+                            var objectResponse_ = await ReadObjectResponseAsync<object>(response_, headers_, cancellationToken).ConfigureAwait(false);
                             if (objectResponse_.Object == null)
                             {
                                 throw new ApiException("Response was null which was not expected.", status_, objectResponse_.Text, headers_, null);
                             }
                             return objectResponse_.Object;
+                        }
+                        else
+                        if (status_ == 204)
+                        {
+                            string responseText_ = ( response_.Content == null ) ? string.Empty : await response_.Content.ReadAsStringAsync().ConfigureAwait(false);
+                            throw new ApiException("The results with links to the references.", status_, responseText_, headers_, null);
                         }
                         else
                         if (status_ == 404)
@@ -1308,9 +1337,9 @@ namespace SOH.Process.Server.Generated
         /// retrieve the list of available processes.
         /// </summary>
         /// <remarks>
-        /// The list of processes contains a summary of each process the OGC API - Processes offers, including the link to
-        /// <br/>a more detailed description of the process.  For more information, see [Section
-        /// <br/>7.9](https://docs.ogc.org/is/18-062/18-062.html#sc_process_list).
+        /// The list of processes contains a summary of each process the OGC API - Processes offers,
+        /// <br/>including the link to a more detailed description of the process.
+        /// <br/>For more information, see [Section 7.9](https://docs.ogc.org/is/18-062/18-062.html#sc_process_list).
         /// </remarks>
         /// <returns>Information about the available processes</returns>
         /// <exception cref="ApiException">A server side error occurred.</exception>
@@ -1321,9 +1350,9 @@ namespace SOH.Process.Server.Generated
         /// retrieve the list of available processes.
         /// </summary>
         /// <remarks>
-        /// The list of processes contains a summary of each process the OGC API - Processes offers, including the link to
-        /// <br/>a more detailed description of the process.  For more information, see [Section
-        /// <br/>7.9](https://docs.ogc.org/is/18-062/18-062.html#sc_process_list).
+        /// The list of processes contains a summary of each process the OGC API - Processes offers,
+        /// <br/>including the link to a more detailed description of the process.
+        /// <br/>For more information, see [Section 7.9](https://docs.ogc.org/is/18-062/18-062.html#sc_process_list).
         /// </remarks>
         /// <returns>Information about the available processes</returns>
         /// <exception cref="ApiException">A server side error occurred.</exception>
@@ -1362,28 +1391,36 @@ namespace SOH.Process.Server.Generated
         /// execute a process.
         /// </summary>
         /// <remarks>
-        /// Create a new job.  For more information, see [Section
-        /// <br/>7.11](https://docs.ogc.org/is/18-062/18-062.html#sc_create_job).
+        /// Create a new job.  For more information, see
+        /// <br/>[Section 7.11](https://docs.ogc.org/is/18-062/18-062.html#sc_create_job).
         /// </remarks>
         /// <param name="processId">The process to start.</param>
         /// <param name="request">Mandatory execute request JSON.</param>
-        /// <returns>Result of synchronous execution</returns>
+        /// <returns>Result of synchronous execution
+        /// <br/>or
+        /// <br/>The collection of results for multiple selected outputs.
+        /// <br/>or
+        /// <br/>For single output execution, as per output definition from process description</returns>
         /// <exception cref="ApiException">A server side error occurred.</exception>
-        System.Threading.Tasks.Task<Result> ExecuteAsync(string processId, Execute request);
+        System.Threading.Tasks.Task<object> ExecuteAsync(string processId, Execute? request);
 
         /// <param name="cancellationToken">A cancellation token that can be used by other objects or threads to receive notice of cancellation.</param>
         /// <summary>
         /// execute a process.
         /// </summary>
         /// <remarks>
-        /// Create a new job.  For more information, see [Section
-        /// <br/>7.11](https://docs.ogc.org/is/18-062/18-062.html#sc_create_job).
+        /// Create a new job.  For more information, see
+        /// <br/>[Section 7.11](https://docs.ogc.org/is/18-062/18-062.html#sc_create_job).
         /// </remarks>
         /// <param name="processId">The process to start.</param>
         /// <param name="request">Mandatory execute request JSON.</param>
-        /// <returns>Result of synchronous execution</returns>
+        /// <returns>Result of synchronous execution
+        /// <br/>or
+        /// <br/>The collection of results for multiple selected outputs.
+        /// <br/>or
+        /// <br/>For single output execution, as per output definition from process description</returns>
         /// <exception cref="ApiException">A server side error occurred.</exception>
-        System.Threading.Tasks.Task<Result> ExecuteAsync(string processId, Execute request, System.Threading.CancellationToken cancellationToken);
+        System.Threading.Tasks.Task<object> ExecuteAsync(string processId, Execute? request, System.Threading.CancellationToken cancellationToken);
 
     }
 
@@ -1417,9 +1454,9 @@ namespace SOH.Process.Server.Generated
         /// retrieve the list of available processes.
         /// </summary>
         /// <remarks>
-        /// The list of processes contains a summary of each process the OGC API - Processes offers, including the link to
-        /// <br/>a more detailed description of the process.  For more information, see [Section
-        /// <br/>7.9](https://docs.ogc.org/is/18-062/18-062.html#sc_process_list).
+        /// The list of processes contains a summary of each process the OGC API - Processes offers,
+        /// <br/>including the link to a more detailed description of the process.
+        /// <br/>For more information, see [Section 7.9](https://docs.ogc.org/is/18-062/18-062.html#sc_process_list).
         /// </remarks>
         /// <returns>Information about the available processes</returns>
         /// <exception cref="ApiException">A server side error occurred.</exception>
@@ -1433,9 +1470,9 @@ namespace SOH.Process.Server.Generated
         /// retrieve the list of available processes.
         /// </summary>
         /// <remarks>
-        /// The list of processes contains a summary of each process the OGC API - Processes offers, including the link to
-        /// <br/>a more detailed description of the process.  For more information, see [Section
-        /// <br/>7.9](https://docs.ogc.org/is/18-062/18-062.html#sc_process_list).
+        /// The list of processes contains a summary of each process the OGC API - Processes offers,
+        /// <br/>including the link to a more detailed description of the process.
+        /// <br/>For more information, see [Section 7.9](https://docs.ogc.org/is/18-062/18-062.html#sc_process_list).
         /// </remarks>
         /// <returns>Information about the available processes</returns>
         /// <exception cref="ApiException">A server side error occurred.</exception>
@@ -1633,14 +1670,18 @@ namespace SOH.Process.Server.Generated
         /// execute a process.
         /// </summary>
         /// <remarks>
-        /// Create a new job.  For more information, see [Section
-        /// <br/>7.11](https://docs.ogc.org/is/18-062/18-062.html#sc_create_job).
+        /// Create a new job.  For more information, see
+        /// <br/>[Section 7.11](https://docs.ogc.org/is/18-062/18-062.html#sc_create_job).
         /// </remarks>
         /// <param name="processId">The process to start.</param>
         /// <param name="request">Mandatory execute request JSON.</param>
-        /// <returns>Result of synchronous execution</returns>
+        /// <returns>Result of synchronous execution
+        /// <br/>or
+        /// <br/>The collection of results for multiple selected outputs.
+        /// <br/>or
+        /// <br/>For single output execution, as per output definition from process description</returns>
         /// <exception cref="ApiException">A server side error occurred.</exception>
-        public virtual System.Threading.Tasks.Task<Result> ExecuteAsync(string processId, Execute request)
+        public virtual System.Threading.Tasks.Task<object> ExecuteAsync(string processId, Execute? request)
         {
             return ExecuteAsync(processId, request, System.Threading.CancellationToken.None);
         }
@@ -1650,20 +1691,21 @@ namespace SOH.Process.Server.Generated
         /// execute a process.
         /// </summary>
         /// <remarks>
-        /// Create a new job.  For more information, see [Section
-        /// <br/>7.11](https://docs.ogc.org/is/18-062/18-062.html#sc_create_job).
+        /// Create a new job.  For more information, see
+        /// <br/>[Section 7.11](https://docs.ogc.org/is/18-062/18-062.html#sc_create_job).
         /// </remarks>
         /// <param name="processId">The process to start.</param>
         /// <param name="request">Mandatory execute request JSON.</param>
-        /// <returns>Result of synchronous execution</returns>
+        /// <returns>Result of synchronous execution
+        /// <br/>or
+        /// <br/>The collection of results for multiple selected outputs.
+        /// <br/>or
+        /// <br/>For single output execution, as per output definition from process description</returns>
         /// <exception cref="ApiException">A server side error occurred.</exception>
-        public virtual async System.Threading.Tasks.Task<Result> ExecuteAsync(string processId, Execute request, System.Threading.CancellationToken cancellationToken)
+        public virtual async System.Threading.Tasks.Task<object> ExecuteAsync(string processId, Execute? request, System.Threading.CancellationToken cancellationToken)
         {
             if (processId == null)
                 throw new System.ArgumentNullException("processId");
-
-            if (request == null)
-                throw new System.ArgumentNullException("request");
 
             var client_ = _httpClient;
             var disposeClient_ = false;
@@ -1710,7 +1752,7 @@ namespace SOH.Process.Server.Generated
                         var status_ = (int)response_.StatusCode;
                         if (status_ == 200)
                         {
-                            var objectResponse_ = await ReadObjectResponseAsync<Result>(response_, headers_, cancellationToken).ConfigureAwait(false);
+                            var objectResponse_ = await ReadObjectResponseAsync<object>(response_, headers_, cancellationToken).ConfigureAwait(false);
                             if (objectResponse_.Object == null)
                             {
                                 throw new ApiException("Response was null which was not expected.", status_, objectResponse_.Text, headers_, null);
@@ -1726,6 +1768,428 @@ namespace SOH.Process.Server.Generated
                                 throw new ApiException("Response was null which was not expected.", status_, objectResponse_.Text, headers_, null);
                             }
                             throw new ApiException<StatusInfo>("Started asynchronous execution. Created job.", status_, objectResponse_.Text, headers_, objectResponse_.Object, null);
+                        }
+                        else
+                        if (status_ == 204)
+                        {
+                            string responseText_ = ( response_.Content == null ) ? string.Empty : await response_.Content.ReadAsStringAsync().ConfigureAwait(false);
+                            throw new ApiException("Successful operation (no response body)", status_, responseText_, headers_, null);
+                        }
+                        else
+                        if (status_ == 404)
+                        {
+                            var objectResponse_ = await ReadObjectResponseAsync<ProblemDetails>(response_, headers_, cancellationToken).ConfigureAwait(false);
+                            if (objectResponse_.Object == null)
+                            {
+                                throw new ApiException("Response was null which was not expected.", status_, objectResponse_.Text, headers_, null);
+                            }
+                            throw new ApiException<ProblemDetails>("The requested URI was not found.", status_, objectResponse_.Text, headers_, objectResponse_.Object, null);
+                        }
+                        else
+                        if (status_ == 500)
+                        {
+                            var objectResponse_ = await ReadObjectResponseAsync<ProblemDetails>(response_, headers_, cancellationToken).ConfigureAwait(false);
+                            if (objectResponse_.Object == null)
+                            {
+                                throw new ApiException("Response was null which was not expected.", status_, objectResponse_.Text, headers_, null);
+                            }
+                            throw new ApiException<ProblemDetails>("A server error occurred.", status_, objectResponse_.Text, headers_, objectResponse_.Object, null);
+                        }
+                        else
+                        {
+                            var responseData_ = response_.Content == null ? null : await response_.Content.ReadAsStringAsync().ConfigureAwait(false);
+                            throw new ApiException("The HTTP status code of the response was not expected (" + status_ + ").", status_, responseData_, headers_, null);
+                        }
+                    }
+                    finally
+                    {
+                        if (disposeResponse_)
+                            response_.Dispose();
+                    }
+                }
+            }
+            finally
+            {
+                if (disposeClient_)
+                    client_.Dispose();
+            }
+        }
+
+        protected struct ObjectResponseResult<T>
+        {
+            public ObjectResponseResult(T responseObject, string responseText)
+            {
+                this.Object = responseObject;
+                this.Text = responseText;
+            }
+
+            public T Object { get; }
+
+            public string Text { get; }
+        }
+
+        public bool ReadResponseAsString { get; set; }
+
+        protected virtual async System.Threading.Tasks.Task<ObjectResponseResult<T>> ReadObjectResponseAsync<T>(System.Net.Http.HttpResponseMessage response, System.Collections.Generic.IReadOnlyDictionary<string, System.Collections.Generic.IEnumerable<string>> headers, System.Threading.CancellationToken cancellationToken)
+        {
+            if (response == null || response.Content == null)
+            {
+                return new ObjectResponseResult<T>(default(T)!, string.Empty);
+            }
+
+            if (ReadResponseAsString)
+            {
+                var responseText = await response.Content.ReadAsStringAsync().ConfigureAwait(false);
+                try
+                {
+                    var typedBody = Newtonsoft.Json.JsonConvert.DeserializeObject<T>(responseText, JsonSerializerSettings);
+                    return new ObjectResponseResult<T>(typedBody!, responseText);
+                }
+                catch (Newtonsoft.Json.JsonException exception)
+                {
+                    var message = "Could not deserialize the response body string as " + typeof(T).FullName + ".";
+                    throw new ApiException(message, (int)response.StatusCode, responseText, headers, exception);
+                }
+            }
+            else
+            {
+                try
+                {
+                    using (var responseStream = await response.Content.ReadAsStreamAsync().ConfigureAwait(false))
+                    using (var streamReader = new System.IO.StreamReader(responseStream))
+                    using (var jsonTextReader = new Newtonsoft.Json.JsonTextReader(streamReader))
+                    {
+                        var serializer = Newtonsoft.Json.JsonSerializer.Create(JsonSerializerSettings);
+                        var typedBody = serializer.Deserialize<T>(jsonTextReader);
+                        return new ObjectResponseResult<T>(typedBody!, string.Empty);
+                    }
+                }
+                catch (Newtonsoft.Json.JsonException exception)
+                {
+                    var message = "Could not deserialize the response body stream as " + typeof(T).FullName + ".";
+                    throw new ApiException(message, (int)response.StatusCode, string.Empty, headers, exception);
+                }
+            }
+        }
+
+        private string ConvertToString(object? value, System.Globalization.CultureInfo cultureInfo)
+        {
+            if (value == null)
+            {
+                return "";
+            }
+
+            if (value is System.Enum)
+            {
+                var name = System.Enum.GetName(value.GetType(), value);
+                if (name != null)
+                {
+                    var field = System.Reflection.IntrospectionExtensions.GetTypeInfo(value.GetType()).GetDeclaredField(name);
+                    if (field != null)
+                    {
+                        var attribute = System.Reflection.CustomAttributeExtensions.GetCustomAttribute(field, typeof(System.Runtime.Serialization.EnumMemberAttribute)) 
+                            as System.Runtime.Serialization.EnumMemberAttribute;
+                        if (attribute != null)
+                        {
+                            return attribute.Value != null ? attribute.Value : name;
+                        }
+                    }
+
+                    var converted = System.Convert.ToString(System.Convert.ChangeType(value, System.Enum.GetUnderlyingType(value.GetType()), cultureInfo));
+                    return converted == null ? string.Empty : converted;
+                }
+            }
+            else if (value is bool) 
+            {
+                return System.Convert.ToString((bool)value, cultureInfo).ToLowerInvariant();
+            }
+            else if (value is byte[])
+            {
+                return System.Convert.ToBase64String((byte[]) value);
+            }
+            else if (value is string[])
+            {
+                return string.Join(",", (string[])value);
+            }
+            else if (value.GetType().IsArray)
+            {
+                var valueArray = (System.Array)value;
+                var valueTextArray = new string[valueArray.Length];
+                for (var i = 0; i < valueArray.Length; i++)
+                {
+                    valueTextArray[i] = ConvertToString(valueArray.GetValue(i), cultureInfo);
+                }
+                return string.Join(",", valueTextArray);
+            }
+
+            var result = System.Convert.ToString(value, cultureInfo);
+            return result == null ? "" : result;
+        }
+    }
+
+    [System.CodeDom.Compiler.GeneratedCode("NSwag", "14.0.0.0 (NJsonSchema v11.0.0.0 (Newtonsoft.Json v13.0.0.0))")]
+    public partial interface IResultsClient : SOH.Process.Server.Generated.IApiService
+    {
+        /// <summary>
+        /// retrieve result by id.
+        /// </summary>
+        /// <remarks>
+        /// An available result of a job.
+        /// </remarks>
+        /// <returns>The result object associated with this.</returns>
+        /// <exception cref="ApiException">A server side error occurred.</exception>
+        System.Threading.Tasks.Task<Result> GetResultAsync(string? resultId);
+
+        /// <param name="cancellationToken">A cancellation token that can be used by other objects or threads to receive notice of cancellation.</param>
+        /// <summary>
+        /// retrieve result by id.
+        /// </summary>
+        /// <remarks>
+        /// An available result of a job.
+        /// </remarks>
+        /// <returns>The result object associated with this.</returns>
+        /// <exception cref="ApiException">A server side error occurred.</exception>
+        System.Threading.Tasks.Task<Result> GetResultAsync(string? resultId, System.Threading.CancellationToken cancellationToken);
+
+        /// <summary>
+        /// retrieve result by job id.
+        /// </summary>
+        /// <remarks>
+        /// An available result of a job.
+        /// </remarks>
+        /// <returns>The result object associated with this.</returns>
+        /// <exception cref="ApiException">A server side error occurred.</exception>
+        System.Threading.Tasks.Task<Result> GetResultByJobAsync(string jobId);
+
+        /// <param name="cancellationToken">A cancellation token that can be used by other objects or threads to receive notice of cancellation.</param>
+        /// <summary>
+        /// retrieve result by job id.
+        /// </summary>
+        /// <remarks>
+        /// An available result of a job.
+        /// </remarks>
+        /// <returns>The result object associated with this.</returns>
+        /// <exception cref="ApiException">A server side error occurred.</exception>
+        System.Threading.Tasks.Task<Result> GetResultByJobAsync(string jobId, System.Threading.CancellationToken cancellationToken);
+
+    }
+
+    [System.CodeDom.Compiler.GeneratedCode("NSwag", "14.0.0.0 (NJsonSchema v11.0.0.0 (Newtonsoft.Json v13.0.0.0))")]
+    public partial class ResultsClient : SOH.Process.Server.Generated.AbstractTheraflowClient, IResultsClient
+    {
+        private System.Net.Http.HttpClient _httpClient;
+        private static System.Lazy<Newtonsoft.Json.JsonSerializerSettings> _settings = new System.Lazy<Newtonsoft.Json.JsonSerializerSettings>(CreateSerializerSettings, true);
+
+        public ResultsClient(System.Net.Http.HttpClient httpClient)
+        {
+            _httpClient = httpClient;
+        }
+
+        private static Newtonsoft.Json.JsonSerializerSettings CreateSerializerSettings()
+        {
+            var settings = CustomJsonSerializerSettings(new Newtonsoft.Json.JsonSerializerSettings {  });
+            UpdateJsonSerializerSettings(settings);
+            return settings;
+        }
+
+        public Newtonsoft.Json.JsonSerializerSettings JsonSerializerSettings { get { return _settings.Value; } }
+
+        static partial void UpdateJsonSerializerSettings(Newtonsoft.Json.JsonSerializerSettings settings);
+
+        partial void PrepareRequest(System.Net.Http.HttpClient client, System.Net.Http.HttpRequestMessage request, string url);
+        partial void PrepareRequest(System.Net.Http.HttpClient client, System.Net.Http.HttpRequestMessage request, System.Text.StringBuilder urlBuilder);
+        partial void ProcessResponse(System.Net.Http.HttpClient client, System.Net.Http.HttpResponseMessage response);
+
+        /// <summary>
+        /// retrieve result by id.
+        /// </summary>
+        /// <remarks>
+        /// An available result of a job.
+        /// </remarks>
+        /// <returns>The result object associated with this.</returns>
+        /// <exception cref="ApiException">A server side error occurred.</exception>
+        public virtual System.Threading.Tasks.Task<Result> GetResultAsync(string? resultId)
+        {
+            return GetResultAsync(resultId, System.Threading.CancellationToken.None);
+        }
+
+        /// <param name="cancellationToken">A cancellation token that can be used by other objects or threads to receive notice of cancellation.</param>
+        /// <summary>
+        /// retrieve result by id.
+        /// </summary>
+        /// <remarks>
+        /// An available result of a job.
+        /// </remarks>
+        /// <returns>The result object associated with this.</returns>
+        /// <exception cref="ApiException">A server side error occurred.</exception>
+        public virtual async System.Threading.Tasks.Task<Result> GetResultAsync(string? resultId, System.Threading.CancellationToken cancellationToken)
+        {
+            var client_ = _httpClient;
+            var disposeClient_ = false;
+            try
+            {
+                using (var request_ = new System.Net.Http.HttpRequestMessage())
+                {
+                    request_.Method = new System.Net.Http.HttpMethod("GET");
+                    request_.Headers.Accept.Add(System.Net.Http.Headers.MediaTypeWithQualityHeaderValue.Parse("application/json"));
+
+                    var urlBuilder_ = new System.Text.StringBuilder();
+                
+                    // Operation Path: "results"
+                    urlBuilder_.Append("results");
+            urlBuilder_.Append('?');
+            if (resultId != null)
+            {
+                urlBuilder_.Append(System.Uri.EscapeDataString("resultId")).Append('=').Append(System.Uri.EscapeDataString(ConvertToString(resultId, System.Globalization.CultureInfo.InvariantCulture))).Append('&');
+            }
+            urlBuilder_.Length--;
+
+                    PrepareRequest(client_, request_, urlBuilder_);
+
+                    var url_ = urlBuilder_.ToString();
+                    request_.RequestUri = new System.Uri(url_, System.UriKind.RelativeOrAbsolute);
+
+                    PrepareRequest(client_, request_, url_);
+
+                    var response_ = await client_.SendAsync(request_, System.Net.Http.HttpCompletionOption.ResponseHeadersRead, cancellationToken).ConfigureAwait(false);
+                    var disposeResponse_ = true;
+                    try
+                    {
+                        var headers_ = new System.Collections.Generic.Dictionary<string, System.Collections.Generic.IEnumerable<string>>();
+                        foreach (var item_ in response_.Headers)
+                            headers_[item_.Key] = item_.Value;
+                        if (response_.Content != null && response_.Content.Headers != null)
+                        {
+                            foreach (var item_ in response_.Content.Headers)
+                                headers_[item_.Key] = item_.Value;
+                        }
+
+                        ProcessResponse(client_, response_);
+
+                        var status_ = (int)response_.StatusCode;
+                        if (status_ == 200)
+                        {
+                            var objectResponse_ = await ReadObjectResponseAsync<Result>(response_, headers_, cancellationToken).ConfigureAwait(false);
+                            if (objectResponse_.Object == null)
+                            {
+                                throw new ApiException("Response was null which was not expected.", status_, objectResponse_.Text, headers_, null);
+                            }
+                            return objectResponse_.Object;
+                        }
+                        else
+                        if (status_ == 404)
+                        {
+                            var objectResponse_ = await ReadObjectResponseAsync<ProblemDetails>(response_, headers_, cancellationToken).ConfigureAwait(false);
+                            if (objectResponse_.Object == null)
+                            {
+                                throw new ApiException("Response was null which was not expected.", status_, objectResponse_.Text, headers_, null);
+                            }
+                            throw new ApiException<ProblemDetails>("The requested URI was not found.", status_, objectResponse_.Text, headers_, objectResponse_.Object, null);
+                        }
+                        else
+                        if (status_ == 500)
+                        {
+                            var objectResponse_ = await ReadObjectResponseAsync<ProblemDetails>(response_, headers_, cancellationToken).ConfigureAwait(false);
+                            if (objectResponse_.Object == null)
+                            {
+                                throw new ApiException("Response was null which was not expected.", status_, objectResponse_.Text, headers_, null);
+                            }
+                            throw new ApiException<ProblemDetails>("A server error occurred.", status_, objectResponse_.Text, headers_, objectResponse_.Object, null);
+                        }
+                        else
+                        {
+                            var responseData_ = response_.Content == null ? null : await response_.Content.ReadAsStringAsync().ConfigureAwait(false);
+                            throw new ApiException("The HTTP status code of the response was not expected (" + status_ + ").", status_, responseData_, headers_, null);
+                        }
+                    }
+                    finally
+                    {
+                        if (disposeResponse_)
+                            response_.Dispose();
+                    }
+                }
+            }
+            finally
+            {
+                if (disposeClient_)
+                    client_.Dispose();
+            }
+        }
+
+        /// <summary>
+        /// retrieve result by job id.
+        /// </summary>
+        /// <remarks>
+        /// An available result of a job.
+        /// </remarks>
+        /// <returns>The result object associated with this.</returns>
+        /// <exception cref="ApiException">A server side error occurred.</exception>
+        public virtual System.Threading.Tasks.Task<Result> GetResultByJobAsync(string jobId)
+        {
+            return GetResultByJobAsync(jobId, System.Threading.CancellationToken.None);
+        }
+
+        /// <param name="cancellationToken">A cancellation token that can be used by other objects or threads to receive notice of cancellation.</param>
+        /// <summary>
+        /// retrieve result by job id.
+        /// </summary>
+        /// <remarks>
+        /// An available result of a job.
+        /// </remarks>
+        /// <returns>The result object associated with this.</returns>
+        /// <exception cref="ApiException">A server side error occurred.</exception>
+        public virtual async System.Threading.Tasks.Task<Result> GetResultByJobAsync(string jobId, System.Threading.CancellationToken cancellationToken)
+        {
+            if (jobId == null)
+                throw new System.ArgumentNullException("jobId");
+
+            var client_ = _httpClient;
+            var disposeClient_ = false;
+            try
+            {
+                using (var request_ = new System.Net.Http.HttpRequestMessage())
+                {
+                    request_.Method = new System.Net.Http.HttpMethod("GET");
+                    request_.Headers.Accept.Add(System.Net.Http.Headers.MediaTypeWithQualityHeaderValue.Parse("application/json"));
+
+                    var urlBuilder_ = new System.Text.StringBuilder();
+                
+                    // Operation Path: "results/{jobId}/job"
+                    urlBuilder_.Append("results/");
+                    urlBuilder_.Append(System.Uri.EscapeDataString(ConvertToString(jobId, System.Globalization.CultureInfo.InvariantCulture)));
+                    urlBuilder_.Append("/job");
+
+                    PrepareRequest(client_, request_, urlBuilder_);
+
+                    var url_ = urlBuilder_.ToString();
+                    request_.RequestUri = new System.Uri(url_, System.UriKind.RelativeOrAbsolute);
+
+                    PrepareRequest(client_, request_, url_);
+
+                    var response_ = await client_.SendAsync(request_, System.Net.Http.HttpCompletionOption.ResponseHeadersRead, cancellationToken).ConfigureAwait(false);
+                    var disposeResponse_ = true;
+                    try
+                    {
+                        var headers_ = new System.Collections.Generic.Dictionary<string, System.Collections.Generic.IEnumerable<string>>();
+                        foreach (var item_ in response_.Headers)
+                            headers_[item_.Key] = item_.Value;
+                        if (response_.Content != null && response_.Content.Headers != null)
+                        {
+                            foreach (var item_ in response_.Content.Headers)
+                                headers_[item_.Key] = item_.Value;
+                        }
+
+                        ProcessResponse(client_, response_);
+
+                        var status_ = (int)response_.StatusCode;
+                        if (status_ == 200)
+                        {
+                            var objectResponse_ = await ReadObjectResponseAsync<Result>(response_, headers_, cancellationToken).ConfigureAwait(false);
+                            if (objectResponse_.Object == null)
+                            {
+                                throw new ApiException("Response was null which was not expected.", status_, objectResponse_.Text, headers_, null);
+                            }
+                            return objectResponse_.Object;
                         }
                         else
                         if (status_ == 404)
@@ -2078,7 +2542,7 @@ namespace SOH.Process.Server.Generated
     {
 
         [System.Runtime.Serialization.EnumMember(Value = @"process")]
-        ProcessEnum = 0,
+        Process = 0,
 
     }
 
@@ -2104,6 +2568,256 @@ namespace SOH.Process.Server.Generated
 
         [System.Runtime.Serialization.EnumMember(Value = @"dismissed")]
         Dismissed = 4,
+
+    }
+
+    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.0.0.0 (NJsonSchema v11.0.0.0 (Newtonsoft.Json v13.0.0.0))")]
+    public abstract partial class HttpContent
+    {
+        [Newtonsoft.Json.JsonProperty("headers", Required = Newtonsoft.Json.Required.DisallowNull, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
+        public HttpContentHeaders Headers { get; set; } = default!;
+
+        private System.Collections.Generic.IDictionary<string, object>? _additionalProperties;
+
+        [Newtonsoft.Json.JsonExtensionData]
+        public System.Collections.Generic.IDictionary<string, object> AdditionalProperties
+        {
+            get { return _additionalProperties ?? (_additionalProperties = new System.Collections.Generic.Dictionary<string, object>()); }
+            set { _additionalProperties = value; }
+        }
+
+        public string ToJson()
+        {
+
+            return Newtonsoft.Json.JsonConvert.SerializeObject(this, CustomJsonSerializerSettings(new Newtonsoft.Json.JsonSerializerSettings {  }));
+
+        }
+        public static HttpContent FromJson(string data)
+        {
+
+            return Newtonsoft.Json.JsonConvert.DeserializeObject<HttpContent>(data, CustomJsonSerializerSettings(new Newtonsoft.Json.JsonSerializerSettings {  }));
+
+        }
+
+    }
+
+    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.0.0.0 (NJsonSchema v11.0.0.0 (Newtonsoft.Json v13.0.0.0))")]
+    public partial class HttpContentHeaders : Anonymous
+    {
+
+        public string ToJson()
+        {
+
+            return Newtonsoft.Json.JsonConvert.SerializeObject(this, CustomJsonSerializerSettings(new Newtonsoft.Json.JsonSerializerSettings {  }));
+
+        }
+        public static HttpContentHeaders FromJson(string data)
+        {
+
+            return Newtonsoft.Json.JsonConvert.DeserializeObject<HttpContentHeaders>(data, CustomJsonSerializerSettings(new Newtonsoft.Json.JsonSerializerSettings {  }));
+
+        }
+
+    }
+
+    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.0.0.0 (NJsonSchema v11.0.0.0 (Newtonsoft.Json v13.0.0.0))")]
+    public partial class ContentDispositionHeaderValue
+    {
+        [Newtonsoft.Json.JsonProperty("dispositionType", Required = Newtonsoft.Json.Required.DisallowNull, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
+        public string DispositionType { get; set; } = default!;
+
+        [Newtonsoft.Json.JsonProperty("parameters", Required = Newtonsoft.Json.Required.DisallowNull, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
+        public System.Collections.Generic.ICollection<NameValueHeaderValue> Parameters { get; set; } = default!;
+
+        [Newtonsoft.Json.JsonProperty("name", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
+        public string? Name { get; set; } = default!;
+
+        [Newtonsoft.Json.JsonProperty("fileName", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
+        public string? FileName { get; set; } = default!;
+
+        [Newtonsoft.Json.JsonProperty("fileNameStar", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
+        public string? FileNameStar { get; set; } = default!;
+
+        [Newtonsoft.Json.JsonProperty("creationDate", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
+        public System.DateTime? CreationDate { get; set; } = default!;
+
+        [Newtonsoft.Json.JsonProperty("modificationDate", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
+        public System.DateTime? ModificationDate { get; set; } = default!;
+
+        [Newtonsoft.Json.JsonProperty("readDate", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
+        public System.DateTime? ReadDate { get; set; } = default!;
+
+        [Newtonsoft.Json.JsonProperty("size", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
+        public long? Size { get; set; } = default!;
+
+        private System.Collections.Generic.IDictionary<string, object>? _additionalProperties;
+
+        [Newtonsoft.Json.JsonExtensionData]
+        public System.Collections.Generic.IDictionary<string, object> AdditionalProperties
+        {
+            get { return _additionalProperties ?? (_additionalProperties = new System.Collections.Generic.Dictionary<string, object>()); }
+            set { _additionalProperties = value; }
+        }
+
+        public string ToJson()
+        {
+
+            return Newtonsoft.Json.JsonConvert.SerializeObject(this, CustomJsonSerializerSettings(new Newtonsoft.Json.JsonSerializerSettings {  }));
+
+        }
+        public static ContentDispositionHeaderValue FromJson(string data)
+        {
+
+            return Newtonsoft.Json.JsonConvert.DeserializeObject<ContentDispositionHeaderValue>(data, CustomJsonSerializerSettings(new Newtonsoft.Json.JsonSerializerSettings {  }));
+
+        }
+
+    }
+
+    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.0.0.0 (NJsonSchema v11.0.0.0 (Newtonsoft.Json v13.0.0.0))")]
+    public partial class NameValueHeaderValue
+    {
+        [Newtonsoft.Json.JsonProperty("name", Required = Newtonsoft.Json.Required.DisallowNull, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
+        public string Name { get; set; } = default!;
+
+        [Newtonsoft.Json.JsonProperty("value", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
+        public string? Value { get; set; } = default!;
+
+        private System.Collections.Generic.IDictionary<string, object>? _additionalProperties;
+
+        [Newtonsoft.Json.JsonExtensionData]
+        public System.Collections.Generic.IDictionary<string, object> AdditionalProperties
+        {
+            get { return _additionalProperties ?? (_additionalProperties = new System.Collections.Generic.Dictionary<string, object>()); }
+            set { _additionalProperties = value; }
+        }
+
+        public string ToJson()
+        {
+
+            return Newtonsoft.Json.JsonConvert.SerializeObject(this, CustomJsonSerializerSettings(new Newtonsoft.Json.JsonSerializerSettings {  }));
+
+        }
+        public static NameValueHeaderValue FromJson(string data)
+        {
+
+            return Newtonsoft.Json.JsonConvert.DeserializeObject<NameValueHeaderValue>(data, CustomJsonSerializerSettings(new Newtonsoft.Json.JsonSerializerSettings {  }));
+
+        }
+
+    }
+
+    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.0.0.0 (NJsonSchema v11.0.0.0 (Newtonsoft.Json v13.0.0.0))")]
+    public partial class ContentRangeHeaderValue
+    {
+        [Newtonsoft.Json.JsonProperty("unit", Required = Newtonsoft.Json.Required.DisallowNull, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
+        public string Unit { get; set; } = default!;
+
+        [Newtonsoft.Json.JsonProperty("from", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
+        public long? From { get; set; } = default!;
+
+        [Newtonsoft.Json.JsonProperty("to", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
+        public long? To { get; set; } = default!;
+
+        [Newtonsoft.Json.JsonProperty("length", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
+        public long? Length { get; set; } = default!;
+
+        [Newtonsoft.Json.JsonProperty("hasLength", Required = Newtonsoft.Json.Required.DisallowNull, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
+        public bool HasLength { get; set; } = default!;
+
+        [Newtonsoft.Json.JsonProperty("hasRange", Required = Newtonsoft.Json.Required.DisallowNull, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
+        public bool HasRange { get; set; } = default!;
+
+        private System.Collections.Generic.IDictionary<string, object>? _additionalProperties;
+
+        [Newtonsoft.Json.JsonExtensionData]
+        public System.Collections.Generic.IDictionary<string, object> AdditionalProperties
+        {
+            get { return _additionalProperties ?? (_additionalProperties = new System.Collections.Generic.Dictionary<string, object>()); }
+            set { _additionalProperties = value; }
+        }
+
+        public string ToJson()
+        {
+
+            return Newtonsoft.Json.JsonConvert.SerializeObject(this, CustomJsonSerializerSettings(new Newtonsoft.Json.JsonSerializerSettings {  }));
+
+        }
+        public static ContentRangeHeaderValue FromJson(string data)
+        {
+
+            return Newtonsoft.Json.JsonConvert.DeserializeObject<ContentRangeHeaderValue>(data, CustomJsonSerializerSettings(new Newtonsoft.Json.JsonSerializerSettings {  }));
+
+        }
+
+    }
+
+    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.0.0.0 (NJsonSchema v11.0.0.0 (Newtonsoft.Json v13.0.0.0))")]
+    public partial class MediaTypeHeaderValue
+    {
+        [Newtonsoft.Json.JsonProperty("charSet", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
+        public string? CharSet { get; set; } = default!;
+
+        [Newtonsoft.Json.JsonProperty("parameters", Required = Newtonsoft.Json.Required.DisallowNull, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
+        public System.Collections.Generic.ICollection<NameValueHeaderValue> Parameters { get; set; } = default!;
+
+        [Newtonsoft.Json.JsonProperty("mediaType", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
+        public string? MediaType { get; set; } = default!;
+
+        private System.Collections.Generic.IDictionary<string, object>? _additionalProperties;
+
+        [Newtonsoft.Json.JsonExtensionData]
+        public System.Collections.Generic.IDictionary<string, object> AdditionalProperties
+        {
+            get { return _additionalProperties ?? (_additionalProperties = new System.Collections.Generic.Dictionary<string, object>()); }
+            set { _additionalProperties = value; }
+        }
+
+        public string ToJson()
+        {
+
+            return Newtonsoft.Json.JsonConvert.SerializeObject(this, CustomJsonSerializerSettings(new Newtonsoft.Json.JsonSerializerSettings {  }));
+
+        }
+        public static MediaTypeHeaderValue FromJson(string data)
+        {
+
+            return Newtonsoft.Json.JsonConvert.DeserializeObject<MediaTypeHeaderValue>(data, CustomJsonSerializerSettings(new Newtonsoft.Json.JsonSerializerSettings {  }));
+
+        }
+
+    }
+
+    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.0.0.0 (NJsonSchema v11.0.0.0 (Newtonsoft.Json v13.0.0.0))")]
+    public partial class KeyValuePairOfStringAndIEnumerableOfString
+    {
+        [Newtonsoft.Json.JsonProperty("key", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
+        public string? Key { get; set; } = default!;
+
+        [Newtonsoft.Json.JsonProperty("value", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
+        public System.Collections.Generic.ICollection<string>? Value { get; set; } = default!;
+
+        private System.Collections.Generic.IDictionary<string, object>? _additionalProperties;
+
+        [Newtonsoft.Json.JsonExtensionData]
+        public System.Collections.Generic.IDictionary<string, object> AdditionalProperties
+        {
+            get { return _additionalProperties ?? (_additionalProperties = new System.Collections.Generic.Dictionary<string, object>()); }
+            set { _additionalProperties = value; }
+        }
+
+        public string ToJson()
+        {
+
+            return Newtonsoft.Json.JsonConvert.SerializeObject(this, CustomJsonSerializerSettings(new Newtonsoft.Json.JsonSerializerSettings {  }));
+
+        }
+        public static KeyValuePairOfStringAndIEnumerableOfString FromJson(string data)
+        {
+
+            return Newtonsoft.Json.JsonConvert.DeserializeObject<KeyValuePairOfStringAndIEnumerableOfString>(data, CustomJsonSerializerSettings(new Newtonsoft.Json.JsonSerializerSettings {  }));
+
+        }
 
     }
 
@@ -2501,51 +3215,6 @@ namespace SOH.Process.Server.Generated
     }
 
     [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.0.0.0 (NJsonSchema v11.0.0.0 (Newtonsoft.Json v13.0.0.0))")]
-    public partial class Coordinate
-    {
-        [Newtonsoft.Json.JsonProperty("x", Required = Newtonsoft.Json.Required.DisallowNull, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
-        public double X { get; set; } = default!;
-
-        [Newtonsoft.Json.JsonProperty("y", Required = Newtonsoft.Json.Required.DisallowNull, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
-        public double Y { get; set; } = default!;
-
-        [Newtonsoft.Json.JsonProperty("z", Required = Newtonsoft.Json.Required.DisallowNull, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
-        public double Z { get; set; } = default!;
-
-        [Newtonsoft.Json.JsonProperty("m", Required = Newtonsoft.Json.Required.DisallowNull, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
-        public double M { get; set; } = default!;
-
-        [Newtonsoft.Json.JsonProperty("coordinateValue", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
-        public Coordinate? CoordinateValue { get; set; } = default!;
-
-        [Newtonsoft.Json.JsonProperty("isValid", Required = Newtonsoft.Json.Required.DisallowNull, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
-        public bool IsValid { get; set; } = default!;
-
-        private System.Collections.Generic.IDictionary<string, object>? _additionalProperties;
-
-        [Newtonsoft.Json.JsonExtensionData]
-        public System.Collections.Generic.IDictionary<string, object> AdditionalProperties
-        {
-            get { return _additionalProperties ?? (_additionalProperties = new System.Collections.Generic.Dictionary<string, object>()); }
-            set { _additionalProperties = value; }
-        }
-
-        public string ToJson()
-        {
-
-            return Newtonsoft.Json.JsonConvert.SerializeObject(this, CustomJsonSerializerSettings(new Newtonsoft.Json.JsonSerializerSettings {  }));
-
-        }
-        public static Coordinate FromJson(string data)
-        {
-
-            return Newtonsoft.Json.JsonConvert.DeserializeObject<Coordinate>(data, CustomJsonSerializerSettings(new Newtonsoft.Json.JsonSerializerSettings {  }));
-
-        }
-
-    }
-
-    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.0.0.0 (NJsonSchema v11.0.0.0 (Newtonsoft.Json v13.0.0.0))")]
     public abstract partial class IFeature
     {
         [Newtonsoft.Json.JsonProperty("geometry", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
@@ -2576,78 +3245,6 @@ namespace SOH.Process.Server.Generated
         {
 
             return Newtonsoft.Json.JsonConvert.DeserializeObject<IFeature>(data, CustomJsonSerializerSettings(new Newtonsoft.Json.JsonSerializerSettings {  }));
-
-        }
-
-    }
-
-    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.0.0.0 (NJsonSchema v11.0.0.0 (Newtonsoft.Json v13.0.0.0))")]
-    public abstract partial class Geometry
-    {
-        [Newtonsoft.Json.JsonProperty("factory", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
-        public GeometryFactory? Factory { get; set; } = default!;
-
-        [Newtonsoft.Json.JsonProperty("userData", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
-        public object? UserData { get; set; } = default!;
-
-        [Newtonsoft.Json.JsonProperty("srid", Required = Newtonsoft.Json.Required.DisallowNull, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
-        public int Srid { get; set; } = default!;
-
-        [Newtonsoft.Json.JsonProperty("precisionModel", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
-        public PrecisionModel? PrecisionModel { get; set; } = default!;
-
-        [Newtonsoft.Json.JsonProperty("numGeometries", Required = Newtonsoft.Json.Required.DisallowNull, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
-        public int NumGeometries { get; set; } = default!;
-
-        [Newtonsoft.Json.JsonProperty("isSimple", Required = Newtonsoft.Json.Required.DisallowNull, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
-        public bool IsSimple { get; set; } = default!;
-
-        [Newtonsoft.Json.JsonProperty("isValid", Required = Newtonsoft.Json.Required.DisallowNull, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
-        public bool IsValid { get; set; } = default!;
-
-        [Newtonsoft.Json.JsonProperty("area", Required = Newtonsoft.Json.Required.DisallowNull, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
-        public double Area { get; set; } = default!;
-
-        [Newtonsoft.Json.JsonProperty("length", Required = Newtonsoft.Json.Required.DisallowNull, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
-        public double Length { get; set; } = default!;
-
-        [Newtonsoft.Json.JsonProperty("centroid", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
-        public Point? Centroid { get; set; } = default!;
-
-        [Newtonsoft.Json.JsonProperty("interiorPoint", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
-        public Point? InteriorPoint { get; set; } = default!;
-
-        [Newtonsoft.Json.JsonProperty("pointOnSurface", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
-        public Point? PointOnSurface { get; set; } = default!;
-
-        [Newtonsoft.Json.JsonProperty("envelope", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
-        public Geometry? Envelope { get; set; } = default!;
-
-        [Newtonsoft.Json.JsonProperty("envelopeInternal", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
-        public Envelope? EnvelopeInternal { get; set; } = default!;
-
-        [Newtonsoft.Json.JsonProperty("isRectangle", Required = Newtonsoft.Json.Required.DisallowNull, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
-        public bool IsRectangle { get; set; } = default!;
-
-        private System.Collections.Generic.IDictionary<string, object>? _additionalProperties;
-
-        [Newtonsoft.Json.JsonExtensionData]
-        public System.Collections.Generic.IDictionary<string, object> AdditionalProperties
-        {
-            get { return _additionalProperties ?? (_additionalProperties = new System.Collections.Generic.Dictionary<string, object>()); }
-            set { _additionalProperties = value; }
-        }
-
-        public string ToJson()
-        {
-
-            return Newtonsoft.Json.JsonConvert.SerializeObject(this, CustomJsonSerializerSettings(new Newtonsoft.Json.JsonSerializerSettings {  }));
-
-        }
-        public static Geometry FromJson(string data)
-        {
-
-            return Newtonsoft.Json.JsonConvert.DeserializeObject<Geometry>(data, CustomJsonSerializerSettings(new Newtonsoft.Json.JsonSerializerSettings {  }));
 
         }
 
@@ -2989,192 +3586,6 @@ namespace SOH.Process.Server.Generated
     }
 
     [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.0.0.0 (NJsonSchema v11.0.0.0 (Newtonsoft.Json v13.0.0.0))")]
-    public partial class Point : Geometry
-    {
-        [Newtonsoft.Json.JsonProperty("coordinateSequence", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
-        public CoordinateSequence? CoordinateSequence { get; set; } = default!;
-
-        [Newtonsoft.Json.JsonProperty("coordinates", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
-        public System.Collections.Generic.ICollection<Coordinate>? Coordinates { get; set; } = default!;
-
-        [Newtonsoft.Json.JsonProperty("numPoints", Required = Newtonsoft.Json.Required.DisallowNull, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
-        public int NumPoints { get; set; } = default!;
-
-        [Newtonsoft.Json.JsonProperty("isEmpty", Required = Newtonsoft.Json.Required.DisallowNull, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
-        public bool IsEmpty { get; set; } = default!;
-
-        [Newtonsoft.Json.JsonProperty("dimension", Required = Newtonsoft.Json.Required.DisallowNull, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
-        public Dimension Dimension { get; set; } = default!;
-
-        [Newtonsoft.Json.JsonProperty("boundaryDimension", Required = Newtonsoft.Json.Required.DisallowNull, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
-        public Dimension BoundaryDimension { get; set; } = default!;
-
-        [Newtonsoft.Json.JsonProperty("x", Required = Newtonsoft.Json.Required.DisallowNull, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
-        public double X { get; set; } = default!;
-
-        [Newtonsoft.Json.JsonProperty("y", Required = Newtonsoft.Json.Required.DisallowNull, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
-        public double Y { get; set; } = default!;
-
-        [Newtonsoft.Json.JsonProperty("coordinate", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
-        public Coordinate? Coordinate { get; set; } = default!;
-
-        [Newtonsoft.Json.JsonProperty("geometryType", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
-        public string? GeometryType { get; set; } = default!;
-
-        [Newtonsoft.Json.JsonProperty("ogcGeometryType", Required = Newtonsoft.Json.Required.DisallowNull, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
-        public OgcGeometryType OgcGeometryType { get; set; } = default!;
-
-        [Newtonsoft.Json.JsonProperty("boundary", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
-        public Geometry? Boundary { get; set; } = default!;
-
-        [Newtonsoft.Json.JsonProperty("z", Required = Newtonsoft.Json.Required.DisallowNull, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
-        public double Z { get; set; } = default!;
-
-        [Newtonsoft.Json.JsonProperty("m", Required = Newtonsoft.Json.Required.DisallowNull, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
-        public double M { get; set; } = default!;
-
-        public string ToJson()
-        {
-
-            return Newtonsoft.Json.JsonConvert.SerializeObject(this, CustomJsonSerializerSettings(new Newtonsoft.Json.JsonSerializerSettings {  }));
-
-        }
-        public static Point FromJson(string data)
-        {
-
-            return Newtonsoft.Json.JsonConvert.DeserializeObject<Point>(data, CustomJsonSerializerSettings(new Newtonsoft.Json.JsonSerializerSettings {  }));
-
-        }
-
-    }
-
-    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.0.0.0 (NJsonSchema v11.0.0.0 (Newtonsoft.Json v13.0.0.0))")]
-    public abstract partial class CoordinateSequence
-    {
-        [Newtonsoft.Json.JsonProperty("dimension", Required = Newtonsoft.Json.Required.DisallowNull, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
-        public int Dimension { get; set; } = default!;
-
-        [Newtonsoft.Json.JsonProperty("measures", Required = Newtonsoft.Json.Required.DisallowNull, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
-        public int Measures { get; set; } = default!;
-
-        [Newtonsoft.Json.JsonProperty("spatial", Required = Newtonsoft.Json.Required.DisallowNull, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
-        public int Spatial { get; set; } = default!;
-
-        [Newtonsoft.Json.JsonProperty("ordinates", Required = Newtonsoft.Json.Required.DisallowNull, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
-        public Ordinates Ordinates { get; set; } = default!;
-
-        [Newtonsoft.Json.JsonProperty("hasZ", Required = Newtonsoft.Json.Required.DisallowNull, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
-        public bool HasZ { get; set; } = default!;
-
-        [Newtonsoft.Json.JsonProperty("hasM", Required = Newtonsoft.Json.Required.DisallowNull, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
-        public bool HasM { get; set; } = default!;
-
-        [Newtonsoft.Json.JsonProperty("zOrdinateIndex", Required = Newtonsoft.Json.Required.DisallowNull, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
-        public int ZOrdinateIndex { get; set; } = default!;
-
-        [Newtonsoft.Json.JsonProperty("mOrdinateIndex", Required = Newtonsoft.Json.Required.DisallowNull, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
-        public int MOrdinateIndex { get; set; } = default!;
-
-        [Newtonsoft.Json.JsonProperty("first", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
-        public Coordinate? First { get; set; } = default!;
-
-        [Newtonsoft.Json.JsonProperty("last", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
-        public Coordinate? Last { get; set; } = default!;
-
-        [Newtonsoft.Json.JsonProperty("count", Required = Newtonsoft.Json.Required.DisallowNull, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
-        public int Count { get; set; } = default!;
-
-        private System.Collections.Generic.IDictionary<string, object>? _additionalProperties;
-
-        [Newtonsoft.Json.JsonExtensionData]
-        public System.Collections.Generic.IDictionary<string, object> AdditionalProperties
-        {
-            get { return _additionalProperties ?? (_additionalProperties = new System.Collections.Generic.Dictionary<string, object>()); }
-            set { _additionalProperties = value; }
-        }
-
-        public string ToJson()
-        {
-
-            return Newtonsoft.Json.JsonConvert.SerializeObject(this, CustomJsonSerializerSettings(new Newtonsoft.Json.JsonSerializerSettings {  }));
-
-        }
-        public static CoordinateSequence FromJson(string data)
-        {
-
-            return Newtonsoft.Json.JsonConvert.DeserializeObject<CoordinateSequence>(data, CustomJsonSerializerSettings(new Newtonsoft.Json.JsonSerializerSettings {  }));
-
-        }
-
-    }
-
-    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.0.0.0 (NJsonSchema v11.0.0.0 (Newtonsoft.Json v13.0.0.0))")]
-    public enum Dimension
-    {
-
-        Point = 0,
-
-        P = 0,
-
-        Curve = 1,
-
-        L = 1,
-
-        Surface = 2,
-
-        A = 2,
-
-        Collapse = 3,
-
-        Dontcare = -3,
-
-        True = -2,
-
-        False = -1,
-
-        Unknown = -1,
-
-    }
-
-    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.0.0.0 (NJsonSchema v11.0.0.0 (Newtonsoft.Json v13.0.0.0))")]
-    public enum OgcGeometryType
-    {
-
-        Point = 1,
-
-        LineString = 2,
-
-        Polygon = 3,
-
-        MultiPoint = 4,
-
-        MultiLineString = 5,
-
-        MultiPolygon = 6,
-
-        GeometryCollection = 7,
-
-        CircularString = 8,
-
-        CompoundCurve = 9,
-
-        CurvePolygon = 10,
-
-        MultiCurve = 11,
-
-        MultiSurface = 12,
-
-        Curve = 13,
-
-        Surface = 14,
-
-        PolyhedralSurface = 15,
-
-        TIN = 16,
-
-    }
-
-    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.0.0.0 (NJsonSchema v11.0.0.0 (Newtonsoft.Json v13.0.0.0))")]
     public abstract partial class IAttributesTable
     {
         [Newtonsoft.Json.JsonProperty("count", Required = Newtonsoft.Json.Required.DisallowNull, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
@@ -3199,6 +3610,34 @@ namespace SOH.Process.Server.Generated
         {
 
             return Newtonsoft.Json.JsonConvert.DeserializeObject<IAttributesTable>(data, CustomJsonSerializerSettings(new Newtonsoft.Json.JsonSerializerSettings {  }));
+
+        }
+
+    }
+
+    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.0.0.0 (NJsonSchema v11.0.0.0 (Newtonsoft.Json v13.0.0.0))")]
+    public partial class Void
+    {
+
+        private System.Collections.Generic.IDictionary<string, object>? _additionalProperties;
+
+        [Newtonsoft.Json.JsonExtensionData]
+        public System.Collections.Generic.IDictionary<string, object> AdditionalProperties
+        {
+            get { return _additionalProperties ?? (_additionalProperties = new System.Collections.Generic.Dictionary<string, object>()); }
+            set { _additionalProperties = value; }
+        }
+
+        public string ToJson()
+        {
+
+            return Newtonsoft.Json.JsonConvert.SerializeObject(this, CustomJsonSerializerSettings(new Newtonsoft.Json.JsonSerializerSettings {  }));
+
+        }
+        public static Void FromJson(string data)
+        {
+
+            return Newtonsoft.Json.JsonConvert.DeserializeObject<Void>(data, CustomJsonSerializerSettings(new Newtonsoft.Json.JsonSerializerSettings {  }));
 
         }
 
@@ -3258,15 +3697,45 @@ namespace SOH.Process.Server.Generated
         RawEnum = 0,
 
         [System.Runtime.Serialization.EnumMember(Value = @"document")]
-        DocumentEnum = 1,
+        Document = 1,
 
     }
 
     [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.0.0.0 (NJsonSchema v11.0.0.0 (Newtonsoft.Json v13.0.0.0))")]
     public partial class Anonymous
     {
-        [Newtonsoft.Json.JsonProperty("BoundingBox", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
-        public Envelope? BoundingBox { get; set; } = default!;
+        [Newtonsoft.Json.JsonProperty("Allow", Required = Newtonsoft.Json.Required.DisallowNull, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
+        public System.Collections.Generic.ICollection<string> Allow { get; set; } = default!;
+
+        [Newtonsoft.Json.JsonProperty("ContentDisposition", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
+        public ContentDispositionHeaderValue? ContentDisposition { get; set; } = default!;
+
+        [Newtonsoft.Json.JsonProperty("ContentEncoding", Required = Newtonsoft.Json.Required.DisallowNull, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
+        public System.Collections.Generic.ICollection<string> ContentEncoding { get; set; } = default!;
+
+        [Newtonsoft.Json.JsonProperty("ContentLanguage", Required = Newtonsoft.Json.Required.DisallowNull, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
+        public System.Collections.Generic.ICollection<string> ContentLanguage { get; set; } = default!;
+
+        [Newtonsoft.Json.JsonProperty("ContentLength", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
+        public long? ContentLength { get; set; } = default!;
+
+        [Newtonsoft.Json.JsonProperty("ContentLocation", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
+        public System.Uri? ContentLocation { get; set; } = default!;
+
+        [Newtonsoft.Json.JsonProperty("ContentMD5", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
+        public byte[]? ContentMD5 { get; set; } = default!;
+
+        [Newtonsoft.Json.JsonProperty("ContentRange", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
+        public ContentRangeHeaderValue? ContentRange { get; set; } = default!;
+
+        [Newtonsoft.Json.JsonProperty("ContentType", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
+        public MediaTypeHeaderValue? ContentType { get; set; } = default!;
+
+        [Newtonsoft.Json.JsonProperty("Expires", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
+        public System.DateTime? Expires { get; set; } = default!;
+
+        [Newtonsoft.Json.JsonProperty("LastModified", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
+        public System.DateTime? LastModified { get; set; } = default!;
 
         private System.Collections.Generic.IDictionary<string, object>? _additionalProperties;
 
@@ -3287,6 +3756,36 @@ namespace SOH.Process.Server.Generated
         {
 
             return Newtonsoft.Json.JsonConvert.DeserializeObject<Anonymous>(data, CustomJsonSerializerSettings(new Newtonsoft.Json.JsonSerializerSettings {  }));
+
+        }
+
+    }
+
+    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.0.0.0 (NJsonSchema v11.0.0.0 (Newtonsoft.Json v13.0.0.0))")]
+    public partial class Anonymous2
+    {
+        [Newtonsoft.Json.JsonProperty("BoundingBox", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
+        public Envelope? BoundingBox { get; set; } = default!;
+
+        private System.Collections.Generic.IDictionary<string, object>? _additionalProperties;
+
+        [Newtonsoft.Json.JsonExtensionData]
+        public System.Collections.Generic.IDictionary<string, object> AdditionalProperties
+        {
+            get { return _additionalProperties ?? (_additionalProperties = new System.Collections.Generic.Dictionary<string, object>()); }
+            set { _additionalProperties = value; }
+        }
+
+        public string ToJson()
+        {
+
+            return Newtonsoft.Json.JsonConvert.SerializeObject(this, CustomJsonSerializerSettings(new Newtonsoft.Json.JsonSerializerSettings {  }));
+
+        }
+        public static Anonymous2 FromJson(string data)
+        {
+
+            return Newtonsoft.Json.JsonConvert.DeserializeObject<Anonymous2>(data, CustomJsonSerializerSettings(new Newtonsoft.Json.JsonSerializerSettings {  }));
 
         }
 

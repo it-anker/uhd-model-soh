@@ -6,6 +6,7 @@ using MediatR;
 using Microsoft.Extensions.DependencyInjection;
 using Moq;
 using SOH.Process.Server.Models.Common.Exceptions;
+using SOH.Process.Server.Models.Ogc;
 using SOH.Process.Server.Models.Processes;
 using SOH.Process.Server.Simulations;
 using SOH.Process.Server.Simulations.Jobs;
@@ -73,42 +74,42 @@ public class SimulationManagementTests : AbstractManagementTests
         };
 
         string simulationId = await _simulationService.CreateAsync(create);
-        Assert.NotNull(simulationId);
+        NotNull(simulationId);
 
         var simulation = await _simulationService.GetSimulationAsync(simulationId);
-        Assert.Equal("my sim desc", simulation.Description);
-        Assert.Equal("SOH Test", simulation.Title);
-        Assert.Equal("1.0.0", simulation.Version);
-        Assert.Contains("planning", simulation.Keywords);
-        Assert.DoesNotContain("soh", simulation.Keywords);
-        Assert.Contains("ferry", simulation.Keywords);
-        Assert.Single(simulation.Inputs);
-        Assert.Single(simulation.OutputTransmission);
-        Assert.Equal(TransmissionMode.Value, simulation.OutputTransmission[0]);
-        Assert.Equal(JobControlOptions.SynchronousExecution, simulation.JobControlOptions[0]);
-        Assert.Contains("myInput", simulation.Inputs);
+        Equal("my sim desc", simulation.Description);
+        Equal("SOH Test", simulation.Title);
+        Equal("1.0.0", simulation.Version);
+        Contains("planning", simulation.Keywords);
+        DoesNotContain("soh", simulation.Keywords);
+        Contains("ferry", simulation.Keywords);
+        Single(simulation.Inputs);
+        Single(simulation.OutputTransmission);
+        Equal(TransmissionMode.Value, simulation.OutputTransmission[0]);
+        Equal(JobControlOptions.SynchronousExecution, simulation.JobControlOptions[0]);
+        Contains("myInput", simulation.Inputs);
 
         var input = simulation.Inputs.Values.First();
-        Assert.Equal("my input desc", input.Description);
-        Assert.Equal(1, input.MinOccurs);
-        Assert.Equal(2, input.MaxOccurs.Value<int>());
-        Assert.Equal("MyInput", input.Title);
-        Assert.Contains("param", input.Keywords);
+        Equal("my input desc", input.Description);
+        Equal(1, input.MinOccurs);
+        Equal(2, input.MaxOccurs.Value<int>());
+        Equal("MyInput", input.Title);
+        Contains("param", input.Keywords);
 
-        Assert.Single(simulation.Outputs);
+        Single(simulation.Outputs);
         var output = simulation.Outputs.Values.First();
-        Assert.Equal(TransmissionMode.Value, output.TransmissionMode);
-        Assert.NotNull(output.Format);
-        Assert.Equal("application/geo+json", output.Format.MediaType);
+        Equal(TransmissionMode.Value, output.TransmissionMode);
+        NotNull(output.Format);
+        Equal("application/geo+json", output.Format.MediaType);
 
-        await Assert.ThrowsAsync<NotFoundException>(() =>
+        await ThrowsAsync<NotFoundException>(() =>
             _simulationService.GetSimulationAsync(Guid.NewGuid().ToString()));
 
         var found = await _simulationService.FindSimulationAsync(simulationId);
-        Assert.NotNull(found);
-        Assert.Equal(simulationId, found.Id);
+        NotNull(found);
+        Equal(simulationId, found.Id);
         var notFound = await _simulationService.FindSimulationAsync(Guid.NewGuid().ToString());
-        Assert.Null(notFound);
+        Null(notFound);
     }
 
     [Fact]
@@ -123,7 +124,7 @@ public class SimulationManagementTests : AbstractManagementTests
                 Description = "my desc"
             };
             string id = await _simulationService.CreateAsync(create);
-            Assert.StartsWith("simulation", id);
+            StartsWith("simulation", id);
         }
 
         var filter = new SearchProcessRequest
@@ -131,28 +132,36 @@ public class SimulationManagementTests : AbstractManagementTests
             PageSize = 1, PageNumber = 1
         };
         var response = await _simulationService.ListProcessesAsync(filter);
-        Assert.NotEmpty(response.Processes);
-        Assert.Single(response.Processes);
+        NotEmpty(response.Processes);
+        Single(response.Processes);
 
         var paginatedResponse = await _simulationService.ListProcessesPaginatedAsync(new SearchProcessRequest
         {
             PageSize = 1, Query = ""
         });
 
-        Assert.Single(paginatedResponse.Data);
-        Assert.True(paginatedResponse.HasNextPage);
-        Assert.True(paginatedResponse.TotalCount > 1);
-        Assert.Equal(1, paginatedResponse.PageSize);
-        Assert.Equal(1, paginatedResponse.CurrentPage);
+        Single(paginatedResponse.Data);
+        True(paginatedResponse.HasNextPage);
+        True(paginatedResponse.TotalCount > 1);
+        Equal(1, paginatedResponse.PageSize);
+        Equal(1, paginatedResponse.CurrentPage);
 
         var paginatedNext = await _simulationService.ListProcessesPaginatedAsync(new SearchProcessRequest
         {
             PageSize = 1, Query = "", PageNumber = 2
         });
 
-        Assert.Single(paginatedNext.Data);
-        Assert.NotEqual(paginatedNext.Data[0].Id, paginatedResponse.Data[0].Id);
-        Assert.Equal(2, paginatedNext.CurrentPage);
+        Single(paginatedNext.Data);
+        NotEqual(paginatedNext.Data[0].Id, paginatedResponse.Data[0].Id);
+        Equal(2, paginatedNext.CurrentPage);
+
+        var ferryResponse = await _simulationService.ListProcessesPaginatedAsync(new SearchProcessRequest
+        {
+            PageSize = 1, Query = "ferry"
+        });
+
+        Assert.Single(ferryResponse.Data);
+        Assert.Equal(GlobalConstants.FerryTransferId, ferryResponse.Data[0].Id);
     }
 
     [Fact]
@@ -163,24 +172,24 @@ public class SimulationManagementTests : AbstractManagementTests
             Title = "TestUpdateSimulation",
             Description = "my sim desc"
         };
-        await Assert.ThrowsAsync<ArgumentNullException>(() => _simulationService.CreateAsync(create));
+        await ThrowsAsync<ArgumentNullException>(() => _simulationService.CreateAsync(create));
         create.Version = "1.0.0";
         string simulationId = await _simulationService.CreateAsync(create);
-        Assert.NotNull(simulationId);
+        NotNull(simulationId);
 
         var simulation = await _simulationService.GetSimulationAsync(simulationId);
-        Assert.Equal("TestUpdateSimulation", simulation.Title);
+        Equal("TestUpdateSimulation", simulation.Title);
         var update = simulation.Adapt<UpdateSimulationProcessDescriptionRequest>();
-        Assert.Equal("my sim desc", simulation.Description);
+        Equal("my sim desc", simulation.Description);
         update.Description = "my updated desc";
         update.Version = "1.0.1";
 
         await _simulationService.UpdateAsync(simulationId, update);
         var updatedSimulation = await _simulationService.GetSimulationAsync(simulationId);
 
-        Assert.Equal("my updated desc", updatedSimulation.Description);
-        Assert.Equal("1.0.1", updatedSimulation.Version);
-        await Assert.ThrowsAsync<NotFoundException>(() =>
+        Equal("my updated desc", updatedSimulation.Description);
+        Equal("1.0.1", updatedSimulation.Version);
+        await ThrowsAsync<NotFoundException>(() =>
             _simulationService.GetSimulationAsync(Guid.NewGuid().ToString()));
     }
 
@@ -191,7 +200,7 @@ public class SimulationManagementTests : AbstractManagementTests
         {
             PageSize = 1000
         });
-        Assert.Contains(existingProcess.Processes, summary => summary.Title?.Contains("Ferry Transfer") == true);
+        Contains(existingProcess.Processes, summary => summary.Title?.Contains("Ferry Transfer") == true);
     }
 
     [Fact]
@@ -200,16 +209,16 @@ public class SimulationManagementTests : AbstractManagementTests
         var create = new CreateSimulationProcessDescriptionRequest
         {
             Title = "TestRunSimulation",
-            Version = "1.0.0",
+            Version = "1.0.0", IsTest = true,
             Description = "my sim desc",
             JobControlOptions = [JobControlOptions.SynchronousExecution]
         };
 
         string simulationId = await _simulationService.CreateAsync(create);
-        Assert.NotNull(simulationId);
+        NotNull(simulationId);
 
         var simulation = await _simulationService.GetSimulationAsync(simulationId);
-        Assert.Equal("TestRunSimulation", simulation.Title);
+        Equal("TestRunSimulation", simulation.Title);
 
         var createJobHandler = Services.GetRequiredService
             <IRequestHandler<CreateSimulationJobRequest, SimulationJob>>();
@@ -219,20 +228,21 @@ public class SimulationManagementTests : AbstractManagementTests
             SimulationId = simulationId, Execute = new Execute()
         }, CancellationToken.None);
 
-        Assert.Null(job.HangfireJobKey);
-        Assert.NotNull(job.StartedUtc);
-        Assert.NotNull(job.FinishedUtc);
-        Assert.NotNull(job.ResultId);
+        Null(job.HangfireJobKey);
+        NotNull(job.StartedUtc);
+        NotNull(job.FinishedUtc);
+        NotNull(job.ResultId);
 
         var result = await _resultService.FindAsync(job.ResultId);
 
-        Assert.NotNull(result);
-        Assert.NotNull(result.FeatureCollection);
+        NotNull(result);
+        NotEmpty(result.Results);
+        Contains(result.Results, pair => pair.Value.FeatureCollection != null);
         var loadedJob = await _simulationService.GetSimulationJobAsync(job.JobId);
-        Assert.Null(loadedJob.HangfireJobKey);
-        Assert.Equal(job.ResultId, loadedJob.ResultId);
-        Assert.Equal(100, loadedJob.Progress);
-        Assert.Equal(StatusCode.Successful, loadedJob.Status);
+        Null(loadedJob.HangfireJobKey);
+        Equal(job.ResultId, loadedJob.ResultId);
+        Equal(100, loadedJob.Progress);
+        Equal(StatusCode.Successful, loadedJob.Status);
     }
 
     [Fact]
@@ -240,17 +250,17 @@ public class SimulationManagementTests : AbstractManagementTests
     {
         var ferryTransferProcess = await _simulationService.GetSimulationAsync(GlobalConstants.FerryTransferId);
 
-        Assert.Equal("Simple transfer model to of the Hamburg HADAG ferry system.", ferryTransferProcess.Description);
-        Assert.Equal("SOH - Ferry Transfer Model", ferryTransferProcess.Title);
-        Assert.Single(ferryTransferProcess.Outputs);
+        Equal("Simple transfer model to of the Hamburg HADAG ferry system.", ferryTransferProcess.Description);
+        Equal("SOH - Ferry Transfer Model", ferryTransferProcess.Title);
+        NotEmpty(ferryTransferProcess.Outputs);
         var singleOutput = ferryTransferProcess.Outputs.Values.First();
-        Assert.NotNull(singleOutput.Schema);
-        Assert.Equal("Point-based output of each agent and their values with different simulation times.",
+        NotNull(singleOutput.Schema);
+        Equal("Point-based output of each agent and their values with different simulation times.",
             singleOutput.Schema.Title);
 
-        Assert.Contains(GlobalConstants.FerryTransfer, ferryTransferProcess.Id);
-        Assert.Equal(ProcessExecutionKind.Direct, ferryTransferProcess.ExecutionKind);
-        Assert.Contains("simulation", ferryTransferProcess.Keywords);
+        Contains(GlobalConstants.FerryTransfer, ferryTransferProcess.Id);
+        Equal(ProcessExecutionKind.Direct, ferryTransferProcess.ExecutionKind);
+        Contains("simulation", ferryTransferProcess.Keywords);
 
         var createJobHandler = Services.GetRequiredService
             <IRequestHandler<CreateSimulationJobRequest, SimulationJob>>();
@@ -260,6 +270,10 @@ public class SimulationManagementTests : AbstractManagementTests
         {
             SimulationId = ferryTransferProcess.Id, Execute = new Execute
             {
+                Outputs = new Dictionary<string, Output>
+                {
+                    { "agents", new Output() }
+                },
                 Inputs = new Dictionary<string, object>
                 {
                     { "config", configContent }
@@ -267,22 +281,21 @@ public class SimulationManagementTests : AbstractManagementTests
             }
         }, CancellationToken.None);
 
-        Assert.Null(job.HangfireJobKey);
-        Assert.NotNull(job.StartedUtc);
-        Assert.NotNull(job.FinishedUtc);
-        Assert.NotNull(job.ResultId);
+        Null(job.HangfireJobKey);
+        NotNull(job.StartedUtc);
+        NotNull(job.FinishedUtc);
+        NotNull(job.ResultId);
 
         var result = await _resultService.FindAsync(job.ResultId);
 
-        Assert.NotNull(result);
-        Assert.Equal("agents", result.Output);
-        Assert.NotNull(result.FeatureCollection);
-        Assert.Empty(result.FeatureCollection);
+        NotNull(result);
+
+        Contains(result.Results, pair => pair.Value.FeatureCollection?.Count == 0);
         var loadedJob = await _simulationService.GetSimulationJobAsync(job.JobId);
-        Assert.Null(loadedJob.HangfireJobKey);
-        Assert.Equal(job.ResultId, loadedJob.ResultId);
-        Assert.Equal(100, loadedJob.Progress);
-        Assert.Equal(StatusCode.Successful, loadedJob.Status);
+        Null(loadedJob.HangfireJobKey);
+        Equal(job.ResultId, loadedJob.ResultId);
+        Equal(100, loadedJob.Progress);
+        Equal(StatusCode.Successful, loadedJob.Status);
     }
 
     [Fact]
@@ -290,17 +303,17 @@ public class SimulationManagementTests : AbstractManagementTests
     {
         var ferryTransferProcess = await _simulationService.GetSimulationAsync(GlobalConstants.FerryTransferId);
 
-        Assert.Equal("Simple transfer model to of the Hamburg HADAG ferry system.", ferryTransferProcess.Description);
-        Assert.Equal("SOH - Ferry Transfer Model", ferryTransferProcess.Title);
-        Assert.Single(ferryTransferProcess.Outputs);
+        Equal("Simple transfer model to of the Hamburg HADAG ferry system.", ferryTransferProcess.Description);
+        Equal("SOH - Ferry Transfer Model", ferryTransferProcess.Title);
+        NotEmpty(ferryTransferProcess.Outputs);
         var singleOutput = ferryTransferProcess.Outputs.Values.First();
-        Assert.NotNull(singleOutput.Schema);
-        Assert.Equal("Point-based output of each agent and their values with different simulation times.",
+        NotNull(singleOutput.Schema);
+        Equal("Point-based output of each agent and their values with different simulation times.",
             singleOutput.Schema.Title);
 
-        Assert.Contains(GlobalConstants.FerryTransfer, ferryTransferProcess.Id);
-        Assert.Equal(ProcessExecutionKind.Direct, ferryTransferProcess.ExecutionKind);
-        Assert.Contains("simulation", ferryTransferProcess.Keywords);
+        Contains(GlobalConstants.FerryTransfer, ferryTransferProcess.Id);
+        Equal(ProcessExecutionKind.Direct, ferryTransferProcess.ExecutionKind);
+        Contains("simulation", ferryTransferProcess.Keywords);
 
         var createJobHandler = Services.GetRequiredService
             <IRequestHandler<CreateSimulationJobRequest, SimulationJob>>();
@@ -313,27 +326,31 @@ public class SimulationManagementTests : AbstractManagementTests
                 Inputs = new Dictionary<string, object>
                 {
                     { "config", configContent }
+                },
+                Outputs = new Dictionary<string, Output>
+                {
+                    { "agents", new Output()}
                 }
             }
         }, CancellationToken.None);
 
-        Assert.Null(job.HangfireJobKey);
-        Assert.NotNull(job.StartedUtc);
-        Assert.NotNull(job.FinishedUtc);
-        Assert.NotNull(job.ResultId);
+        Null(job.HangfireJobKey);
+        NotNull(job.StartedUtc);
+        NotNull(job.FinishedUtc);
+        NotNull(job.ResultId);
 
         var result = await _resultService.FindAsync(job.ResultId);
 
-        Assert.NotNull(result);
-        Assert.NotNull(result.FeatureCollection);
+        NotNull(result);
+        Contains(result.Results, pair => pair.Value.FeatureCollection != null);
         // Assert.NotEmpty(result.FeatureCollection);
         // Assert.Contains(result.FeatureCollection, feature =>
         //     feature.Attributes["ActiveCapability"].ToString() == "Walking");
         var loadedJob = await _simulationService.GetSimulationJobAsync(job.JobId);
-        Assert.Null(loadedJob.HangfireJobKey);
-        Assert.Equal(job.ResultId, loadedJob.ResultId);
-        Assert.Equal(100, loadedJob.Progress);
-        Assert.Equal(StatusCode.Successful, loadedJob.Status);
+        Null(loadedJob.HangfireJobKey);
+        Equal(job.ResultId, loadedJob.ResultId);
+        Equal(100, loadedJob.Progress);
+        Equal(StatusCode.Successful, loadedJob.Status);
     }
 
     [Fact]
@@ -343,7 +360,7 @@ public class SimulationManagementTests : AbstractManagementTests
         var createJobHandler = Services.GetRequiredService
             <IRequestHandler<CreateSimulationJobRequest, SimulationJob>>();
 
-        await Assert.ThrowsAsync<BadRequestException>(() => createJobHandler.Handle(new CreateSimulationJobRequest
+        await ThrowsAsync<BadRequestException>(() => createJobHandler.Handle(new CreateSimulationJobRequest
             {
                 SimulationId = ferryTransferProcess.Id, Execute = new Execute
                 {
@@ -362,12 +379,13 @@ public class SimulationManagementTests : AbstractManagementTests
         {
             Title = "TestFailedSimulationAsync",
             Version = "1.0.0",
+            IsTest = true,
             Description = "my failed sim",
             JobControlOptions = [JobControlOptions.SynchronousExecution]
         };
 
         string simulationId = await _simulationService.CreateAsync(create);
-        Assert.NotNull(simulationId);
+        NotNull(simulationId);
 
         var createJobHandler = Services.GetRequiredService
             <IRequestHandler<CreateSimulationJobRequest, SimulationJob>>();
@@ -378,16 +396,14 @@ public class SimulationManagementTests : AbstractManagementTests
             {
                 Inputs = new Dictionary<string, object>
                 {
-                    {
-                        "func", new Action<int, SimulationJob>((i, job) =>
-                            throw new InvalidOperationException("any error during sim run"))
-                    }
+                    { "errorInSim", true }
                 }
             }
         }, CancellationToken.None);
-        Assert.Equal(StatusCode.Failed, job.Status);
-        Assert.Null(job.ResultId);
-        Assert.NotNull(job.FinishedUtc);
+        Equal(StatusCode.Failed, job.Status);
+        NotNull(job.ExceptionMessage);
+        Null(job.ResultId);
+        NotNull(job.FinishedUtc);
     }
 
     [Fact]
@@ -402,10 +418,10 @@ public class SimulationManagementTests : AbstractManagementTests
         };
 
         string simulationId = await _simulationService.CreateAsync(create);
-        Assert.NotNull(simulationId);
+        NotNull(simulationId);
 
         var simulation = await _simulationService.GetSimulationAsync(simulationId);
-        Assert.Equal("TestRunSimulationAsync", simulation.Title);
+        Equal("TestRunSimulationAsync", simulation.Title);
 
         var createJobHandler = Services.GetRequiredService
             <IRequestHandler<CreateSimulationJobRequest, SimulationJob>>();
@@ -422,10 +438,10 @@ public class SimulationManagementTests : AbstractManagementTests
                                       && ((SimulationRunJobRequest)acceptedJobRequest.Args[0]).JobId == job.JobId),
             It.IsAny<EnqueuedState>()));
 
-        Assert.Null(job.ResultId);
+        Null(job.ResultId);
 
         var loadedJob = await _simulationService.GetSimulationJobAsync(job.JobId);
-        Assert.Equal(job.ResultId, loadedJob.ResultId);
+        Equal(job.ResultId, loadedJob.ResultId);
     }
 
     [Fact]
@@ -439,14 +455,14 @@ public class SimulationManagementTests : AbstractManagementTests
         };
 
         string simulationId = await _simulationService.CreateAsync(create);
-        Assert.NotNull(simulationId);
+        NotNull(simulationId);
 
         var found = await _simulationService.FindSimulationAsync(simulationId);
-        Assert.NotNull(found);
+        NotNull(found);
         await _simulationService.DeleteAsync(simulationId);
         var notFound = await _simulationService.FindSimulationAsync(simulationId);
-        Assert.Null(notFound);
-        await Assert.ThrowsAsync<NotFoundException>(() =>
+        Null(notFound);
+        await ThrowsAsync<NotFoundException>(() =>
             _simulationService.GetSimulationAsync(simulationId));
     }
 }

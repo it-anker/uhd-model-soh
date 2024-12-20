@@ -1,0 +1,76 @@
+{
+  "id": "green4bikes",
+  "globals": {
+    "deltaT": 1,
+    "startPoint": "2020-01-01T00:00:00",
+    "endPoint": "2020-01-02T00:00:00",
+    "deltaTUnit": "seconds",
+    "console": true
+  },
+  "agents": [
+    {
+      "name": "CycleTraveler",
+      "outputs":[
+        {
+          "kind": "trips",
+          "outputConfiguration": {
+            "tripsFields": [
+              "ActiveCapability"
+            ]
+          }
+        }
+      ],
+      "individual": [
+        {
+          "value": true,
+          "parameter": "CapabilityCycling"
+        }
+      ]
+    }
+  ],
+  "layers": [
+    {
+      "name": "SidewalkLayer",
+      "file": "resources/harburg_walk_graph.geojson"
+    },
+    {
+      "name": "SpatialGraphMediatorLayer",
+      "inputs": [
+        {
+          "file": "resources/harburg_walk_graph.geojson",
+          "inputConfiguration": {
+            "isBidirectedGraph": true,
+            "modalities": [
+              "Cycling",
+              "Walking"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "BicycleLayer",
+      "file": "resources/harburg_bike_graph.geojson"
+    },
+    {
+      "name": "GatewayLayer",
+      "file": "resources/hamburg_sbahn_stations.geojson"
+    },
+    {
+      "name": "BicycleRentalLayer",
+      "output": "geojson",
+      "outputFrequency": 1000,
+      "file": "resources/harburg_rental_stations.geojson"
+    },
+    {
+      "name": "CycleTravelerSchedulerLayer",
+      "file": "resources/cycle_traveler.csv"
+    }
+  ],
+  "entities": [
+    {
+      "name": "RentalBicycle",
+      "file": "resources/bicycle.csv"
+    }
+  ]
+}
