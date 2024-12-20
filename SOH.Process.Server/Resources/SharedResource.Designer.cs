@@ -122,5 +122,17 @@ namespace SOH.Process.Server.Resources {
                 return ResourceManager.GetString("soh_output_agents", resourceCulture);
             }
         }
+        
+        public static string soh_output_avg_road_count_desc {
+            get {
+                return ResourceManager.GetString("soh_output_avg_road_count_desc", resourceCulture);
+            }
+        }
+        
+        public static string soh_output_avg_road_count {
+            get {
+                return ResourceManager.GetString("soh_output_avg_road_count", resourceCulture);
+            }
+        }
     }
 }

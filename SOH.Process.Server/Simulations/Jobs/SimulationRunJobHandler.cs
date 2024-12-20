@@ -233,11 +233,11 @@ public class SimulationRunJobHandler(
 
         // Ensure not exceed the default
         var range = simConfig.Globals.EndPoint.GetValueOrDefault() - simConfig.Globals.StartPoint.GetValueOrDefault();
-        if (range.Seconds > GlobalConstants.FerryTransferDefaultRange)
+        if (range.Seconds > GlobalConstants.DefaultStepRange)
         {
             simConfig.Globals.EndPoint = simConfig.Globals.StartPoint
                 .GetValueOrDefault()
-                .AddSeconds(GlobalConstants.FerryTransferDefaultRange);
+                .AddSeconds(GlobalConstants.DefaultStepRange);
         }
     }
 
@@ -268,7 +268,7 @@ public class SimulationRunJobHandler(
         }
         else if (processDescription.Id == GlobalConstants.Green4BikesId)
         {
-            string file = await File.ReadAllTextAsync(GlobalConstants.Green4BikesId, token);
+            string file = await File.ReadAllTextAsync(GlobalConstants.Green4BikesDefaultConfig, token);
             config = SimulationConfig.Deserialize(file);
         }
         else

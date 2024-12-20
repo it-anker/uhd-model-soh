@@ -52,9 +52,15 @@
         <value>Merged agents output of Traveller walking and cycling from their source to their destination.</value>
     </data>
     <data name="soh_output_statistics_avg_travel_time" xml:space="preserve">
-        <value>Average traveltime of each agent of the simulation run.</value>
+        <value>Time series of average agent travel time to cross a road segment</value>
     </data>
     <data name="soh_output_agents" xml:space="preserve">
         <value>Point-based output of each agent and their values with different simulation times.</value>
+    </data>
+    <data name="soh_output_avg_road_count_desc" xml:space="preserve">
+        <value>The time series of average amount of agents on each road of the selected area.</value>
+    </data>
+    <data name="soh_output_avg_road_count" xml:space="preserve">
+        <value>Time series of average road occupation</value>
     </data>
 </root>
