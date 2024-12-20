@@ -1,0 +1,51 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: ogc-service-simulation
+  namespace: default
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: ogc-service-simulation
+  template:
+    metadata:
+      labels:
+        app: ogc-service-simulation
+    spec:
+      containers:
+        - name: ogc-service-simulation
+          image: ogc-service-simulation:latest
+          ports:
+            - containerPort: 8080
+          env:
+            - name: ASPNETCORE_ENVIRONMENT
+              value: "Development"
+            - name: REDIS_CONNECTION
+              valueFrom:
+                secretKeyRef:
+                  name: redis-secret
+                  key: redis-connection
+          command: ["dotnet", "SOH.Process.Server.dll"]
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: ogc-service-simulation
+  namespace: default
+spec:
+  selector:
+    app: ogc-service-simulation
+  ports:
+    - protocol: TCP
+      port: 8080
+      targetPort: 8080
+  type: ClusterIP
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: redis-secret
+  namespace: default
+stringData:
+  redis-connection: "redis-svc:6379"
