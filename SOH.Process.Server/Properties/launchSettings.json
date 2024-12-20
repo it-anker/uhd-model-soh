@@ -14,6 +14,7 @@
       "dotnetRunMessages": true,
       "launchBrowser": false,
       "launchUrl": "swagger",
+      "workingDirectory": "$(ProjectDir)bin/Debug/$(TargetFramework)",
       "applicationUrl": "http://localhost:5185",
       "environmentVariables": {
         "ASPNETCORE_ENVIRONMENT": "Development"
@@ -24,6 +25,7 @@
       "dotnetRunMessages": true,
       "launchBrowser": false,
       "launchUrl": "swagger",
+      "workingDirectory": "$(ProjectDir)bin/Debug/$(TargetFramework)",
       "applicationUrl": "https://localhost:7003;http://localhost:5185",
       "environmentVariables": {
         "ASPNETCORE_ENVIRONMENT": "Development"
