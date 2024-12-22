@@ -2,7 +2,7 @@ Re-/Generate the code for the OpenAPI Swagger Theraflow API
 
 Be sure the server is running and the ``swagger.json`` is available at the following path:
 
-https://localhost:5001/swagger/v1/swagger.json
+https://localhost:7003/swagger/v1/swagger.json
 
 > Note that the version number "v1" can be changed with the development progress.
 
