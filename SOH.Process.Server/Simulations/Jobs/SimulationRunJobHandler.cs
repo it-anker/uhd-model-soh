@@ -3,19 +3,15 @@ using Mars.Common.Core;
 using Mars.Components.Starter;
 using Mars.Core.Data;
 using Mars.Core.Simulation;
-using Mars.Core.Simulation.Entities;
 using Mars.Interfaces.Model;
 using Mars.Interfaces.Model.Options;
 using MediatR;
 using Microsoft.Extensions.Localization;
-using NetTopologySuite.Features;
-using NetTopologySuite.Geometries;
 using SOH.Process.Server.Models.Common.Exceptions;
 using SOH.Process.Server.Models.Ogc;
 using SOH.Process.Server.Models.Processes;
 using SOH.Process.Server.Resources;
 using SOH.Process.Server.Simulations.Workflows;
-using SOHModel.Domain.Graph;
 
 namespace SOH.Process.Server.Simulations.Jobs;
 
@@ -67,18 +63,14 @@ public class SimulationRunJobHandler(
             var application = SimulationStarter.BuildApplication(description, simConfig);
             var simulation = application.Resolve<ISimulation>();
             var step = simulation.PrepareSimulation(description, simConfig);
-
             var serializer = application.Resolve<ISerializerManager>();
 
-            var featureCollection = currentJob.ExecutionConfig.Outputs.ContainsKey("agents")
-                ? new FeatureCollection()
-                : null;
-            var timeSeries = currentJob.ExecutionConfig.Outputs.ContainsKey("avg_road_count")
-                ? new List<TimeSeriesStep>()
-                : null;
+            var result = new Result
+            {
+                ProcessId = processDescription.Id, JobId = currentJob.JobId
+            };
 
-            CollectAgentResultForFeatureCollection(serializer, step, featureCollection);
-            CollectAgentRoadOccupationResult(serializer, step, timeSeries);
+            serializer.CollectOutputs(step, currentJob.ExecutionConfig, result);
             while (!step.IsFinished)
             {
                 if (currentJob.IsCancellationRequested)
@@ -97,23 +89,7 @@ public class SimulationRunJobHandler(
 
                 step = simulation.StepSimulation();
                 currentJob = await simulationService.GetSimulationJobAsync(jobId, token);
-                CollectAgentResultForFeatureCollection(serializer, step, featureCollection);
-                CollectAgentRoadOccupationResult(serializer, step, timeSeries);
-            }
-
-            var result = new Result
-            {
-                ProcessId = processDescription.Id, JobId = currentJob.JobId
-            };
-
-            if (featureCollection != null)
-            {
-                result.Results.Add("agents", new ResultEntry { FeatureCollection = featureCollection });
-            }
-
-            if (timeSeries != null)
-            {
-                result.Results.Add("avg_road_count", new ResultEntry { TimeSeries = timeSeries });
+                serializer.CollectOutputs(step, currentJob.ExecutionConfig, result);
             }
 
             currentJob.ResultId = await resultService.CreateAsync(result, token);
@@ -122,7 +98,7 @@ public class SimulationRunJobHandler(
             if (currentJob.Status == StatusCode.Successful)
             {
                 currentJob.Message = string.Format(CultureInfo.InvariantCulture,
-                    localization["simulation_finised {0}"], step.CurrentTimePoint);
+                    localization["simulation_finished {0}"], step.CurrentTimePoint);
             }
         }
         catch (Exception exception)
@@ -135,70 +111,6 @@ public class SimulationRunJobHandler(
         if (Directory.Exists($"results_{simConfig.SimulationIdentifier}"))
         {
             Directory.Delete($"results_{simConfig.SimulationIdentifier}", true);
-        }
-    }
-
-    private static void CollectAgentResultForFeatureCollection(ISerializerManager serializer,
-        SimulationWorkflowState step, FeatureCollection? featureCollection)
-    {
-        if (featureCollection == null) return;
-
-        var typeLoggers = serializer
-            .GetTypeLoggers()
-            .Where(logger => logger.Mapping is AgentMapping);
-
-        foreach (var typeLogger in typeLoggers)
-        {
-            long currentTick = step.CurrentTick;
-            var serializeAbleProxies =
-                typeLogger.EntityProxies.Where(proxy =>
-                    (proxy.OutputTicks != null && proxy.OutputTicks.Contains(currentTick)) ||
-                    (proxy.OutputFrequency > 0 && currentTick % proxy.OutputFrequency == 0));
-
-            foreach (var entityLogger in serializeAbleProxies.Where(logger => logger.Position != null))
-            {
-                var point = new Point(entityLogger.Position.X, entityLogger.Position.Y);
-                var dictionary = entityLogger.SerializeProperties()
-                    .ToDictionary(tuple => tuple.Item1, tuple => tuple.Item2);
-                var feature = new Feature(point, new AttributesTable(dictionary));
-
-                featureCollection.Add(feature);
-
-                if (featureCollection.BoundingBox == null)
-                {
-                    featureCollection.BoundingBox = feature.BoundingBox;
-                }
-                else
-                {
-                    featureCollection.BoundingBox.ExpandToInclude(point.X, point.Y);
-                }
-            }
-        }
-    }
-
-    private static void CollectAgentRoadOccupationResult(
-        ISerializerManager serializer,
-        SimulationWorkflowState step,
-        List<TimeSeriesStep>? timeSeries)
-    {
-        if (timeSeries == null) return;
-
-        var graphLayer = serializer.LayerLoggers
-            .Values.FirstOrDefault(pair =>
-                pair.LayerType.MetaType == typeof(SpatialGraphMediatorLayer));
-
-        if (graphLayer?.Entity is ISpatialGraphLayer spatialGraphLayer)
-        {
-            double averageCount = spatialGraphLayer.Environment.Entities.Count > 0
-                ? spatialGraphLayer.Environment.Edges.Values
-                    .Average(edge => edge.Entities.Count)
-                : 0;
-            timeSeries.Add(new TimeSeriesStep
-            {
-                DateTime = step.CurrentTimePoint,
-                Tick = step.CurrentTick,
-                Value = averageCount
-            });
         }
     }
 

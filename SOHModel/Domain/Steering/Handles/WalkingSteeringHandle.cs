@@ -47,20 +47,29 @@ public class WalkingSteeringHandle : ISteeringHandle
     {
         if (GoalReached) return;
 
-        var distance = CalculateMovementDistance();
+        double distance = CalculateMovementDistance();
 
-        if (!Environment.Entities.ContainsKey(WalkingShoes)) // should not occur, but for stability reasons in here
+        // should not occur, but for stability reasons in here
+        if (!Environment.Entities.ContainsKey(WalkingShoes))
+        {
             Environment.Insert(WalkingShoes, Route.First().Edge.From);
+        }
 
         if (!Environment.Move(WalkingShoes, Route, distance))
+        {
             throw new ArgumentException(
                 $"{nameof(WalkingSteeringHandle)} should always be able to move");
+        }
 
         _positionValidationRequired = true;
         if (GoalReached)
+        {
             WalkingShoes.Velocity = 0;
+        }
         else
+        {
             WalkingShoes.Velocity = Math.Round(distance, 2, MidpointRounding.AwayFromZero) * _deltaTinSeconds;
+        }
     }
 
     public Position Position

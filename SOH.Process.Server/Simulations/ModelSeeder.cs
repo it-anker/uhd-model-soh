@@ -1,7 +1,6 @@
 using Mapster;
 using Microsoft.Extensions.Localization;
 using NetTopologySuite.Features;
-using NetTopologySuite.Geometries;
 using SOH.Process.Server.Models.Ogc;
 using SOH.Process.Server.Models.Parameters;
 using SOH.Process.Server.Resources;
@@ -130,58 +129,7 @@ internal class ModelSeeder(
                     }
                 }
             },
-            Outputs = new Dictionary<string, OutputDescription>
-            {
-                {
-                    "agents", new OutputDescription
-                    {
-                        Format = new Format
-                        {
-                            MediaType = "application/geo+json",
-                        },
-                        Schema = new Schema
-                        {
-                            Title = localization["soh_output_agents"],
-                            ContentMediaType = "application/geo+json",
-                            Default = new FeatureCollection(),
-                            Example = new FeatureCollection
-                            {
-                                new Feature(new Point(9.978667786160287, 53.54407542750305),
-                                    new AttributesTable
-                                    {
-                                        { "ActiveCapability", "Walking" },
-                                        { "RouteLength", 8838 },
-                                        { "DistanceStartGoal", 6281.220268477454 },
-                                        { "tick", 12 },
-                                        { "dateTime", "2024-12-01T07:20:01" }
-                                    })
-                            }
-                        }
-                    }
-                },
-                {
-                    "avg_road_count", new OutputDescription
-                    {
-                        Format = new Format
-                        {
-                            MediaType = "application/json",
-                        },
-                        Schema = new Schema
-                        {
-                            Title = localization["soh_output_avg_road_count"],
-                            ContentMediaType = "application/json",
-                            Description = localization["soh_output_avg_road_count_desc"],
-                            Default = new List<TimeSeriesStep>
-                            {
-                                new() { Tick = 1, DateTime = DateTime.Today, Value = 3.123 },
-                                new() { Tick = 2, DateTime = DateTime.Today, Value = 3.314 },
-                                new() { Tick = 3, DateTime = DateTime.Today, Value = 3.458 },
-                                new() { Tick = 4, DateTime = DateTime.Today, Value = 3.513 }
-                            }
-                        }
-                    }
-                },
-            },
+            Outputs = ModelSeederOutputs.GetSmartOpenHamburgOutputs(localization),
             Links =
             [
                 new Link
@@ -276,73 +224,7 @@ internal class ModelSeeder(
                     }
                 }
             },
-            Outputs = new Dictionary<string, OutputDescription>
-            {
-                {
-                    "agents", new OutputDescription
-                    {
-                        Format = new Format
-                        {
-                            MediaType = "application/geo+json",
-                        },
-                        Schema = new Schema
-                        {
-                            Title = localization["green_4_bikes_output_agents"],
-                            ContentMediaType = "application/geo+json",
-                            Default = new FeatureCollection(),
-                            Example = new FeatureCollection
-                            {
-                                new Feature(new Point(9.978667786160287, 53.54407542750305),
-                                    new AttributesTable
-                                    {
-                                        { "ActiveCapability", "Walking" },
-                                        { "RouteLength", 8838 },
-                                        { "DistanceStartGoal", 6281.220268477454 },
-                                        { "tick", 12 },
-                                        { "dateTime", "2024-12-01T07:20:01" }
-                                    })
-                            }
-                        }
-                    }
-                },
-                {
-                    "avg_road_count", new OutputDescription
-                    {
-                        Format = new Format
-                        {
-                            MediaType = "application/json",
-                        },
-                        Schema = new Schema
-                        {
-                            Title = localization["soh_output_avg_road_count"],
-                            ContentMediaType = "application/json",
-                            Description = localization["soh_output_avg_road_count_desc"],
-                            Default = new List<TimeSeriesStep>
-                            {
-                                new() { Tick = 1, DateTime = DateTime.Today, Value = 3.123 },
-                                new() { Tick = 2, DateTime = DateTime.Today, Value = 3.314 },
-                                new() { Tick = 3, DateTime = DateTime.Today, Value = 3.458 },
-                                new() { Tick = 4, DateTime = DateTime.Today, Value = 3.513 }
-                            }
-                        }
-                    }
-                },
-                {
-                    "bicycleRentalStations", new OutputDescription
-                    {
-                        Format = new Format
-                        {
-                            MediaType = "application/geo+json",
-                        },
-                        Schema = new Schema
-                        {
-                            Title = localization["green_4_bikes_output_rental_stations"],
-                            ContentMediaType = "application/geo+json",
-                            Default = new FeatureCollection()
-                        }
-                    }
-                }
-            },
+            Outputs = ModelSeederOutputs.GetSmartOpenHamburgOutputs(localization),
             Links =
             [
                 new Link

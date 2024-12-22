@@ -52,6 +52,13 @@ The OpenAPI documentation can be explored using Swagger UI: (http://localhost:80
 
 >> Ensure you access the UI with `http` not `https`, otherwise the server needs a trusted certificate, which is often only provided by the reverse proxy.
 
+You can use `curl` to access the REST resources. For example when search for existing simulations run:
+
+```bash
+curl -X 'GET' 'http://localhost:8080/processes?limit=10&searchQuery=ferry'
+```
+You get a list of existing and available processes to run, matching the query `ferry`.
+
 ### Running an existing simulation
 
 The OGC process API provides two execution modes and the service already provide one simulation by default. The ferry transfer model of SmartOpenHamburg. To execute the simulation directly and returning all agents and ther intermediate states of each tick, send a REST request as follows, e.g., with `curl`: 
@@ -69,7 +76,7 @@ curl -X 'POST' \
 
 returns the concrete result - here as GeoJson as FeatureCollection with all agents, their attribute, position by time.
 
-You can combine or select other outputs for a single e.g., to return a time series of average road occupation.  
+You can combine or select other outputs for a single job e.g., to get a time series of average road occupation and saving the response in `result.json`.  
 
 ```bash
 curl -X 'POST' \
@@ -80,7 +87,7 @@ curl -X 'POST' \
     "outputs": {
         "agents": {}
     }
-}'
+}' > results.json
 ```
 
 Use the `visualize_time_series.py` script to show the increase and decrease of road usages over time:
@@ -102,7 +109,7 @@ curl -X 'POST' \
     "outputs": {
         "agents": {}
     }
-}'
+}' > results.json
 ```
 returns a job with unique ``jobID`` associated to the selected simulation process and the actual execution status.
 

@@ -64,7 +64,7 @@ public class SimulationControllerTests : AbstractManagementTests
         var ferrySimulation = processes.Processes.First(summary =>
             summary.Id == GlobalConstants.FerryTransferId);
         var ferrySimulationLoaded = await _processesClient.GetProcessDescriptionAsync(ferrySimulation.Id);
-        Equal(2, ferrySimulationLoaded.Outputs.Count);
+        True(ferrySimulationLoaded.Outputs.Count >= 2);
         Equal(2, ferrySimulationLoaded.JobControlOptions.Count);
     }
 
@@ -221,7 +221,7 @@ public class SimulationControllerTests : AbstractManagementTests
             },
             Outputs = new Dictionary<string, Output>
             {
-                { "avg_road_count", new Output() }
+                { "soh_output_avg_road_count", new Output() }
             }
         });
 
@@ -242,7 +242,8 @@ public class SimulationControllerTests : AbstractManagementTests
             Outputs = new Dictionary<string, Output>
             {
                 { "agents", new Output()},
-                { "avg_road_count", new Output() }
+                { "soh_output_sum_modality_usage", new Output()},
+                { "soh_output_avg_road_count", new Output() }
             }
         });
         NotNull(multiResult);

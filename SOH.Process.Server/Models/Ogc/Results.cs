@@ -26,6 +26,9 @@ public class JobResultResponse
 
 public class TimeSeriesResult
 {
+    [DataMember(Name = "reference")]
+    public string? Reference { get; set; }
+
     [DataMember(Name = "steps")]
     public List<TimeSeriesStep> Steps { get; set; } = [];
 }

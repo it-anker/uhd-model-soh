@@ -3,7 +3,7 @@
 <root>
     <xsd:schema id="root" xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
         <xsd:element name="root" msdata:IsDataSet="true">
-            
+
         </xsd:element>
     </xsd:schema>
     <resheader name="resmimetype">
@@ -36,7 +36,7 @@
     <data name="simulation_progress {0}" xml:space="preserve">
         <value>Executing simulation time point-- {0}</value>
     </data>
-    <data name="simulation_finised {0}" xml:space="preserve">
+    <data name="simulation_finished {0}" xml:space="preserve">
         <value>Finished simulation -- {0}</value>
     </data>
     <data name="process_finished" xml:space="preserve">
@@ -60,7 +60,13 @@
     <data name="soh_output_avg_road_count_desc" xml:space="preserve">
         <value>The time series of average amount of agents on each road of the selected area.</value>
     </data>
+    <data name="soh_output_sum_modality_usage_desc" xml:space="preserve">
+        <value>The time series of usage of current active modality of all agents.</value>
+    </data>
     <data name="soh_output_avg_road_count" xml:space="preserve">
         <value>Time series of average road occupation</value>
+    </data>
+    <data name="soh_output_sum_modality_usage" xml:space="preserve">
+        <value>The time series of active modality.</value>
     </data>
 </root>

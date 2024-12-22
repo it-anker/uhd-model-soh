@@ -81,9 +81,9 @@ namespace SOH.Process.Server.Resources {
             }
         }
         
-        public static string simulation_finised__0_ {
+        public static string simulation_finished__0_ {
             get {
-                return ResourceManager.GetString("simulation_finised {0}", resourceCulture);
+                return ResourceManager.GetString("simulation_finished {0}", resourceCulture);
             }
         }
         
@@ -129,9 +129,21 @@ namespace SOH.Process.Server.Resources {
             }
         }
         
+        public static string soh_output_sum_modality_usage_desc {
+            get {
+                return ResourceManager.GetString("soh_output_sum_modality_usage_desc", resourceCulture);
+            }
+        }
+        
         public static string soh_output_avg_road_count {
             get {
                 return ResourceManager.GetString("soh_output_avg_road_count", resourceCulture);
+            }
+        }
+        
+        public static string soh_output_sum_modality_usage {
+            get {
+                return ResourceManager.GetString("soh_output_sum_modality_usage", resourceCulture);
             }
         }
     }

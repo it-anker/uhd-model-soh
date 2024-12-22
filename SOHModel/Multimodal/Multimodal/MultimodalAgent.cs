@@ -42,9 +42,7 @@ public abstract class MultimodalAgent<TLayer> : IAgent<TLayer>, IModalCapabiliti
 
     public virtual void Init(TLayer layer)
     {
-        if (layer == null)
-            throw new ArgumentException("MultimodalAgent requires an IMultimodalLayer as init input.");
-
+        ArgumentNullException.ThrowIfNull(layer);
         MultimodalLayer = layer;
     }
 
@@ -61,12 +59,17 @@ public abstract class MultimodalAgent<TLayer> : IAgent<TLayer>, IModalCapabiliti
     public virtual void Move()
     {
         if (MultimodalRoute == null || MultimodalRoute.GoalReached) return;
-        if (EnterRequired) //start with current route
+
+        // start with current route
+        if (EnterRequired)
+        {
             if (!EnterModalType(MultimodalRoute.CurrentModalChoice, MultimodalRoute.CurrentRoute) &&
                 MultimodalRoute.CurrentRoute.GoalReached)
                 MultimodalRoute.Next();
+        }
 
-        if (SwitchRequired) // leave old modality, continue with next one
+        // leave old modality, continue with next one
+        if (SwitchRequired)
         {
             var previousModalType = MultimodalRoute.CurrentModalChoice;
             MultimodalRoute.Next();
@@ -85,11 +88,16 @@ public abstract class MultimodalAgent<TLayer> : IAgent<TLayer>, IModalCapabiliti
 
         if (MultimodalRoute.GoalReached)
         {
-            if (InVehicle &&
-                !LeaveModalType(MultimodalRoute
-                    .CurrentModalChoice)) // goal reached but vehicle cannot be parked here
+            // goal reached but vehicle cannot be parked here
+            if (InVehicle && !LeaveModalType(MultimodalRoute.CurrentModalChoice))
+            {
                 ReRouteToGoal();
-            if (OnSidewalk) LeaveModalType(MultimodalRoute.CurrentModalChoice);
+            }
+
+            if (OnSidewalk)
+            {
+                LeaveModalType(MultimodalRoute.CurrentModalChoice);
+            }
         }
     }
 
@@ -123,7 +131,6 @@ public abstract class MultimodalAgent<TLayer> : IAgent<TLayer>, IModalCapabiliti
     /// <param name="modalChoice">that will be left.</param>
     /// <returns>Success of leaving.</returns>
     protected abstract bool LeaveModalType(ModalChoice modalChoice);
-
 
     /// <summary>
     ///     Tries to enter a vehicle as the driver. If this succeeds, the pedestrian leaves the sidewalk (switch of
