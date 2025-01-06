@@ -1,6 +1,4 @@
-﻿version: '3.8'
-
-services:
+﻿services:
   redis-svc:
     container_name: ogc-service-redis
     image: redis:7.4.1-alpine3.20

@@ -76,26 +76,48 @@ curl -X 'POST' \
 
 returns the concrete result - here as GeoJson as FeatureCollection with all agents, their attribute, position by time.
 
-You can combine or select other outputs for a single job e.g., to get a time series of average road occupation and saving the response in `result.json`.  
+You can combine or select other outputs for a single job e.g., to get a time series of average road occupation and saving the response in `result.json`. For example, you can select teh `green4bikes` model and configure the average road occupation using:
 
 ```bash
 curl -X 'POST' \
-'http://localhost:8080/processes/simulation:ferryTransfer:fc1e588a-1595-42a3-bd58-eba1382f54c0/execution' \
+'http://localhost:8080/processes/simulation:green4Bikes:e475eb85-673e-4541-bded-3c809f458454/execution' \
 -H 'accept: application/json' \
 -H 'Content-Type: application/json' \
 -d '{
     "outputs": {
-        "agents": {}
+        "soh_output_avg_road_count": {}
     }
 }' > results.json
+```
+returning the concrete time series of average occupation across each edge.
+
+#### Example visualization
+ 
+Prepare your `venv` environment and activate the interpreter. 
+
+```bash
+python3 -m venv .venv
+source .venv/bin/activate
+```
+
+Install the visualization library e.g., `matplotlib`.
+
+```bash
+pip install matplotlib
 ```
 
 Use the `visualize_time_series.py` script to show the increase and decrease of road usages over time:
 
 ```bash
-pip3 install matplotlib
+pip install matplotlib
 python3 visualize_time_series.py result.json
 ```
+
+>> The default green4bikes scenario configuration only contains a single agent
+
+The result should look like, showing the average road occupation:
+
+<img src="example.png" alt="Beschreibung" width="300">
 
 Process also can be executed asynchronously in which the server responds with a `201` and job description, which can be used to retrieve the status or result if already exist. Use the following command:
 

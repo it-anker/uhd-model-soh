@@ -19,15 +19,15 @@ def plot_line_chart(file_path):
     # Chart labels and title
     plt.xlabel('Time', fontsize=12)
     plt.ylabel('Value', fontsize=12)
-    plt.title('Line Chart of Values Over Time', fontsize=14)
+    plt.title('Example time series visualization', fontsize=14)
     plt.grid(True)
     plt.legend()
 
-    # X-Achsen-Labels anpassen
+    # Change x-axis labels
     plt.xticks(rotation=45, fontsize=10)
     plt.tight_layout()
 
-    # Diagramm anzeigen
+    # Show diagram
     plt.show()
 
 if __name__ == "__main__":

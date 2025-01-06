@@ -366,3 +366,4 @@ Explorer/out/
 Explorer/resources/omnisharp/win/
 Explorer/.webpack/
 tools/
+.venv
