@@ -64,7 +64,7 @@ You get a list of existing and available processes to run, matching the query `f
 The OGC process API provides two execution modes and the service already provide one simulation by default. The ferry transfer model of SmartOpenHamburg. To execute the simulation directly and returning all agents and ther intermediate states of each tick, send a REST request as follows, e.g., with `curl`: 
 ```bash
 curl -X 'POST' \
-'http://localhost:8080/processes/simulation:ferryTransfer:fc1e588a-1595-42a3-bd58-eba1382f54c0/execution' \
+'http://localhost:8080/processes/sim-ferryTransfer-default/execution' \
 -H 'accept: application/json' \
 -H 'Content-Type: application/json' \
 -d '{
@@ -80,7 +80,7 @@ You can combine or select other outputs for a single job e.g., to get a time ser
 
 ```bash
 curl -X 'POST' \
-'http://localhost:8080/processes/simulation:green4Bikes:e475eb85-673e-4541-bded-3c809f458454/execution' \
+'http://localhost:8080/processes/sim-green4Bikes-default/execution' \
 -H 'accept: application/json' \
 -H 'Content-Type: application/json' \
 -d '{
@@ -123,7 +123,7 @@ Process also can be executed asynchronously in which the server responds with a 
 
 ```bash
 curl -X 'POST' \
-'http://localhost:8080/processes/simulation:ferryTransfer:fc1e588a-1595-42a3-bd58-eba1382f54c0/execution' \
+'http://localhost:8080/processes/sim-ferryTransfer-default/execution' \
 -H 'accept: application/json' \
 -H 'Content-Type: application/json' \
 -H 'Prefer: respond-async' \
