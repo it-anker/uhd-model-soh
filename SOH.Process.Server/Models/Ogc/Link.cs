@@ -11,7 +11,7 @@ public sealed class Link
     /// </summary>
     [Required]
     [DataMember(Name = "href")]
-    public string Href { get; set; } = default!;
+    public string Href { get; set; } = null!;
 
     /// <summary>
     ///     Gets or Sets Rel.

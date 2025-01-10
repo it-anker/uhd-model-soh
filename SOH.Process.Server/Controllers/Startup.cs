@@ -11,6 +11,7 @@ using NSwag.Generation.Processors.Security;
 using Serilog;
 using SOH.Process.Server.Middlewares;
 using SOH.Process.Server.Models;
+using SOH.Process.Server.Models.Ogc;
 using SOH.Process.Server.Simulations.Validators;
 
 namespace SOH.Process.Server.Controllers;
@@ -71,6 +72,7 @@ public static class Startup
                 options.SerializerSettings.DefaultValueHandling = DefaultValueHandling.Include;
                 options.SerializerSettings.DateFormatHandling = DateFormatHandling.IsoDateFormat;
                 options.SerializerSettings.Converters.Add(new FeatureCollectionConverter());
+                // options.SerializerSettings.Converters.Add(new EmptyListConverter<Link>());
                 options.SerializerSettings.Converters.Add(new FeatureConverter());
                 options.SerializerSettings.Converters.Add(new GeometryConverter());
                 options.SerializerSettings.Converters.Add(new AttributesTableConverter());
@@ -131,7 +133,6 @@ public static class Startup
                                             " for Simulation- and Execution Management";
             })
             .UseCustomMiddlewares()
-            .UseSwagger()
             .UseResponseCompression()
             .UseEndpoints(routeBuilder => routeBuilder.MapControllerEndpoints());
 

@@ -93,6 +93,7 @@ public class ProcessesController(
     [SwaggerResponse(200, description: "For single output execution, as per output definition from process description")]
     [SwaggerResponse(201, type: typeof(StatusInfo), description: "Started asynchronous execution. Created job.")]
     [SwaggerResponse(204, description: "Successful operation (no response body)")]
+    [SwaggerResponse(400, type: typeof(ProblemDetails), description: "The request is not valid.")]
     [SwaggerResponse(404, type: typeof(ProblemDetails), description: "The requested URI was not found.")]
     [SwaggerResponse(500, type: typeof(ProblemDetails), description: "A server error occurred.")]
     public async Task<IActionResult> ExecuteAsync(

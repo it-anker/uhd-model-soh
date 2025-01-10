@@ -24,4 +24,6 @@ public class LandingPage
     [Required]
     [DataMember(Name = "links")]
     public List<Link> Links { get; set; } = [];
+
+    public bool ShouldSerializeLinks() => Links != null! && Links.Count > 0;
 }

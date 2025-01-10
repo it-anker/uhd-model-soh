@@ -1,5 +1,7 @@
 using Mapster;
 using Microsoft.Extensions.Localization;
+using NetTopologySuite.Shape.Fractal;
+using ServiceStack;
 using SOH.Process.Server.Models.Common.Exceptions;
 using SOH.Process.Server.Models.Ogc;
 using SOH.Process.Server.Models.Processes;
@@ -13,10 +15,14 @@ public class SimulationServiceImpl(
     IStringLocalizer<SharedResource> localizer) : ISimulationService
 {
     public async Task<string> CreateAsync(
-        CreateSimulationProcessDescriptionRequest descriptionRequest,
+        CreateSimulationProcessDescriptionRequest request,
         CancellationToken token = default)
     {
-        return await CreateAsync($"simulation:{Guid.NewGuid()}", descriptionRequest, token);
+        string id = string.IsNullOrEmpty(request.Id)
+            ? $"sim-{await NanoidDotNet.Nanoid.GenerateAsync()}"
+            : $"sim-{request.Id.TrimPrefixes("sim-")}";
+
+        return await CreateAsync(id.Trim('-', ':'), request, token);
     }
 
     public async Task<string> CreateAsync(string id, CreateSimulationProcessDescriptionRequest descriptionRequest, CancellationToken token = default)
@@ -34,10 +40,10 @@ public class SimulationServiceImpl(
     public async Task<string> CreateAsync(SimulationJob request, CancellationToken token = default)
     {
         ArgumentNullException.ThrowIfNull(request.ProcessId);
-
+        string jobId = await NanoidDotNet.Nanoid.GenerateAsync();
         var simulationJob = request.Adapt<SimulationJob>();
-        simulationJob.JobId = $"job:{request.ProcessId}:{Guid.NewGuid()}:" +
-                              $"{request.ExecutionConfig.JobIdentifier}".Trim(':');
+        simulationJob.JobId = $"job-{request.ProcessId}-{jobId}-{request.ExecutionConfig.JobIdentifier}"
+            .Trim('-', ':');
         simulationJob.ProcessId = request.ProcessId;
         request.Message ??= localizer["simulation created"];
         simulationJob.Update(request);
@@ -140,7 +146,7 @@ public class SimulationServiceImpl(
         var processes = await ListProcessesPaginatedAsync(request, token);
         return new ProcessList
         {
-            Processes = processes.Data.OfType<ProcessSummary>().ToList()
+            Processes = processes.Data.Adapt<List<ProcessSummary>>()
         };
     }
 
@@ -163,6 +169,6 @@ public class SimulationServiceImpl(
     {
         string term = request.Query != null ? request.Query.Trim('*') + "*" : string.Empty;
         return await simulationRepository.ListPaginatedAsync<SimulationProcessDescription>(
-            "simulation*" + term, request, token);
+            "sim-*" + term, request, token);
     }
 }

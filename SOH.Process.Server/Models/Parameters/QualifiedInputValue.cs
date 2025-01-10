@@ -11,7 +11,7 @@ public sealed class QualifiedInputValue : Format, IEquatable<QualifiedInputValue
     /// </summary>
     [Required]
     [DataMember(Name = "value")]
-    public object Value { get; set; } = default!;
+    public object Value { get; set; } = null!;
 
     public bool Equals(QualifiedInputValue? other)
     {

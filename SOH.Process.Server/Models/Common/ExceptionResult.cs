@@ -12,10 +12,10 @@ public sealed class ExceptionResult : Dictionary<string, object>
 {
     [DataMember(Name = "errorId")]
     [Required]
-    public string ErrorId { get; set; } = default!;
+    public string ErrorId { get; set; } = null!;
 
     [Required, DataMember(Name = "type")]
-    public string Type { get; set; } = default!;
+    public string Type { get; set; } = null!;
 
     [DataMember(Name = "title")]
     public string? Title { get; set; }

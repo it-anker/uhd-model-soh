@@ -2,5 +2,5 @@ namespace SOH.Process.Server.Persistence;
 
 public class RedisDatabaseSettings
 {
-    public string ConnectionString { get; set; } = default!;
+    public string ConnectionString { get; set; } = null!;
 }

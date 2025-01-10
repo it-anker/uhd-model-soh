@@ -5,7 +5,7 @@ namespace SOH.Process.Server.Simulations;
 
 public interface ISimulationService
 {
-    Task<string> CreateAsync(CreateSimulationProcessDescriptionRequest descriptionRequest, CancellationToken token = default);
+    Task<string> CreateAsync(CreateSimulationProcessDescriptionRequest request, CancellationToken token = default);
 
     Task<string> CreateAsync(string id, CreateSimulationProcessDescriptionRequest descriptionRequest, CancellationToken token = default);
 

@@ -1,5 +1,7 @@
+using System.ComponentModel;
 using System.ComponentModel.DataAnnotations;
 using System.Runtime.Serialization;
+using Newtonsoft.Json;
 using SOH.Process.Server.Models.Ogc;
 
 namespace SOH.Process.Server.Models.Parameters;
@@ -11,6 +13,7 @@ public sealed class InputDescription : DescriptionType
     ///     Gets or sets the minimum required elements.
     /// </summary>
     [DataMember(Name = "minOccurs")]
+    [DefaultValue(1)]
     public int MinOccurs { get; set; } = 1;
 
     /// <summary>
@@ -24,5 +27,5 @@ public sealed class InputDescription : DescriptionType
     /// </summary>
     [Required]
     [DataMember(Name = "schema")]
-    public Schema Schema { get; set; } = default!;
+    public Schema Schema { get; set; } = null!;
 }

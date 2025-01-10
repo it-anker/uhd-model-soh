@@ -1,3 +1,4 @@
+using FluentValidation;
 using MediatR;
 using Microsoft.AspNetCore.HttpOverrides;
 using Serilog;
@@ -76,6 +77,7 @@ public static class Startup
             .AddScoped<ICustomSeeder, ModelSeeder>()
             .AddScoped<JobSubscribeWorkflow>()
             .AddScoped<SimulationResultWorkflow>()
+            .AddValidatorsFromAssemblies(assemblies)
             .AddMediatR(config =>
                 config.RegisterServicesFromAssemblies(assemblies)
                     .AddBehavior(typeof(IPipelineBehavior<,>), typeof(LoggingBehavior<,>))

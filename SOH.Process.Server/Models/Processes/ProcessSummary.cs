@@ -1,5 +1,8 @@
+using System.ComponentModel;
 using System.ComponentModel.DataAnnotations;
+using System.Diagnostics;
 using System.Runtime.Serialization;
+using Newtonsoft.Json;
 using SOH.Process.Server.Models.Ogc;
 using SOH.Process.Server.Models.Parameters;
 
@@ -12,7 +15,7 @@ public class ProcessSummary
     ///     The unique identifier of this process.
     /// </summary>
     [Required] [DataMember(Name = "id")]
-    public string Id { get; set; } = default!;
+    public string Id { get; set; } = null!;
 
     /// <summary>
     ///     Gets or sets the title to display.
@@ -49,7 +52,7 @@ public class ProcessSummary
     /// </summary>
     [Required]
     [DataMember(Name = "version")]
-    public string Version { get; set; } = default!;
+    public string Version { get; set; } = null!;
 
     /// <summary>
     ///     Gets or Sets JobControlOptions.
@@ -68,6 +71,11 @@ public class ProcessSummary
     /// </summary>
     [DataMember(Name = "links")]
     public List<Link> Links { get; set; } = [];
+
+    public bool ShouldSerializeLinks() => Links != null! && Links.Count > 0;
+    public bool ShouldSerializeOutputTransmission() => OutputTransmission != null! && OutputTransmission.Count > 0;
+    public bool ShouldSerializeJobControlOptions() => JobControlOptions != null! && JobControlOptions.Count > 0;
+    public bool ShouldSerializeMetadata() => Metadata != null! && Metadata.Count > 0;
 
     private bool Equals(ProcessSummary? other)
     {

@@ -13,6 +13,8 @@ public sealed class AllOfdescriptionTypeAdditionalParameters : Metadata,
     [DataMember(Name = "parameters")]
     public List<AdditionalParameter> Parameters { get; set; } = [];
 
+    public bool ShouldSerializeParameters() => Parameters != null! && Parameters.Count > 0;
+
     public bool Equals(AllOfdescriptionTypeAdditionalParameters? other)
     {
         if (other is null) return false;

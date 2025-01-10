@@ -11,7 +11,7 @@ public sealed class AdditionalParameter : IEquatable<AdditionalParameter>
     /// </summary>
     [Required]
     [DataMember(Name = "name")]
-    public string Name { get; set; } = default!;
+    public string Name { get; set; } = null!;
 
     /// <summary>
     ///     Gets or Sets Value.
@@ -19,6 +19,8 @@ public sealed class AdditionalParameter : IEquatable<AdditionalParameter>
     [Required]
     [DataMember(Name = "value")]
     public List<object> Value { get; set; } = [];
+
+    public bool ShouldSerializeValue() => Value != null! && Value.Count > 0;
 
     /// <summary>
     ///     Returns true if AdditionalParameter instances are equal.

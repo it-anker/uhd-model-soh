@@ -4,5 +4,5 @@ namespace SOH.Process.Server.Models;
 
 public class OgcSettings
 {
-    public LandingPage Capabilities { get; set; } = default!;
+    public LandingPage Capabilities { get; set; } = null!;
 }

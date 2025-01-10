@@ -26,7 +26,7 @@ public class SimulationControllerTests : AbstractManagementTests
     {
         var httpClient = SmartOpenHamburg.CreateClient();
         _jobsClient = new JobsClient(httpClient);
-        _processesClient = new ProcessesClient(httpClient){ReadResponseAsString = true};
+        _processesClient = new ProcessesClient(httpClient) { ReadResponseAsString = true };
         _conformanceClient = new ConformanceClient(httpClient);
         _capabilitiesClient = new CapabilitiesClient(httpClient);
         _resultsClient = new ResultsClient(httpClient);
@@ -83,7 +83,7 @@ public class SimulationControllerTests : AbstractManagementTests
     {
         var processes = await _processesClient.GetProcessesAsync(1, "testProcessId");
         Single(processes.Processes);
-        Equal("simulation:testProcessId", processes.Processes[0].Id);
+        Equal("sim-testProcessId", processes.Processes[0].Id);
     }
 
     [Fact]
@@ -117,7 +117,8 @@ public class SimulationControllerTests : AbstractManagementTests
         Single(jobs.Jobs);
         var job = jobs.Jobs.First(info => info.ProcessId == testModel.Id);
         Equal(StatusCode.Successful, job.Status);
-        NotNull(job.FinishedUtc); ;
+        NotNull(job.FinishedUtc);
+        ;
 
         var executedJob = await _jobsClient.GetStatusAsync(job.JobId);
         Equal(100, executedJob.Progress);
@@ -162,7 +163,8 @@ public class SimulationControllerTests : AbstractManagementTests
             .GetProcessDescriptionAsync(GlobalConstants.FerryTransferId);
 
         string configContent = await File.ReadAllTextAsync("ferry_transfer_test_config_2.json");
-        object executionResponse = await _processesClient.ExecuteAsync(ferrySimulation.Id, new Execute
+
+        var execute = new Execute
         {
             JobIdentifier = "ferrySingle",
             Inputs = new Dictionary<string, object>
@@ -173,10 +175,18 @@ public class SimulationControllerTests : AbstractManagementTests
             },
             Outputs = new Dictionary<string, Output>
             {
-                { "agents", new Output()},
-                { "not_existing_output", new Output()}
+                { "agents", new Output() },
+                { "not_existing_output", new Output() }
             }
-        });
+        };
+
+        var invalid = await Assert.ThrowsAsync<ApiException<ProblemDetails>>(() =>
+            _processesClient.ExecuteAsync(ferrySimulation.Id, execute));
+        Assert.Equal((int)HttpStatusCode.BadRequest, invalid.StatusCode);
+        Assert.Equal($"Selected output 'not_existing_output' is not provided " +
+                     $"by process {GlobalConstants.FerryTransferId}", invalid.Result.Detail);
+        execute.Outputs.Remove("not_existing_output");
+        object executionResponse = await _processesClient.ExecuteAsync(ferrySimulation.Id, execute);
         var geoJsonReader = new GeoJsonReader();
         var rawResult = geoJsonReader.Read<FeatureCollection>(((JObject)executionResponse).ToString());
         NotNull(rawResult);
@@ -241,8 +251,8 @@ public class SimulationControllerTests : AbstractManagementTests
             },
             Outputs = new Dictionary<string, Output>
             {
-                { "agents", new Output()},
-                { "soh_output_sum_modality_usage", new Output()},
+                { "agents", new Output() },
+                { "soh_output_sum_modality_usage", new Output() },
                 { "soh_output_avg_road_count", new Output() }
             }
         });
@@ -252,17 +262,41 @@ public class SimulationControllerTests : AbstractManagementTests
     [Fact]
     public async Task TestExecuteFerryProcessDefault()
     {
+        var execute = new Execute
+        {
+            JobIdentifier = nameof(TestExecuteFerryProcessDefault),
+            Outputs = new Dictionary<string, Output>
+            {
+                { "agents", new Output() }
+            }
+        };
+        const string invalidId = "simulation:ferryTransfer:fc1e588a-1595-42a3-bd58-eba1382f54c0";
+
+        var notFound = await Assert.ThrowsAsync<ApiException<ProblemDetails>>(() =>
+            _processesClient.ExecuteAsync(Guid.Empty.ToString(), execute));
+        var notFound2 = await Assert.ThrowsAsync<ApiException<ProblemDetails>>(() =>
+            _processesClient.ExecuteAsync(invalidId, execute));
+        Assert.Equal((int)HttpStatusCode.NotFound, notFound.StatusCode);
+        Assert.Equal((int)HttpStatusCode.NotFound, notFound2.StatusCode);
+
+        var invalidExecute = new Execute
+        {
+            JobIdentifier = nameof(TestExecuteFerryProcessDefault),
+            Outputs = new Dictionary<string, Output>
+            {
+                { "agent", new Output() }
+            }
+        };
+
+        var invalid = await Assert.ThrowsAsync<ApiException<ProblemDetails>>(() =>
+            _processesClient.ExecuteAsync(GlobalConstants.FerryTransferId, invalidExecute));
+
+        Assert.StartsWith($"Selected output 'agent' is not provided by process", invalid.Result.Detail);
+        Assert.Equal((int)HttpStatusCode.BadRequest, invalid.StatusCode);
         var ferrySimulation = await _processesClient
             .GetProcessDescriptionAsync(GlobalConstants.FerryTransferId);
         object executionResponse = await _processesClient.ExecuteAsync(
-            GlobalConstants.FerryTransferId, new Execute
-            {
-                JobIdentifier = nameof(TestExecuteFerryProcessDefault),
-                Outputs = new Dictionary<string, Output>
-                {
-                    { "agents", new Output()}
-                }
-            });
+            GlobalConstants.FerryTransferId, execute);
         var geoJsonReader = new GeoJsonReader();
         var result = geoJsonReader.Read<FeatureCollection>(((JObject)executionResponse).ToString());
 

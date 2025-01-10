@@ -124,7 +124,7 @@ public class SimulationManagementTests : AbstractManagementTests
                 Description = "my desc"
             };
             string id = await _simulationService.CreateAsync(create);
-            StartsWith("simulation", id);
+            StartsWith("sim-", id);
         }
 
         var filter = new SearchProcessRequest
@@ -137,7 +137,7 @@ public class SimulationManagementTests : AbstractManagementTests
 
         var paginatedResponse = await _simulationService.ListProcessesPaginatedAsync(new SearchProcessRequest
         {
-            PageSize = 1, Query = ""
+            PageSize = 1, Query = string.Empty
         });
 
         Single(paginatedResponse.Data);
@@ -148,7 +148,7 @@ public class SimulationManagementTests : AbstractManagementTests
 
         var paginatedNext = await _simulationService.ListProcessesPaginatedAsync(new SearchProcessRequest
         {
-            PageSize = 1, Query = "", PageNumber = 2
+            PageSize = 1, Query = string.Empty, PageNumber = 2
         });
 
         Single(paginatedNext.Data);

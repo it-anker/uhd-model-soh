@@ -4,5 +4,5 @@ namespace SOH.Process.Server.Models.Common.Exceptions;
 
 public class BadRequestException(
     string message,
-    List<string>? errors = default,
+    List<string>? errors = null,
     HttpStatusCode statusCode = HttpStatusCode.BadRequest) : CustomException(message, errors, statusCode);

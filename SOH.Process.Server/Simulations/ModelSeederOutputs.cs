@@ -10,6 +10,75 @@ namespace SOH.Process.Server.Simulations;
 
 public static class ModelSeederOutputs
 {
+    public static Dictionary<string, InputDescription> GetSmartOpenHamburgInputs(
+        IStringLocalizer<SharedResource> localization)
+    {
+        return new Dictionary<string, InputDescription>
+        {
+            {
+                "config", new InputDescription
+                {
+                    Title = "An optional scenario configuration to override each setting.",
+                    Description = "The global configuration used to parameterize all settings of the scenarios, allowing to " +
+                                  "override each configuration and used resource.",
+
+                    Schema = new Schema
+                    {
+                        ContentMediaType = "application/json",
+                        Nullable = true
+                    },
+                    AdditionalParameters = new AllOfdescriptionTypeAdditionalParameters
+                    {
+                        Title = "Simulation config documentation",
+                        Href = "https://www.mars-group.org/docs/category/configuration"
+                    }
+                }
+            },
+            {
+                "startPoint", new InputDescription
+                {
+                    Title = "The concrete start datetime of the simulation time to calculate",
+                    Description = "The time point when the simulation starts internally. " +
+                                  "Specified as ISO 8601 format",
+                    Schema = new Schema
+                    {
+                        Type = "string",
+                        Format = "dateTime",
+                        Nullable = true
+                    }
+                }
+            },
+            {
+                "endPoint", new InputDescription
+                {
+                    Title = "The concrete end datetime of the simulation time to calculate",
+                    Description = "The time point when the simulation end internally. " +
+                                  "Specified as ISO 8601 format",
+                    Schema = new Schema
+                    {
+                        Type = "string",
+                        Format = "dateTime",
+                        Nullable = true
+                    }
+                }
+            },
+            {
+                "steps", new InputDescription
+                {
+                    Title = "The amount of steps in seconds to simulate.",
+                    Description = "The amount of steps in seconds to simulate used " +
+                                  "instead of end time point, starting from start time point",
+                    Schema = new Schema
+                    {
+                        Type = "number",
+                        Maximum = 1000,
+                        Minimum = 0
+                    }
+                }
+            }
+        };
+    }
+
     public static Dictionary<string, OutputDescription> GetSmartOpenHamburgOutputs(
         IStringLocalizer<SharedResource> localization)
     {

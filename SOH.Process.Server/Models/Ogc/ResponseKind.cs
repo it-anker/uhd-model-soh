@@ -5,7 +5,7 @@ using Newtonsoft.Json.Converters;
 namespace SOH.Process.Server.Models.Ogc;
 
 /// <summary>
-///     Gets or Sets Response.
+///     The response kind enabled for result.
 /// </summary>
 [JsonConverter(typeof(StringEnumConverter))]
 public enum ResponseKind

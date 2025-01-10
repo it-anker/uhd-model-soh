@@ -35,4 +35,7 @@ public class DescriptionType
     /// </summary>
     [DataMember(Name = "additionalParameters")]
     public AllOfdescriptionTypeAdditionalParameters? AdditionalParameters { get; set; }
+    public bool ShouldSerializeMetadata() => Metadata != null! && Metadata.Count > 0;
+
+    public bool ShouldSerializeKeywords() => Metadata != null! && Metadata.Count > 0;
 }

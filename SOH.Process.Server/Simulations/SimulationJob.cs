@@ -19,7 +19,7 @@ public class SimulationJob : StatusInfo
     public string? ExceptionMessage { get; set; }
 
     [DataMember(Name = "executionConfig")]
-    public Execute ExecutionConfig { get; set; } = default!;
+    public Execute ExecutionConfig { get; set; } = null!;
 
     public void Update(SimulationJob job)
     {

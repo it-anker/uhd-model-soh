@@ -10,7 +10,7 @@ public class GetJobResultRequest : IRequest<JobResultResponse>
 {
     [Required]
     [DataMember(Name = "jobId")]
-    public string JobId { get; set; } = default!;
+    public string JobId { get; set; } = null!;
 }
 
 public class JobResultResponse
@@ -31,6 +31,8 @@ public class TimeSeriesResult
 
     [DataMember(Name = "steps")]
     public List<TimeSeriesStep> Steps { get; set; } = [];
+
+    public bool ShouldSerializeSteps() => Steps != null! && Steps.Count > 0;
 }
 
 public class TimeSeriesStep
@@ -49,10 +51,10 @@ public class Result
 {
     [Required]
     [DataMember(Name = "processID")]
-    public string ProcessId { get; set; } = default!;
+    public string ProcessId { get; set; } = null!;
 
     [Required] [DataMember(Name = "jobID")]
-    public string JobId { get; set; } = default!;
+    public string JobId { get; set; } = null!;
 
     [DataMember(Name = "fileId")]
     public string? FileId { get; set; }
@@ -62,7 +64,9 @@ public class Result
 
     [Required]
     [DataMember(Name = "resultID")]
-    public string Id { get; set; } = default!;
+    public string Id { get; set; } = null!;
+
+    public bool ShouldSerializeResults() => Results != null! && Results.Count > 0;
 }
 
 public class ResultEntry
@@ -90,4 +94,6 @@ public class Results : Dictionary<string, object?>
     /// </summary>
     [DataMember(Name = "links")]
     public List<Link> Links { get; set; } = [];
+
+    public bool ShouldSerializeLinks() => Links != null! && Links.Count > 0;
 }

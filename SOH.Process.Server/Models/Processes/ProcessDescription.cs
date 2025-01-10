@@ -18,4 +18,7 @@ public class ProcessDescription : ProcessSummary
     /// </summary>
     [DataMember(Name = "outputs")]
     public Dictionary<string, OutputDescription> Outputs { get; set; } = [];
+
+    public bool ShouldSerializeInputs() => Inputs != null! && Inputs.Count > 0;
+    public bool ShouldSerializeOutputs() => Outputs != null! && Outputs.Count > 0;
 }

@@ -1,3 +1,4 @@
+using System.ComponentModel;
 using System.ComponentModel.DataAnnotations;
 using System.Runtime.Serialization;
 using Newtonsoft.Json;
@@ -26,14 +27,14 @@ public class StatusInfo
     /// </summary>
     [Required]
     [DataMember(Name = "jobID")]
-    public string JobId { get; set; } = default!;
+    public string JobId { get; set; } = null!;
 
     /// <summary>
     ///     The referenced ID of the process executed by this job.
     /// </summary>
     [Required]
     [DataMember(Name = "processID")]
-    public string ProcessId { get; set; } = default!;
+    public string ProcessId { get; set; } = null!;
 
     /// <summary>
     ///     The kind of processing.
@@ -90,4 +91,6 @@ public class StatusInfo
     /// </summary>
     [DataMember(Name = "links")]
     public List<Link> Links { get; set; } = [];
+
+    public bool ShouldSerializeLinks() => Links != null! && Links.Count > 0;
 }

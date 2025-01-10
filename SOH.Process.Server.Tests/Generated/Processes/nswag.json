@@ -1,10 +1,10 @@
 {
-  "runtime": "Net70",
+  "runtime": "Net90",
   "defaultVariables": null,
   "documentGenerator": {
     "fromDocument": {
       "json": "",
-      "url": "https://localhost:7003/swagger/ogc-processes/swagger.json",
+      "url": "http://localhost:5185/swagger/ogc-processes/swagger.json",
       "output": null,
       "newLineBehavior": "Auto"
     }
@@ -90,11 +90,15 @@
       "generateDefaultValues": true,
       "generateDataAnnotations": true,
       "excludedTypeNames": [
-        "HttpStatusCode", "ProblemDetails", "FeatureCollection", "Result", "Results",
-        "Feature", "SimulationJob","StatusInfo", "Process", "SimulationProcess",
+        "HttpStatusCode", "ProblemDetails", "FeatureCollection", "Result", "Results", "LandingPage", "Link", "ConfClasses",
+        "JobList", "ProcessingKind","Metadata","AdditionalParameter", "Output", "Ordinates", "Envelope", "ProcessSummary",
+        "Feature", "SimulationJob","StatusInfo", "Process", "SimulationProcess", "JobControlOptions", "ProcessDescription",
+        "DescriptionType","GeometryFactory","PrecisionModel","PrecisionModels","CoordinateSequenceFactory","Ordinates",
+        "NtsGeometryServices","GeometryOverlay","CoordinateEqualityComparer","IAttributesTable","Void","ResponseKind",
         "ProcessList","Execute", "InputDescription", "OutputDescription", "TransmissionMode", "Schema", "Format",
         "Subscriber", "TimeSeriesStep", "OgcGeometryType", "Dimension", "CoordinateSequence", "Point",
-        "Geometry", "LineString", "MultiLineString", "MultiPolygon", "Coordinate", "ResultEntry"
+        "Geometry", "LineString", "MultiLineString", "MultiPolygon", "Coordinate", "ResultEntry", "IFeature",
+        "StatusCode", "EqualityComparerOfCoordinate", "AllOfdescriptionTypeAdditionalParameters"
       ],
       "excludedParameterNames": [],
       "handleReferences": false,

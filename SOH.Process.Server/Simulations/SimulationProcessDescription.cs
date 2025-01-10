@@ -65,13 +65,13 @@ public class CreateSimulationJobRequest : IRequest<SimulationJob>
     ///     The reference ID to the running job of this process.
     /// </summary>
     [DataMember(Name = "processID")]
-    public string SimulationId { get; set; } = default!;
+    public string SimulationId { get; set; } = null!;
 
     /// <summary>
     ///     The details of the execution with inputs and output configuration.
     /// </summary>
     [DataMember(Name = "execute")]
-    public Execute Execute { get; set; } = default!;
+    public Execute Execute { get; set; } = null!;
 
     /// <summary>
     ///     Gets or sets the preferred option.

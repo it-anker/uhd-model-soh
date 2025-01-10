@@ -37,7 +37,7 @@ public class Schema
     public int? MaxItems { get; set; }
 
     [DataMember(Name = "minItems", EmitDefaultValue = false), Range(0, int.MaxValue)]
-    public int MinItems { get; set; }
+    public int? MinItems { get; set; }
 
     [DataMember(Name = "uniqueItems", EmitDefaultValue = false)]
     public bool UniqueItems { get; set; }
@@ -46,34 +46,13 @@ public class Schema
     public int? MaxProperties { get; set; }
 
     [DataMember(Name = "minProperties", EmitDefaultValue = false)]
-    public int MinProperties { get; set; }
-
-    [DataMember(Name = "required", EmitDefaultValue = false)]
-    public List<string> Required { get; set; } = [];
-
-    [DataMember(Name = "enum", EmitDefaultValue = false)]
-    public List<object> Enum { get; set; } = [];
+    public int? MinProperties { get; set; }
 
     [DataMember(Name = "type", EmitDefaultValue = false)]
     public string? Type { get; set; }
 
     [DataMember(Name = "not", EmitDefaultValue = false)]
     public Schema? Not { get; set; }
-
-    [DataMember(Name = "allOf", EmitDefaultValue = false)]
-    public List<Schema> AllOf { get; set; } = [];
-
-    [DataMember(Name = "oneOf", EmitDefaultValue = false)]
-    public List<Schema> OneOf { get; set; } = [];
-
-    [DataMember(Name = "anyOf", EmitDefaultValue = false)]
-    public List<Schema> AnyOf { get; set; } = [];
-
-    [DataMember(Name = "items", EmitDefaultValue = false)]
-    public Schema? Items { get; set; }
-
-    [DataMember(Name = "properties", EmitDefaultValue = false)]
-    public Dictionary<string, Schema> Properties { get; set; } = [];
 
     [DataMember(Name = "description", EmitDefaultValue = false)]
     public string? Description { get; set; }
@@ -107,11 +86,41 @@ public class Schema
 
     [DataMember(Name = "contentSchema", EmitDefaultValue = false)]
     public string? ContentSchema { get; set; }
+
+    [DataMember(Name = "required", EmitDefaultValue = false)]
+    public List<string> Required { get; set; } = [];
+
+    [DataMember(Name = "enum", EmitDefaultValue = false)]
+    public List<object> Enum { get; set; } = [];
+
+    [DataMember(Name = "allOf", EmitDefaultValue = false)]
+    public List<Schema> AllOf { get; set; } = [];
+
+    [DataMember(Name = "oneOf", EmitDefaultValue = false)]
+    public List<Schema> OneOf { get; set; } = [];
+
+    [DataMember(Name = "anyOf", EmitDefaultValue = false)]
+    public List<Schema> AnyOf { get; set; } = [];
+
+    [DataMember(Name = "items", EmitDefaultValue = false)]
+    public object? Items { get; set; }
+
+    [DataMember(Name = "properties", EmitDefaultValue = false)]
+    public Dictionary<string, Schema> Properties { get; set; } = [];
+
+    public bool ShouldSerializeProperties() => Properties != null! && Properties.Count > 0;
+
+    public bool ShouldSerializeAnyOf() => AnyOf != null! && AnyOf.Count > 0;
+
+    public bool ShouldSerializeAllOf() => AllOf != null! && AllOf.Count > 0;
+    public bool ShouldSerializeOneOf() => OneOf != null! && OneOf.Count > 0;
+    public bool ShouldSerializeEnum() => Enum != null! && Enum.Count > 0;
+    public bool ShouldSerializeRequired() => Required != null! && Required.Count > 0;
 }
 
 [DataContract]
 public class Reference
 {
     [DataMember(Name = "$ref", EmitDefaultValue = false)]
-    public string Ref { get; set; }
+    public string RefId { get; set; }
 }

@@ -1,11 +1,26 @@
 using System.ComponentModel.DataAnnotations;
 using System.Runtime.Serialization;
+using System.Text.Json.Serialization;
 using FluentValidation;
+using Newtonsoft.Json.Converters;
 
 namespace SOH.Process.Server.Models.Common;
 
 /// <summary>
-///     Defines a validation failure
+///     The validation severities returned by the validator.
+/// </summary>
+[Newtonsoft.Json.JsonConverter(typeof(StringEnumConverter))]
+public enum CustomSeverity
+{
+    [EnumMember(Value = "error")] Error,
+
+    [EnumMember(Value = "warning")] Warning,
+
+    [EnumMember(Value = "info")] Info
+}
+
+/// <summary>
+///     Defines a validation failure.
 /// </summary>
 [Serializable]
 public class CustomValidationFailure : IEqualityComparer<CustomValidationFailure>
@@ -15,29 +30,23 @@ public class CustomValidationFailure : IEqualityComparer<CustomValidationFailure
     /// </summary>
     [Required]
     [DataMember(Name = "propertyName")]
-    public string PropertyName { get; set; } = default!;
+    public string PropertyName { get; set; } = null!;
 
     /// <summary>
-    ///     The error message.
+    ///     The concrete message of an error, warning or info.
     /// </summary>
     [Required]
     [DataMember(Name = "errorMessage")]
-    public string ErrorMessage { get; set; } = default!;
-
-    /// <summary>
-    ///     The property value that caused the failure.
-    /// </summary>
-    [DataMember(Name = "attemptedValue")]
-    public object? AttemptedValue { get; set; }
+    public string ErrorMessage { get; set; } = null!;
 
     /// <summary>
     ///     Custom severity level associated with the failure.
     /// </summary>
     [DataMember(Name = "severity")]
-    public Severity Severity { get; set; } = Severity.Error;
+    public CustomSeverity Severity { get; set; } = CustomSeverity.Error;
 
     /// <summary>
-    ///     Gets or sets the unique identifiable error code to react on it
+    ///     Gets or sets the unique identifiable error code to react on it.
     /// </summary>
     [DataMember(Name = "errorCode")]
     public string? ErrorCode { get; set; }

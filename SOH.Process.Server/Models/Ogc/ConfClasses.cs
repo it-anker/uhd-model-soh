@@ -12,4 +12,6 @@ public sealed class ConfClasses
     [Required]
     [DataMember(Name = "conformsTo")]
     public List<string> ConformsTo { get; set; } = [];
+
+    public bool ShouldSerializeConformsTo() => ConformsTo != null! && ConformsTo.Count > 0;
 }

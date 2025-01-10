@@ -4,7 +4,7 @@ namespace SOH.Process.Server.Models.Common.Exceptions;
 
 public class CustomException : Exception
 {
-    protected CustomException(string message, List<string>? errors = default,
+    protected CustomException(string message, List<string>? errors = null,
         HttpStatusCode statusCode = HttpStatusCode.InternalServerError)
         : base(message)
     {

@@ -20,4 +20,7 @@ public class JobList
     [Required]
     [DataMember(Name = "links")]
     public List<Link> Links { get; set; } = [];
+
+    public bool ShouldSerializeJobs() => Jobs != null! && Jobs.Count > 0;
+    public bool ShouldSerializeLinks() => Links != null! && Links.Count > 0;
 }
